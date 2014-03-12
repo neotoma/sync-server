@@ -1,4 +1,1 @@
-sync
-====
-
-API-centric service for synchronizing data between sources and storages
+This is an API-centric service for synchronizing data between sources and storages.
