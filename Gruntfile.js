@@ -2,23 +2,24 @@ module.exports = function(grunt) {
   'use strict';
 
   grunt.initConfig({
-    express: {
-      options: {
-        hostname: 'localhost',
-        port: 9090,
-        server: 'server.js'
-      },
-      main: {
-        bases: 'public'
+    nodemon: {
+      dev: {
+        script: 'server.js',
+        options: {
+          env: {
+            PORT: 9090
+          }
+        }
       }
     }
   });
 
-  grunt.loadNpmTasks('grunt-express');
+  grunt.loadNpmTasks('grunt-nodemon');
 
   // Run local web server for development
   grunt.registerTask('dev', [
-    'express',
-    'express-keepalive'
+    'nodemon'
+    // 'express',
+    // 'express-keepalive'
   ]);
 };
