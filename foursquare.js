@@ -1,12 +1,10 @@
-var foursquareConfig = {
-  'secrets' : {
-    'clientId' : process.env.FOURSQUARE_CLIENT_ID,
-    'clientSecret' : process.env.FOURSQUARE_CLIENT_SECRET,
-    'redirectUrl' : 'http://localhost:9090/sources/foursquare/callback'
+var foursquare = require('node-foursquare')({
+  secrets : {
+    clientId : process.env.FOURSQUARE_CLIENT_ID,
+    clientSecret : process.env.FOURSQUARE_CLIENT_SECRET,
+    redirectUrl : 'http://localhost:9090/sources/foursquare/callback'
   }
-}
-
-var foursquare = require('node-foursquare')(foursquareConfig);
+});
 
 exports.auth = function(req, res) {
   res.writeHead(303, { 'location' : foursquare.getAuthClientRedirectUrl() });

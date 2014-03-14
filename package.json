@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "express": "~3.4.8",
-    "node-foursquare": "~0.2.0"
+    "node-foursquare": "~0.2.0",
+    "dropbox": "~0.10.2"
   }
 }
