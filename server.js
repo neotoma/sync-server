@@ -1,18 +1,16 @@
-var express = require('express')
-  , app = express()
-  , dropbox = require('./dropbox')
-  , foursquare = require('./foursquare');
+var express = require('express');
+var app = express();
+var port = process.env.PORT || 9090;
+var mongoose = require('./mongoose');
+var passport = require('./passport')(mongoose);
 
+app.use(express.logger('dev'));
 app.use(express.cookieParser());
+app.use(express.session({ secret: process.env.ASHEVILLE_SYNC_EXPRESS_SESSION_SECRET }));
+app.use(passport.initialize());
+app.use(passport.session());
 
-var server = app.listen(process.env.PORT);
+var dropbox = require('./dropbox')(app, passport, mongoose);
+//var foursquare = require('./foursquare')(app, passport, mongoose);
 
-// Dropbox
-app.get('/storages/dropbox/auth', dropbox.auth);
-
-// foursquare
-app.get('/sources/foursquare/auth', foursquare.auth);
-app.get('/sources/foursquare/callback', foursquare.callback);
-app.get('/sources/foursquare/checkins', foursquare.checkins);
-
-module.exports = app;
+var server = app.listen(port);
