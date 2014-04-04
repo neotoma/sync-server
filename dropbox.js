@@ -31,13 +31,20 @@ module.exports = function(app, passport) {
     }
   });
 
-  app.get('/storages/dropbox', function(req, res) {
+  /*
+   * Enforce authentication for all subsequent routes
+   */
+  app.all('*', function(req, res, next) {
     if (typeof req.user == 'undefined' || !req.user.storages.dropbox.token) {
-      req.session.dropboxAuthRedirect = '/storages/dropbox';
+      req.session.dropboxAuthRedirect = req.path;
       res.redirect('/storages/dropbox/auth');
       return;
     }
 
+    next();
+  });
+
+  app.get('/storages/dropbox', function(req, res) {
     res.json({ 
       storages: { 
         dropbox: { 
@@ -48,12 +55,6 @@ module.exports = function(app, passport) {
   });
 
   app.get('/storages/dropbox/account/info', function(req, res) {
-    if (typeof req.user == 'undefined' || !req.user.storages.dropbox.token) {
-      req.session.dropboxAuthRedirect = '/storages/dropbox/account/info';
-      res.redirect('/storages/dropbox/auth');
-      return;
-    }
-
     var options = {
       host: 'api.dropbox.com',
       path: '/1/account/info?access_token=' + req.user.storages.dropbox.token
