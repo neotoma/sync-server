@@ -59,33 +59,25 @@ module.exports = function(app, passport) {
       path: '/1/account/info?access_token=' + req.user.storages.dropbox.token
     };
 
-    console.log('options', options);
-
     _res = res;
 
     try {
-      var req = https.get(options, function(res) {
-        try {
-          if (res.statusCode == 401) {
-            throw { message: 'Unauthorized request' };
-          }
-
-          var data = '';
-
-          res.on('data', function(chunk) {
-            data += chunk;
-          });
-
-          res.on('end', function() {
-            console.log('end!', data);
-            var json = JSON.parse(data);
-            _res.json({ response: json });
-          });
-        } catch (e) {
-          _res.json({ error: 'Response error: ' + e });
+      https.get(options, function(res) {
+        if (res.statusCode == 401) {
+          throw { message: 'Unauthorized request' };
         }
+
+        var data = '';
+
+        res.on('data', function(chunk) {
+          data += chunk;
+        });
+
+        res.on('end', function() {
+          _res.json({ response: JSON.parse(data) });
+        });
       }).on('error', function(e) {
-        throw { message: 'Request error: ' + e };
+        res.json({ error: e.message });
       });
     } catch (e) {
       res.json({ error: e.message });
