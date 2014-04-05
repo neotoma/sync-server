@@ -1,9 +1,8 @@
-module.exports = function(mongoose) {
+module.exports = function(User) {
   var passport = require('passport');
-  passport.User = require('./models/user')(mongoose);
 
   passport.serializeUser(function(user, done) {
-    passport.User.findOrCreate(user, function(error, user) {
+    User.findOrCreate(user, function(error, user) {
       if (error) {
         console.error(error);
       } else {
@@ -13,7 +12,7 @@ module.exports = function(mongoose) {
   });
 
   passport.deserializeUser(function(id, done) {
-    passport.User.findById(id, function(err, user) {
+    User.findById(id, function(err, user) {
       done(err, user);
     });
   });

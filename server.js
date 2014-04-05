@@ -1,20 +1,20 @@
 var express = require('express');
 var app = express();
-var port = process.env.PORT || 9090;
+app.config = require('./config');
+
 var mongoose = require('./mongoose');
-var passport = require('./passport')(mongoose);
+var User = require('./models/user')(mongoose);
+var passport = require('./passport')(User);
 
 app.use(express.logger('dev'));
 app.use(express.cookieParser());
-app.use(express.session({ secret: process.env.ASHEVILLE_SYNC_EXPRESS_SESSION_SECRET }));
+app.use(express.session({ secret: app.config.session.secret }));
 app.use(passport.initialize());
 app.use(passport.session());
 
-var dropbox = require('./dropbox')(app, passport, mongoose);
-var storages = {
-  dropbox: dropbox
-};
+var storages = require('./storages')(app, passport);
+var sources = require('./sources')(app, passport, storages);
 
-var foursquare = require('./foursquare')(app, passport, mongoose, storages);
+var server = app.listen(app.config.port);
 
-var server = app.listen(port);
+console.log('listening on', app.config.port);

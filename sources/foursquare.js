@@ -1,4 +1,4 @@
-module.exports = function(app, passport, mongoose, storages) {
+module.exports = function(app, passport, storages) {
   var foursquarePassport = require('passport-foursquare');
   var https = require('https');
   var apiVersion = '20140404';
@@ -15,9 +15,9 @@ module.exports = function(app, passport, mongoose, storages) {
   };
 
   passport.use(new foursquarePassport.Strategy({
-      clientID: process.env.ASHEVILLE_SYNC_FOURSQUARE_CLIENT_ID,
-      clientSecret: process.env.ASHEVILLE_SYNC_FOURSQUARE_CLIENT_SECRET,
-      callbackURL: 'http://localhost:9090/sources/foursquare/auth-callback',
+      clientID: app.config.sources.foursquare.clientID,
+      clientSecret: app.config.sources.foursquare.clientSecret,
+      callbackURL: app.config.sources.foursquare.callbackURL,
       passReqToCallback: true
     },
     function(req, accessToken, refreshToken, profile, done) {

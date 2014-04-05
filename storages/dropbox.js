@@ -47,9 +47,9 @@ module.exports = function(app, passport) {
   };
 
   passport.use(new dropboxPassport.Strategy({
-      clientID: process.env.ASHEVILLE_SYNC_DROPBOX_APP_KEY,
-      clientSecret: process.env.ASHEVILLE_SYNC_DROPBOX_APP_SECRET,
-      callbackURL: 'http://localhost:9090/storages/dropbox/auth-callback',
+      clientID: app.config.storages.dropbox.appKey,
+      clientSecret: app.config.storages.dropbox.appSecret,
+      callbackURL: app.config.storages.dropbox.callbackURL,
       passReqToCallback: true
     },
     function(req, accessToken, refreshToken, profile, done) {
