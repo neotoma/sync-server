@@ -1,11 +1,11 @@
 var mongoose = require('mongoose');
 
 mongoose.connection.on('error', function(error) {
-  console.error('mongoose connection error: %s', error);
+  console.error('mongoose failed to connect: %s', error);
 });
 
 mongoose.connection.once('open', function() {
-  console.log('mongoose connection opened');
+  console.log('mongoose connected');
 });
 
 mongoose.connect(require('./config/database.js').url);

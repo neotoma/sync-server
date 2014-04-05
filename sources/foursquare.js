@@ -100,13 +100,5 @@ module.exports = function(app, passport, storages) {
     }
   });
 
-  app.get('/sources/foursquare/checkins-old', foursquare.authFilter, function(req, res) {
-    foursquare.Users.getCheckins('self', {}, req.cookies.foursquareAccessToken, 
-      function(error, results) {
-        res.json(results);
-      }
-    );
-  });
-
   return foursquare;
 }
