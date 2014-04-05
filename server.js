@@ -11,6 +11,10 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 var dropbox = require('./dropbox')(app, passport, mongoose);
-//var foursquare = require('./foursquare')(app, passport, mongoose);
+var storages = {
+  dropbox: dropbox
+};
+
+var foursquare = require('./foursquare')(app, passport, mongoose, storages);
 
 var server = app.listen(port);

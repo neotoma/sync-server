@@ -1,27 +1,79 @@
 module.exports = function(app, passport) {
   var dropboxPassport = require('passport-dropbox-oauth2');
   var https = require('https');
+  var dropbox = {};
+
+  dropbox.saveFile = function(user, path, content, callback, error) {
+    var options = {
+      host: 'api-content.dropbox.com',
+      path: '/1/files_put/sandbox/' + path + '?access_token=' + user.storages.dropbox.token,
+      method: 'PUT'
+    };
+
+    try {
+      var req = https.request(options, function(res) {
+        if (res.statusCode == 401) {
+          throw { message: 'Unauthorized request' };
+        }
+
+        var data = '';
+
+        res.on('data', function(chunk) {
+          data += chunk;
+        });
+
+        res.on('end', function() {
+          callback(JSON.parse(data));
+        });
+      }).on('error', function(e) {
+        error(e);
+      });
+
+      req.write(content);
+      req.end();
+    } catch (e) {
+      error(e);
+    }
+  };
+
+  dropbox.authFilter = function(req, res, next) {
+    if (typeof req.user == 'undefined' || !req.user.storages.dropbox.token) {
+      req.session.dropboxAuthRedirect = req.path;
+      res.redirect('/storages/dropbox/auth');
+      return;
+    }
+
+    next();
+  };
 
   passport.use(new dropboxPassport.Strategy({
       clientID: process.env.ASHEVILLE_SYNC_DROPBOX_APP_KEY,
       clientSecret: process.env.ASHEVILLE_SYNC_DROPBOX_APP_SECRET,
-      callbackURL: 'http://localhost:9090/storages/dropbox/auth-callback'
+      callbackURL: 'http://localhost:9090/storages/dropbox/auth-callback',
+      passReqToCallback: true
     },
-    function(accessToken, refreshToken, profile, done) {
-      return done(null, { 
-        storages: { 
-          dropbox: { 
-            token: accessToken 
-          } 
-        } 
-      });
+    function(req, accessToken, refreshToken, profile, done) {
+      if (req.user) {
+        req.user.storages.dropbox.token = accessToken;
+        req.user.save(function(error) {
+          done(null, req.user);
+        });
+      } else {
+        return done(null, { 
+          storages: { 
+            dropbox: { 
+              token: accessToken
+            } 
+          }
+        });
+      }
     }
   ));
 
-  app.get('/storages/dropbox/auth', passport.authenticate('dropbox-oauth2'));
+  app.get('/storages/dropbox/auth', passport.authorize('dropbox-oauth2'));
 
-  app.get('/storages/dropbox/auth-callback', passport.authenticate('dropbox-oauth2', { 
-    failureRedirect: '/login'
+  app.get('/storages/dropbox/auth-callback', passport.authorize('dropbox-oauth2', { 
+    failureRedirect: '/storages/dropbox/auth'
   }), function(req, res) {
     if (req.session.dropboxAuthRedirect) {
       res.redirect(req.session.dropboxAuthRedirect);
@@ -31,20 +83,7 @@ module.exports = function(app, passport) {
     }
   });
 
-  /*
-   * Enforce authentication for all subsequent routes
-   */
-  app.all('*', function(req, res, next) {
-    if (typeof req.user == 'undefined' || !req.user.storages.dropbox.token) {
-      req.session.dropboxAuthRedirect = req.path;
-      res.redirect('/storages/dropbox/auth');
-      return;
-    }
-
-    next();
-  });
-
-  app.get('/storages/dropbox', function(req, res) {
+  app.get('/storages/dropbox', dropbox.authFilter, function(req, res) {
     res.json({ 
       storages: { 
         dropbox: { 
@@ -54,7 +93,7 @@ module.exports = function(app, passport) {
     });
   });
 
-  app.get('/storages/dropbox/account/info', function(req, res) {
+  app.get('/storages/dropbox/account/info', dropbox.authFilter, function(req, res) {
     var options = {
       host: 'api.dropbox.com',
       path: '/1/account/info?access_token=' + req.user.storages.dropbox.token
@@ -84,4 +123,57 @@ module.exports = function(app, passport) {
       res.json({ error: e.message });
     }
   });
+
+  app.get('/storages/dropbox/file-put-test', dropbox.authFilter, function(req, res) {
+    dropbox.saveFile(
+      req.user, 
+      'test.txt', 
+      'hello world!', 
+      function(response) {
+        res.json(response);
+      }, 
+      function(e) {
+        res.json({ error: e.message });
+      }
+    );
+
+    return;
+
+    var options = {
+      host: 'api-content.dropbox.com',
+      path: '/1/files_put/sandbox/test.txt?access_token=' + req.user.storages.dropbox.token,
+      method: 'PUT'
+    };
+
+    body = 'hello world';
+
+    _res = res;
+
+    try {
+      var req = https.request(options, function(res) {
+        if (res.statusCode == 401) {
+          throw { message: 'Unauthorized request' };
+        }
+
+        var data = '';
+
+        res.on('data', function(chunk) {
+          data += chunk;
+        });
+
+        res.on('end', function() {
+          _res.json({ response: JSON.parse(data) });
+        });
+      }).on('error', function(e) {
+        res.json({ error: e.message });
+      });
+
+      req.write(body);
+      req.end();
+    } catch (e) {
+      res.json({ error: e.message });
+    }
+  });
+
+  return dropbox;
 }
