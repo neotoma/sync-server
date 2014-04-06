@@ -2,7 +2,7 @@ var express = require('express');
 var app = express();
 app.config = require('./config');
 
-var mongoose = require('./mongoose');
+var mongoose = require('./mongoose')(app);
 var User = require('./models/user')(mongoose);
 var passport = require('./passport')(User);
 
