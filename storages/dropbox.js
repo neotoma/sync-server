@@ -58,10 +58,9 @@ module.exports = function(app, passport, User) {
   passport.use(new dropboxPassport.Strategy({
       clientID: app.config.storages.dropbox.appKey,
       clientSecret: app.config.storages.dropbox.appSecret,
-      callbackURL: app.config.storages.dropbox.callbackURL,
-      passReqToCallback: true
+      callbackURL: app.config.storages.dropbox.callbackURL
     },
-    function(req, accessToken, refreshToken, profile, done) {
+    function(accessToken, refreshToken, profile, done) {
       app.model.user.findOrCreate({ 
         storages: {
           dropbox: {
