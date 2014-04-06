@@ -1,4 +1,4 @@
-module.exports = function(app, passport) {
+module.exports = function(app, passport, User) {
   var dropboxPassport = require('passport-dropbox-oauth2');
   var https = require('https');
   var dropbox = {};
@@ -23,7 +23,9 @@ module.exports = function(app, passport) {
         });
 
         res.on('end', function() {
-          callback(JSON.parse(data));
+          if (callback) {
+            callback(JSON.parse(data));
+          }
         });
       }).on('error', function(e) {
         error(e);
@@ -37,8 +39,15 @@ module.exports = function(app, passport) {
   };
 
   dropbox.authFilter = function(req, res, next) {
-    if (typeof req.user == 'undefined' || !req.user.storages.dropbox.token) {
-      req.session.dropboxAuthRedirect = req.path;
+    if (typeof req.user == 'undefined' || !req.user.storages.dropbox.id) {
+      req.session.storagesDropboxAuthRedirectPath = req.path;
+
+      if (req.path == '/storages/dropbox/auth') {
+        req.session.storagesDropboxAuthRedirectPath = null;
+      } else {
+        req.session.storagesDropboxAuthRedirectPath = req.path;
+      }
+      
       res.redirect('/storages/dropbox/auth');
       return;
     }
@@ -53,31 +62,29 @@ module.exports = function(app, passport) {
       passReqToCallback: true
     },
     function(req, accessToken, refreshToken, profile, done) {
-      if (req.user) {
-        req.user.storages.dropbox.token = accessToken;
-        req.user.save(function(error) {
-          done(null, req.user);
-        });
-      } else {
-        return done(null, { 
-          storages: { 
-            dropbox: { 
-              token: accessToken
-            } 
+      app.model.user.findOrCreate({ 
+        storages: {
+          dropbox: {
+            id: profile.id
           }
+        }
+      }, function(error, user) {
+        user.storages.dropbox.token = accessToken;
+        user.save(function() {
+          return done(error, user);
         });
-      }
+      });
     }
   ));
 
-  app.get('/storages/dropbox/auth', passport.authorize('dropbox-oauth2'));
+  app.get('/storages/dropbox/auth', passport.authenticate('dropbox-oauth2'));
 
-  app.get('/storages/dropbox/auth-callback', passport.authorize('dropbox-oauth2', { 
+  app.get('/storages/dropbox/auth-callback', passport.authenticate('dropbox-oauth2', { 
     failureRedirect: '/storages/dropbox/auth'
   }), function(req, res) {
-    if (req.session.dropboxAuthRedirect) {
-      res.redirect(req.session.dropboxAuthRedirect);
-      req.session.dropboxAuthRedirect = null;
+    if (req.session.storagesDropboxAuthRedirectPath) {
+      res.redirect(req.session.storagesDropboxAuthRedirectPath);
+      req.session.storagesDropboxAuthRedirectPath = null;
     } else {
       res.redirect('/storages/dropbox');
     }

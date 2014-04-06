@@ -6,7 +6,14 @@ module.exports = function(app, passport, storages) {
 
   foursquare.authFilter = function(req, res, next) {
     if (typeof req.user == 'undefined' || !req.user.sources.foursquare.token) {
-      req.session.foursquareAuthRedirect = req.path;
+      req.session.sourcesFoursquareAuthRedirectPath = req.path;
+
+      if (req.path == '/sources/foursquare/auth') {
+        req.session.sourcesFoursquareAuthRedirectPath = null;
+      } else {
+        req.session.sourcesFoursquareAuthRedirectPath = req.path;
+      }
+
       res.redirect('/sources/foursquare/auth');
       return;
     }
@@ -21,37 +28,28 @@ module.exports = function(app, passport, storages) {
       passReqToCallback: true
     },
     function(req, accessToken, refreshToken, profile, done) {
-      if (req.user) {
-        req.user.sources.foursquare.token = accessToken;
-        req.user.save(function(error) {
-          done(null, req.user);
-        });
-      } else {
-        return done(null, { 
-          sources: { 
-            foursquare: { 
-              token: accessToken 
-            } 
-          }
-        });
-      }
+      req.user.sources.foursquare.id = profile.id;
+      req.user.sources.foursquare.token = accessToken;
+      req.user.save(function(error) {
+        done(null, req.user);
+      });
     }
   ));
 
-  app.get('/sources/foursquare/auth', passport.authenticate('foursquare'));
+  app.get('/sources/foursquare/auth', app.authFilter, passport.authenticate('foursquare'));
 
-  app.get('/sources/foursquare/auth-callback', passport.authenticate('foursquare', { 
+  app.get('/sources/foursquare/auth-callback', app.authFilter, passport.authenticate('foursquare', { 
     failureRedirect: '/sources/foursquare/auth'
   }), function(req, res) {
-    if (req.session.foursquareAuthRedirect) {
-      res.redirect(req.session.foursquareAuthRedirect);
-      req.session.foursquareAuthRedirect = null;
+    if (req.session.sourcesFoursquareAuthRedirectPath) {
+      res.redirect(req.session.sourcesFoursquareAuthRedirectPath);
+      req.session.sourcesFoursquareAuthRedirectPath = null;
     } else {
       res.redirect('/sources/foursquare');
     }
   });
 
-  app.get('/sources/foursquare', foursquare.authFilter, function(req, res) {
+  app.get('/sources/foursquare', app.authFilter, foursquare.authFilter, function(req, res) {
     res.json({ 
       sources: { 
         foursquare: {
@@ -61,7 +59,7 @@ module.exports = function(app, passport, storages) {
     });
   });
 
-  app.get('/sources/foursquare/checkins', foursquare.authFilter, storages.dropbox.authFilter, function(req, res) {
+  app.get('/sources/foursquare/checkins', app.authFilter, foursquare.authFilter, function(req, res) {
     var options = {
       host: 'api.foursquare.com',
       path: '/v2/users/self/checkins?v=' + apiVersion + '&oauth_token=' + req.user.sources.foursquare.token

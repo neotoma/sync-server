@@ -3,8 +3,12 @@ var app = express();
 app.config = require('./config');
 
 var mongoose = require('./mongoose')(app);
-var User = require('./models/user')(mongoose);
-var passport = require('./passport')(User);
+
+app.model = {
+  user: require('./models/user')(mongoose)
+};
+
+var passport = require('./passport')(app);
 
 app.use(express.logger('dev'));
 app.use(express.cookieParser());
@@ -13,6 +17,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 var storages = require('./storages')(app, passport);
+app.authFilter = storages.dropbox.authFilter;
+
 var sources = require('./sources')(app, passport, storages);
 
 var server = app.listen(app.config.port);
