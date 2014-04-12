@@ -28,13 +28,17 @@ module.exports = function(app, passport, User) {
           }
         });
       }).on('error', function(e) {
-        error(e);
+        if (typeof error != 'undefined') {
+          error(e);
+        }
       });
 
       req.write(content);
       req.end();
     } catch (e) {
-      error(e);
+      if (typeof error != 'undefined') {
+        error(e);
+      }
     }
   };
 

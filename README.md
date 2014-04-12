@@ -60,5 +60,5 @@ ASHEVILLE_SYNC_SOURCES_FOURSQUARE_CALLBACK_URL=<foursquare auth callback URL>
 #### Endpoints
 
 - GET `/sources/foursquare/auth`: authenticate foursquare account
-- GET `/sources/foursquare`: Foursquare access token
-- GET `/sources/foursquare/checkins`: view authenticated user's recent checkins and save to Dropbox as `foursquare-checkins.json`
+- GET `/sources/foursquare`: view foursquare access token
+- GET `/sources/foursquare/sync`: sync all of authenticated user's checkins to Dropbox
