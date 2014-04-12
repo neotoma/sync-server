@@ -22,17 +22,19 @@ module.exports = function(app, passport, storages) {
   };
 
   foursquare.sync = function(user) {
-    foursquare.syncCheckins(user);
+    foursquare.syncItems(user, 'checkins');
+    foursquare.syncItems(user, 'tips');
+    foursquare.syncItems(user, 'friends');
   };
 
-  foursquare.syncCheckins = function(user) {
+  foursquare.syncItems = function(user, aspect) {
     try {
       var offset = 0;
 
-      var syncNextCheckinsPage = function() {
+      var syncNextPage = function() {
         var options = {
           host: 'api.foursquare.com',
-          path: '/v2/users/self/checkins?v=' + apiVersion + '&oauth_token=' + user.sources.foursquare.token + '&limit=250&offset=' + offset,
+          path: '/v2/users/self/' + aspect + '?v=' + apiVersion + '&oauth_token=' + user.sources.foursquare.token + '&limit=250&offset=' + offset,
         };
 
         https.get(options, function(res) {
@@ -54,15 +56,15 @@ module.exports = function(app, passport, storages) {
                 throw { message: json.meta.errorType + ' - ' + json.meta.errorDetail };
               }
 
-              var checkins = json.response.checkins.items;
+              var items = json.response[aspect].items;
 
-              if (checkins.length != 0) {
-                while (checkins.length > 0) {
-                  foursquare.syncCheckin(user, checkins.shift());
+              if (items.length != 0) {
+                while (items.length > 0) {
+                  foursquare.syncItem(user, aspect, items.shift());
                   offset++;
                 }
 
-                syncNextCheckinsPage();
+                syncNextPage();
               }
             } catch(e) {
               console.error(e.message);
@@ -73,17 +75,17 @@ module.exports = function(app, passport, storages) {
         });
       };
 
-      syncNextCheckinsPage();
+      syncNextPage();
     } catch (e) {
       console.error(e.message);
     }    
   }
 
-  foursquare.syncCheckin = function(user, checkin) {    
+  foursquare.syncItem = function(user, aspect, item) {    
     storages.dropbox.saveFile(
       user, 
-      '/sources/foursquare/checkins/' + checkin.id + '.json',
-      JSON.stringify(checkin)
+      '/sources/foursquare/' + aspect + '/' + item.id + '.json',
+      JSON.stringify(item)
     );
   }
 
@@ -125,10 +127,11 @@ module.exports = function(app, passport, storages) {
     });
   });
 
-  app.get('/sources/foursquare/sync', app.authFilter, foursquare.authFilter, function(req, res) {
+  app.get('/sources/foursquare/sync/:aspect', app.authFilter, foursquare.authFilter, function(req, res) {
     try {
-      foursquare.syncCheckins(req.user);
-      res.json({ msg: 'foursquare sync started' });
+      var aspect = req.params.aspect;
+      foursquare.syncItems(req.user, aspect);
+      res.json({ msg: 'foursquare ' + aspect + ' sync started' });
     } catch (e) {
       res.json({ error: e.message });
     }
