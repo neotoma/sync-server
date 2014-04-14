@@ -1,5 +1,7 @@
 module.exports = function(app, passport) {
-  return {
+  var storages = {
     dropbox: require('./dropbox')(app, passport)
   };
+
+  return storages;
 }

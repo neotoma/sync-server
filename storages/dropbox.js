@@ -1,4 +1,5 @@
 module.exports = function(app, passport, User) {
+  var logger = require('../logger');
   var dropboxPassport = require('passport-dropbox-oauth2');
   var https = require('https');
   var dropbox = {};
@@ -44,19 +45,13 @@ module.exports = function(app, passport, User) {
 
   dropbox.authFilter = function(req, res, next) {
     if (typeof req.user == 'undefined' || !req.user.storages.dropbox.id) {
+      logger.trace('request screened by Dropbox authFilter');
+
       req.session.storagesDropboxAuthRedirectPath = req.path;
-
-      if (req.path == '/storages/dropbox/auth') {
-        req.session.storagesDropboxAuthRedirectPath = null;
-      } else {
-        req.session.storagesDropboxAuthRedirectPath = req.path;
-      }
-      
       res.redirect('/storages/dropbox/auth');
-      return;
+    } else {
+      next();
     }
-
-    next();
   };
 
   passport.use(new dropboxPassport.Strategy({
@@ -65,6 +60,11 @@ module.exports = function(app, passport, User) {
       callbackURL: app.config.storages.dropbox.callbackURL
     },
     function(accessToken, refreshToken, profile, done) {
+      logger.trace('verifying dropbox auth profile', {
+        dropbox_id: profile.id,
+        display_name: profile.displayName
+      });
+
       app.model.user.findOrCreate({ 
         storages: {
           dropbox: {
@@ -80,21 +80,35 @@ module.exports = function(app, passport, User) {
     }
   ));
 
-  app.get('/storages/dropbox/auth', passport.authenticate('dropbox-oauth2'));
+  app.get('/storages/dropbox/auth', function(req, res) {
+    logger.trace('redirecting request to Dropbox auth');
+    passport.authenticate('dropbox-oauth2')(req, res);
+  }); 
 
-  app.get('/storages/dropbox/auth-callback', passport.authenticate('dropbox-oauth2', { 
-    failureRedirect: '/storages/dropbox/auth'
-  }), function(req, res) {
-    if (req.session.storagesDropboxAuthRedirectPath) {
-      res.redirect(req.session.storagesDropboxAuthRedirectPath);
-      req.session.storagesDropboxAuthRedirectPath = null;
-    } else {
-      res.redirect('/storages/dropbox');
-    }
+  app.get('/storages/dropbox/auth-callback', function(req, res, next) { 
+    passport.authenticate('dropbox-oauth2', function(error, user, info) {
+      if (error) {
+        logger.warn('dropbox auth failed', { error: error });
+        res.redirect('/storages/dropbox/auth');
+      } else {
+        req.logIn(user, function(error) {
+          if (error) { 
+            logger.warn('dropbox auth session establishment failed', { error: error });
+          }
+          
+          if (req.session.storagesDropboxAuthRedirectPath) {
+            res.redirect(req.session.storagesDropboxAuthRedirectPath);
+            req.session.storagesDropboxAuthRedirectPath = null;
+          } else {
+            res.redirect('/storages/dropbox');
+          }
+        });
+      }
+    })(req, res, next);
   });
 
   app.get('/storages/dropbox', dropbox.authFilter, function(req, res) {
-    res.json({ 
+    res.json({
       storages: { 
         dropbox: { 
           token: req.user.storages.dropbox.token 
@@ -129,57 +143,6 @@ module.exports = function(app, passport, User) {
       }).on('error', function(e) {
         res.json({ error: e.message });
       });
-    } catch (e) {
-      res.json({ error: e.message });
-    }
-  });
-
-  app.get('/storages/dropbox/file-put-test', dropbox.authFilter, function(req, res) {
-    dropbox.saveFile(
-      req.user, 
-      'test.txt', 
-      'hello world!', 
-      function(response) {
-        res.json(response);
-      }, 
-      function(e) {
-        res.json({ error: e.message });
-      }
-    );
-
-    return;
-
-    var options = {
-      host: 'api-content.dropbox.com',
-      path: '/1/files_put/sandbox/test.txt?access_token=' + req.user.storages.dropbox.token,
-      method: 'PUT'
-    };
-
-    body = 'hello world';
-
-    _res = res;
-
-    try {
-      var req = https.request(options, function(res) {
-        if (res.statusCode == 401) {
-          throw { message: 'Unauthorized request' };
-        }
-
-        var data = '';
-
-        res.on('data', function(chunk) {
-          data += chunk;
-        });
-
-        res.on('end', function() {
-          _res.json({ response: JSON.parse(data) });
-        });
-      }).on('error', function(e) {
-        res.json({ error: e.message });
-      });
-
-      req.write(body);
-      req.end();
     } catch (e) {
       res.json({ error: e.message });
     }

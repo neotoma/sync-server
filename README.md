@@ -39,7 +39,6 @@ ASHEVILLE_SYNC_STORAGES_DROPBOX_CALLBACK_URL=<dropbox auth callback URL>
 - GET `/storages/dropbox/auth`: authenticate Dropbox account
 - GET `/storages/dropbox`: Dropbox access token
 - GET `/storages/dropbox/account/info`: basic Dropbox account info
-- GET `/storages/dropbox/file-put-test`: load test.txt file into app directory
 
 ## Sources
 

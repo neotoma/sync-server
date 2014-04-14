@@ -1,4 +1,5 @@
 module.exports = function(app, passport, storages) {
+  var logger = require('../logger');
   var foursquarePassport = require('passport-foursquare');
   var https = require('https');
   var apiVersion = '20140404';
@@ -81,7 +82,7 @@ module.exports = function(app, passport, storages) {
     }    
   }
 
-  foursquare.syncItem = function(user, aspect, item) {    
+  foursquare.syncItem = function(user, aspect, item) {  
     storages.dropbox.saveFile(
       user, 
       '/sources/foursquare/' + aspect + '/' + item.id + '.json',

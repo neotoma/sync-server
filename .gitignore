@@ -1,4 +1,5 @@
 .DS_Store
+logs/*
 public/
 node_modules/
 data/

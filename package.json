@@ -10,6 +10,7 @@
     "passport": "~0.2.0",
     "passport-dropbox-oauth2": "~0.1.5",
     "mongoose": "~3.8.8",
-    "passport-foursquare": "~1.0.0"
+    "passport-foursquare": "~1.0.0",
+    "winston": "~0.7.3"
   }
 }
