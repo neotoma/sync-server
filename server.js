@@ -10,7 +10,7 @@ app.model = {
 
 var passport = require('./passport')(app);
 
-app.use(express.logger('dev'));
+app.use(express.logger({ immediate: true, format: "\033[37m:method :url\033[37m (:date)\033[0m" }));
 app.use(express.cookieParser());
 app.use(express.session({ secret: app.config.session.secret }));
 app.use(passport.initialize());

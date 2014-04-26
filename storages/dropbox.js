@@ -14,7 +14,7 @@ module.exports = function(app, passport, User) {
     try {
       var req = https.request(options, function(res) {
         if (res.statusCode == 401) {
-          throw { message: 'Unauthorized request' };
+          throw new Error('unauthorized request');
         }
 
         var data = '';
@@ -29,7 +29,7 @@ module.exports = function(app, passport, User) {
           }
         });
       }).on('error', function(e) {
-        if (typeof error != 'undefined') {
+        if (typeof e != 'undefined') {
           error(e);
         }
       });
@@ -37,7 +37,7 @@ module.exports = function(app, passport, User) {
       req.write(content);
       req.end();
     } catch (e) {
-      if (typeof error != 'undefined') {
+      if (typeof e != 'undefined') {
         error(e);
       }
     }
@@ -45,7 +45,7 @@ module.exports = function(app, passport, User) {
 
   dropbox.authFilter = function(req, res, next) {
     if (typeof req.user == 'undefined' || !req.user.storages.dropbox.id) {
-      logger.trace('request screened by Dropbox authFilter');
+      logger.trace('screened request with dropbox authFilter');
 
       req.session.storagesDropboxAuthRedirectPath = req.path;
       res.redirect('/storages/dropbox/auth');
@@ -60,10 +60,7 @@ module.exports = function(app, passport, User) {
       callbackURL: app.config.storages.dropbox.callbackURL
     },
     function(accessToken, refreshToken, profile, done) {
-      logger.trace('verifying dropbox auth profile', {
-        dropbox_id: profile.id,
-        display_name: profile.displayName
-      });
+      logger.trace('verifying dropbox user', { dropbox_id: profile.id });
 
       app.model.user.findOrCreate({ 
         storages: {
@@ -74,6 +71,7 @@ module.exports = function(app, passport, User) {
       }, function(error, user) {
         user.storages.dropbox.token = accessToken;
         user.save(function() {
+          logger.trace('saved dropbox token to user', { user_id: user.id });
           return done(error, user);
         });
       });
@@ -81,7 +79,7 @@ module.exports = function(app, passport, User) {
   ));
 
   app.get('/storages/dropbox/auth', function(req, res) {
-    logger.trace('redirecting request to Dropbox auth');
+    logger.trace('redirecting request to dropbox auth');
     passport.authenticate('dropbox-oauth2')(req, res);
   }); 
 
@@ -127,23 +125,30 @@ module.exports = function(app, passport, User) {
 
     try {
       https.get(options, function(res) {
-        if (res.statusCode == 401) {
-          throw { message: 'Unauthorized request' };
+        try {
+          if (res.statusCode == 401) {
+            throw new Error('unauthorized request');
+          }
+
+          var data = '';
+
+          res.on('data', function(chunk) {
+            data += chunk;
+          });
+
+          res.on('end', function() {
+            _res.json({ response: JSON.parse(data) });
+          });
+        } catch (e) {
+          logger.warn(e.message);
+          _res.json({ error: e.message });
         }
-
-        var data = '';
-
-        res.on('data', function(chunk) {
-          data += chunk;
-        });
-
-        res.on('end', function() {
-          _res.json({ response: JSON.parse(data) });
-        });
       }).on('error', function(e) {
+        logger.warn(e.message);
         res.json({ error: e.message });
       });
     } catch (e) {
+      logger.warn(e.message);
       res.json({ error: e.message });
     }
   });

@@ -40,7 +40,7 @@ module.exports = function(app, passport, storages) {
 
         https.get(options, function(res) {
           if (res.statusCode == 401) {
-            throw { message: 'Unauthorized request' };
+            throw new Error('unauthorized request');
           }
 
           var data = '';
@@ -54,7 +54,7 @@ module.exports = function(app, passport, storages) {
 
             try {
               if (typeof json.meta.errorType != 'undefined') {
-                throw { message: json.meta.errorType + ' - ' + json.meta.errorDetail };
+                throw new Error(json.meta.errorType + ' - ' + json.meta.errorDetail);
               }
 
               var items = json.response[aspect].items;
@@ -68,17 +68,17 @@ module.exports = function(app, passport, storages) {
                 syncNextPage();
               }
             } catch(e) {
-              console.error(e.message);
+              logger.warn(e.message);
             }
           });
         }).on('error', function(e) {
-          throw e;
+          logger.warn(e.message);
         });
       };
 
       syncNextPage();
     } catch (e) {
-      console.error(e.message);
+      logger.warn(e.message);
     }    
   }
 
@@ -100,6 +100,7 @@ module.exports = function(app, passport, storages) {
       req.user.sources.foursquare.id = profile.id;
       req.user.sources.foursquare.token = accessToken;
       req.user.save(function(error) {
+        logger.trace('saved foursquare ID and token to user', { user_id: req.user.id });
         done(null, req.user);
       });
     }
@@ -134,6 +135,7 @@ module.exports = function(app, passport, storages) {
       foursquare.syncItems(req.user, aspect);
       res.json({ msg: 'foursquare ' + aspect + ' sync started' });
     } catch (e) {
+      logger.warn(e.message);
       res.json({ error: e.message });
     }
   });

@@ -22,9 +22,8 @@ var logger = new(winston.Logger)({
   },
   transports: [
     new winston.transports.Console({
-      level: 'info',
-      colorize: true,
-      timestamp: true
+      level: 'trace',
+      colorize: true
     }),
     new winston.transports.File({
       level: 'trace',

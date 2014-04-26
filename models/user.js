@@ -21,11 +21,11 @@ module.exports = function(mongoose) {
 
     this.findOne(attributes, function(error, user) {
       if (user) {
-        logger.trace('user.findOrCreate user found', { user_id: user.id });
+        logger.trace('found user', { user_id: user.id, attributes: attributes });
         callback(error, user);
       } else {
         _this.create(attributes, function(error, user) {
-          logger.trace('user.findOrCreate new user created', { user_id: user.id });
+          logger.trace('created new user', { user_id: user.id, attributes: attributes });
           callback(error, user);
         });
       }
