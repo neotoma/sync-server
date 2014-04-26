@@ -29,10 +29,21 @@ module.exports = function(app, passport, storages) {
   };
 
   foursquare.syncItems = function(user, aspect) {
+    logger.trace('starting foursquare items sync', { 
+      user_id: user.id, 
+      aspect: aspect 
+    });
+
     try {
       var offset = 0;
 
       var syncNextPage = function() {
+        logger.trace('syncing foursquare next page of items', { 
+          user_id: user.id, 
+          aspect: aspect,
+          offset: offset
+        });
+
         var options = {
           host: 'api.foursquare.com',
           path: '/v2/users/self/' + aspect + '?v=' + apiVersion + '&oauth_token=' + user.sources.foursquare.token + '&limit=250&offset=' + offset,
@@ -59,6 +70,13 @@ module.exports = function(app, passport, storages) {
 
               var items = json.response[aspect].items;
 
+              logger.trace('retrieved foursquare next page of items', { 
+                user_id: user.id, 
+                aspect: aspect,
+                offset: offset,
+                total: items.length
+              });
+
               if (items.length != 0) {
                 while (items.length > 0) {
                   foursquare.syncItem(user, aspect, items.shift());
@@ -66,6 +84,11 @@ module.exports = function(app, passport, storages) {
                 }
 
                 syncNextPage();
+              } else {
+                logger.trace('finished starting foursquare items sync', { 
+                  user_id: user.id, 
+                  aspect: aspect
+                });
               }
             } catch(e) {
               logger.warn(e.message);
@@ -82,11 +105,33 @@ module.exports = function(app, passport, storages) {
     }    
   }
 
-  foursquare.syncItem = function(user, aspect, item) {  
+  foursquare.syncItem = function(user, aspect, item) { 
+    logger.trace('syncing foursquare item', { 
+      user_id: user.id, 
+      aspect: aspect,
+      item: item.id
+    });
+
     storages.dropbox.saveFile(
       user, 
       '/sources/foursquare/' + aspect + '/' + item.id + '.json',
-      JSON.stringify(item)
+      JSON.stringify(item),
+      function(response) {
+        logger.trace('synced foursquare item', { 
+          user_id: user.id, 
+          aspect: aspect,
+          item: item.id,
+          response: response
+        });
+      },
+      function(e) {
+        logger.warn('syncing foursquare item failed', { 
+          user_id: user.id, 
+          aspect: aspect,
+          item: item.id,
+          message: e.message
+        });
+      }
     );
   }
 
@@ -100,7 +145,10 @@ module.exports = function(app, passport, storages) {
       req.user.sources.foursquare.id = profile.id;
       req.user.sources.foursquare.token = accessToken;
       req.user.save(function(error) {
-        logger.trace('saved foursquare ID and token to user', { user_id: req.user.id });
+        logger.trace('saved foursquare ID and token to user', { 
+          user_id: req.user.id 
+        });
+
         done(null, req.user);
       });
     }

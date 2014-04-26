@@ -34,6 +34,4 @@ var logger = new(winston.Logger)({
   ]
 });
 
-//winston.addColors(customColors);
-
 module.exports = logger;
