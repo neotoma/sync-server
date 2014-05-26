@@ -125,7 +125,7 @@ module.exports = function(app, passport, storages) {
       storage_id: 'dropbox',
       source_id: 'foursquare',
       source_item_id: sourceItem.id,
-      content_type_id: aspect
+      content_type_id: aspect.substring(0, aspect.length - 1)
     }, function(error, item) {
       if (error) {
         logger.warn('failed to find or create item', { 
@@ -235,12 +235,41 @@ module.exports = function(app, passport, storages) {
   });
 
   app.get('/sources/foursquare', app.authFilter, foursquare.authFilter, function(req, res) {
-    res.json({ 
-      sources: { 
-        foursquare: {
-          token: req.user.sources.foursquare.token 
-        } 
-      } 
+    items = app.model.item.find({
+      user_id: req.user.id,
+      source_id: 'foursquare'
+    }, function(error, items) {
+      if (error) {
+        logger.warn('failed to get foursquare items', {
+          error: error
+        });
+
+        res.json({
+          error: 'failed to load foursquare info'
+        });
+      } else {
+        res.json({
+          foursquare: {
+            total_items_available: items.length,
+            total_items_synced: items.filter(function(item) { return (item.sync_verified_at); }).length,
+            content_types: [{
+              id: 'checkin',
+              total_items_available: items.filter(function(item) { return (item.content_type_id == 'checkin'); }).length,
+              total_items_synced: items.filter(function(item) { return (item.content_type_id == 'checkin' && item.sync_verified_at); }).length
+            },
+            {
+              id: 'tip',
+              total_items_available: items.filter(function(item) { return (item.content_type_id == 'tip'); }).length,
+              total_items_synced: items.filter(function(item) { return (item.content_type_id == 'tip' && item.sync_verified_at); }).length
+            },
+            {
+              id: 'friend',
+              total_items_available: items.filter(function(item) { return (item.content_type_id == 'friend'); }).length,
+              total_items_synced: items.filter(function(item) { return (item.content_type_id == 'friend' && item.sync_verified_at); }).length
+            }]
+          }
+        });
+      }
     });
   });
 

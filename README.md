@@ -76,7 +76,7 @@ You can find these on the foursquare developer website at [https://foursquare.co
 #### Endpoints
 
 - GET `/sources/foursquare/auth`: authenticate foursquare account
-- GET `/sources/foursquare`: view foursquare access token
+- GET `/sources/foursquare`: view data about items available and synced from foursquare
 - GET `/sources/foursquare/sync/checkins`: sync all of authenticated user's checkins to Dropbox
 - GET `/sources/foursquare/sync/tips`: sync all of authenticated user's tips to Dropbox
 - GET `/sources/foursquare/sync/friends`: sync all of authenticated user's friends to Dropbox
