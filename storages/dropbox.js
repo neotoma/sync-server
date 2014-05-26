@@ -45,7 +45,7 @@ module.exports = function(app, passport, User) {
 
   dropbox.authFilter = function(req, res, next) {
     if (typeof req.user == 'undefined' || !req.user.storages.dropbox.id) {
-      logger.trace('screened request with dropbox authFilter');
+      logger.trace('screened request with Dropbox authFilter');
 
       req.session.storagesDropboxAuthRedirectPath = req.path;
       res.redirect('/storages/dropbox/auth');
@@ -60,7 +60,7 @@ module.exports = function(app, passport, User) {
       callbackURL: app.config.storages.dropbox.callbackURL
     },
     function(accessToken, refreshToken, profile, done) {
-      logger.trace('verifying dropbox user', { dropbox_id: profile.id });
+      logger.trace('authenticating Dropbox user', { dropbox_id: profile.id });
 
       app.model.user.findOrCreate({ 
         storages: {
@@ -71,7 +71,7 @@ module.exports = function(app, passport, User) {
       }, function(error, user) {
         user.storages.dropbox.token = accessToken;
         user.save(function() {
-          logger.trace('saved dropbox token to user', { user_id: user.id });
+          logger.trace('saved Dropbox token to user', { user_id: user.id });
           return done(error, user);
         });
       });
@@ -79,19 +79,19 @@ module.exports = function(app, passport, User) {
   ));
 
   app.get('/storages/dropbox/auth', function(req, res) {
-    logger.trace('redirecting request to dropbox auth');
+    logger.trace('redirecting request to Dropbox auth');
     passport.authenticate('dropbox-oauth2')(req, res);
   }); 
 
   app.get('/storages/dropbox/auth-callback', function(req, res, next) { 
     passport.authenticate('dropbox-oauth2', function(error, user, info) {
       if (error) {
-        logger.warn('dropbox auth failed', { error: error });
+        logger.warn('Dropbox auth failed', { error: error });
         res.redirect('/storages/dropbox/auth');
       } else {
         req.logIn(user, function(error) {
           if (error) { 
-            logger.warn('dropbox auth session establishment failed', { error: error });
+            logger.warn('Dropbox auth session establishment failed', { error: error });
           }
           
           if (req.session.storagesDropboxAuthRedirectPath) {

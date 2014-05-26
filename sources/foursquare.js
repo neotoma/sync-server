@@ -7,6 +7,8 @@ module.exports = function(app, passport, storages) {
 
   foursquare.authFilter = function(req, res, next) {
     if (typeof req.user == 'undefined' || !req.user.sources.foursquare.token) {
+      logger.trace('screened request with foursquare authFilter');
+
       req.session.sourcesFoursquareAuthRedirectPath = req.path;
 
       if (req.path == '/sources/foursquare/auth') {
@@ -142,6 +144,8 @@ module.exports = function(app, passport, storages) {
       passReqToCallback: true
     },
     function(req, accessToken, refreshToken, profile, done) {
+      logger.trace('authenticating foursquare user', { foursquare_id: profile.id });
+
       req.user.sources.foursquare.id = profile.id;
       req.user.sources.foursquare.token = accessToken;
       req.user.save(function(error) {
@@ -154,7 +158,10 @@ module.exports = function(app, passport, storages) {
     }
   ));
 
-  app.get('/sources/foursquare/auth', app.authFilter, passport.authenticate('foursquare'));
+  app.get('/sources/foursquare/auth', app.authFilter, function(req, res) {
+    logger.trace('redirecting request to foursquare auth');
+    passport.authenticate('foursquare')(req, res);
+  });
 
   app.get('/sources/foursquare/auth-callback', app.authFilter, passport.authenticate('foursquare', { 
     failureRedirect: '/sources/foursquare/auth'
