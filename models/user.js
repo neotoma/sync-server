@@ -18,14 +18,15 @@ module.exports = function(mongoose) {
 
   userSchema.statics.findOrCreate = function(attributes, callback) {
     _this = this;
+    logger.trace('finding or creating user', { attributes: attributes });
 
     this.findOne(attributes, function(error, user) {
       if (user) {
-        logger.trace('found user', { user_id: user.id, attributes: attributes });
+        logger.trace('found user', { id: user.id });
         callback(error, user);
       } else {
         _this.create(attributes, function(error, user) {
-          logger.trace('created new user', { user_id: user.id, attributes: attributes });
+          logger.trace('created new user', { id: user.id });
           callback(error, user);
         });
       }

@@ -62,18 +62,13 @@ module.exports = function(app, passport, User) {
     function(accessToken, refreshToken, profile, done) {
       logger.trace('authenticating Dropbox user', { dropbox_id: profile.id });
 
-      app.model.user.findOrCreate({ 
-        storages: {
-          dropbox: {
-            id: profile.id
-          }
-        }
-      }, function(error, user) {
-        user.storages.dropbox.token = accessToken;
-        user.save(function() {
-          logger.trace('saved Dropbox token to user', { user_id: user.id });
-          return done(error, user);
-        });
+      app.model.user.findOrCreate({ "storages.dropbox.id": profile.id }, 
+        function(error, user) {
+          user.storages.dropbox.token = accessToken;
+          user.save(function() {
+            logger.trace('saved Dropbox token to user', { user_id: user.id });
+            return done(error, user);
+          });
       });
     }
   ));
