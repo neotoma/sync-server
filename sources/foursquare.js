@@ -245,7 +245,7 @@ module.exports = function(app, passport, storages) {
         });
 
         res.json({
-          error: 'failed to load foursquare info'
+          error: 'failed to load foursquare items'
         });
       } else {
         res.json({

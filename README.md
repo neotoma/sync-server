@@ -20,7 +20,7 @@ User data is stored in MongoDB, which relies on the following environment variab
 ASHEVILLE_SYNC_MONGODB_URL=<mongodb service url>
 ```
 
-Example: `http://127.0.0.1:27017`
+Example: `mongodb://127.0.0.1:27017`
 
 ## Sessions
 
