@@ -28,17 +28,17 @@ module.exports = function(app, passport, User) {
             callback(JSON.parse(data));
           }
         });
-      }).on('error', function(e) {
-        if (typeof e != 'undefined') {
-          error(e);
+      }).on('error', function(error) {
+        if (typeof error != 'undefined') {
+          error(error);
         }
       });
 
       req.write(content);
       req.end();
-    } catch (e) {
-      if (typeof e != 'undefined') {
-        error(e);
+    } catch (error) {
+      if (typeof error != 'undefined') {
+        error(error);
       }
     }
   };
@@ -65,8 +65,13 @@ module.exports = function(app, passport, User) {
       app.model.user.findOrCreate({ "storages.dropbox.id": profile.id }, 
         function(error, user) {
           user.storages.dropbox.token = accessToken;
-          user.save(function() {
-            logger.trace('saved Dropbox token to user', { user_id: user.id });
+          user.save(function(error) {
+            if (error) {
+              logger.warn('failed to save Dropbox token to user', { id: user.id });
+            } else {
+              logger.trace('saved Dropbox token to user', { id: user.id });
+            }
+
             return done(error, user);
           });
       });
@@ -111,14 +116,14 @@ module.exports = function(app, passport, User) {
   });
 
   app.get('/storages/dropbox/account/info', dropbox.authFilter, function(req, res) {
-    var options = {
-      host: 'api.dropbox.com',
-      path: '/1/account/info?access_token=' + req.user.storages.dropbox.token
-    };
-
-    _res = res;
-
     try {
+      var options = {
+        host: 'api.dropbox.com',
+        path: '/1/account/info?access_token=' + req.user.storages.dropbox.token
+      };
+
+      _res = res;
+
       https.get(options, function(res) {
         try {
           if (res.statusCode == 401) {
@@ -134,17 +139,26 @@ module.exports = function(app, passport, User) {
           res.on('end', function() {
             _res.json({ response: JSON.parse(data) });
           });
-        } catch (e) {
-          logger.warn(e.message);
-          _res.json({ error: e.message });
+        } catch (error) {
+          logger.warn('failed to parse dropbox account info', {
+            error: error
+          });
+
+          _res.json({ error: error.message });
         }
-      }).on('error', function(e) {
-        logger.warn(e.message);
-        res.json({ error: e.message });
+      }).on('error', function(error) {
+        logger.warn('failed to retrieve dropbox account info', {
+          error: error
+        });
+
+        res.json({ error: error.message });
       });
-    } catch (e) {
-      logger.warn(e.message);
-      res.json({ error: e.message });
+    } catch (error) {
+      logger.warn('failed to retrieve dropbox account info', {
+        error: error
+      });
+
+      res.json({ error: error.message });
     }
   });
 

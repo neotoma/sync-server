@@ -26,7 +26,12 @@ module.exports = function(mongoose) {
         callback(error, user);
       } else {
         _this.create(attributes, function(error, user) {
-          logger.trace('created new user', { id: user.id });
+          if (error) {
+            logger.warn('failed to create new user', { error: error.message });
+          } else {
+            logger.trace('created new user', { id: user.id });
+          }
+          
           callback(error, user);
         });
       }

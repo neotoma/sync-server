@@ -31,12 +31,12 @@ module.exports = function(app, passport, storages) {
   };
 
   foursquare.syncItems = function(user, aspect) {
-    logger.trace('starting foursquare items sync', { 
-      user_id: user.id, 
-      aspect: aspect 
-    });
-
     try {
+      logger.trace('starting foursquare items sync', { 
+        user_id: user.id, 
+        aspect: aspect 
+      });
+
       var offset = 0;
 
       var syncNextPage = function() {
@@ -63,9 +63,9 @@ module.exports = function(app, passport, storages) {
           });
 
           res.on('end', function() {
-            var json = JSON.parse(data);
-
             try {
+              var json = JSON.parse(data);
+
               if (typeof json.meta.errorType != 'undefined') {
                 throw new Error(json.meta.errorType + ' - ' + json.meta.errorDetail);
               }
@@ -92,49 +92,103 @@ module.exports = function(app, passport, storages) {
                   aspect: aspect
                 });
               }
-            } catch(e) {
-              logger.warn(e.message);
+            } catch(error) {
+              logger.warn('failed to parse foursquare items data', {
+                error: error
+              });
             }
           });
-        }).on('error', function(e) {
-          logger.warn(e.message);
+        }).on('error', function(error) {
+          logger.warn('failed to retrieve next page of foursquare items', {
+            error: error
+          });
         });
       };
 
       syncNextPage();
-    } catch (e) {
-      logger.warn(e.message);
+    } catch (error) {
+      logger.warn('failed to sync foursquare items', {
+        error: error
+      });
     }    
   }
 
-  foursquare.syncItem = function(user, aspect, item) { 
+  foursquare.syncItem = function(user, aspect, sourceItem) { 
     logger.trace('syncing foursquare item', { 
       user_id: user.id, 
       aspect: aspect,
-      item: item.id
+      source_item_id: sourceItem.id
     });
 
-    storages.dropbox.saveFile(
-      user, 
-      '/sources/foursquare/' + aspect + '/' + item.id + '.json',
-      JSON.stringify(item),
-      function(response) {
-        logger.trace('synced foursquare item', { 
-          user_id: user.id, 
-          aspect: aspect,
-          item: item.id,
-          response: response
+    app.model.item.findOrCreate({
+      user_id: user.id,
+      storage_id: 'dropbox',
+      source_id: 'foursquare',
+      source_item_id: sourceItem.id,
+      content_type_id: aspect
+    }, function(error, item) {
+      if (error) {
+        logger.warn('failed to find or create item', { 
+          error: error 
         });
-      },
-      function(e) {
-        logger.warn('syncing foursquare item failed', { 
-          user_id: user.id, 
-          aspect: aspect,
-          item: item.id,
-          message: e.message
+      } else {
+        item.sync_attempted_at = Date.now();
+        item.save(function(error) {
+          if (error) {
+            logger.warn('failed to update item with sync_attempted_at', { 
+              error: error 
+            });
+          }
         });
+
+        storages.dropbox.saveFile(
+          user, 
+          '/sources/foursquare/' + aspect + '/' + sourceItem.id + '.json',
+          JSON.stringify(sourceItem),
+          function(response) {
+            logger.trace('synced foursquare item', { 
+              user_id: user.id, 
+              aspect: aspect,
+              source_item_id: sourceItem.id,
+              response: response
+            });
+
+            item.sync_verified_at = Date.now();
+            item.bytes = response.bytes;
+            item.path = response.path;
+            item.save(function(error) {
+              if (error) {
+                logger.warn('failed to update item after syncing', { 
+                  error: error
+                });
+              } else {
+                logger.trace('updated item', { 
+                  id: item.id 
+                });
+              }
+            });
+          },
+          function(error) {
+            logger.warn('syncing foursquare item failed', { 
+              user_id: user.id, 
+              aspect: aspect,
+              source_item_id: sourceItem.id,
+              message: error.message
+            });
+
+            item.sync_failed_at = Date.now();
+            item.error = error.message;
+            item.save(function(error) {
+              if (error) {
+                logger.warn('failed to update item after failure to sync', { 
+                  error: error 
+                });
+              }
+            });
+          }
+        );
       }
-    );
+    });
   }
 
   passport.use(new foursquarePassport.Strategy({
@@ -149,9 +203,15 @@ module.exports = function(app, passport, storages) {
       req.user.sources.foursquare.id = profile.id;
       req.user.sources.foursquare.token = accessToken;
       req.user.save(function(error) {
-        logger.trace('saved foursquare ID and token to user', { 
-          user_id: req.user.id 
-        });
+        if (error) {
+          logger.warn('failed to save foursquare ID and token to user', { 
+            error: error
+          });
+        } else {
+          logger.trace('saved foursquare ID and token to user', { 
+            user_id: req.user.id 
+          });
+        }
 
         done(null, req.user);
       });
@@ -188,10 +248,17 @@ module.exports = function(app, passport, storages) {
     try {
       var aspect = req.params.aspect;
       foursquare.syncItems(req.user, aspect);
-      res.json({ msg: 'foursquare ' + aspect + ' sync started' });
-    } catch (e) {
-      logger.warn(e.message);
-      res.json({ error: e.message });
+      res.json({ 
+        msg: 'foursquare sync started',
+        aspect: aspect
+      });
+    } catch (error) {
+      logger.warn('failed to sync foursquare items', {
+        aspect: aspect,
+        error: error
+      });
+
+      res.json({ error: error.message });
     }
   });
 

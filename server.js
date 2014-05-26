@@ -5,7 +5,8 @@ app.config = require('./config');
 var mongoose = require('./mongoose')(app);
 
 app.model = {
-  user: require('./models/user')(mongoose)
+  user: require('./models/user')(mongoose),
+  item: require('./models/item')(mongoose)
 };
 
 var passport = require('./passport')(app);
