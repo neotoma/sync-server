@@ -17,10 +17,16 @@ Example: `http://localhost:9090`
 User data is stored in MongoDB, which relies on the following environment variable:
 
 ```
-ASHEVILLE_SYNC_MONGODB_URL=<mongodb service url>
+ASHEVILLE_SYNC_MONGODB_HOST=<mongodb service host>
 ```
 
-Example: `mongodb://127.0.0.1:27017`
+Example: `mongodb://127.0.0.1`
+
+```
+ASHEVILLE_SYNC_MONGODB_PORT=<mongodb service port>
+```
+
+Example: `27017`
 
 ## Sessions
 

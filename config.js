@@ -5,9 +5,13 @@ if (process.env.ASHEVILLE_SYNC_HOST) {
   var foursquareCallbackURL = process.env.ASHEVILLE_SYNC_HOST + '/sources/foursquare/auth-callback'
 }
 
-module.exports = {
-  mongodbURL: process.env.ASHEVILLE_SYNC_MONGODB_URL || logger.crit('MongoDB URL not provided by environment for config'),
+var config = {
   port: process.env.ASHEVILLE_SYNC_EXPRESS_PORT || 9090,
+  mongodb: {
+    db:   'asheville',
+    host: process.env.ASHEVILLE_SYNC_MONGODB_HOST || logger.crit('MongoDB host not provided by environment for config'),
+    port: process.env.ASHEVILLE_SYNC_MONGODB_PORT || logger.crit('MongoDB port not provided by environment for config')
+  },
   session: {
     secret: process.env.ASHEVILLE_SYNC_SESSIONS_SECRET || logger.crit('Sessions secret not provided by environment for config')
   },
@@ -26,3 +30,7 @@ module.exports = {
     }
   }
 }
+
+config.mongodb.url = config.mongodb.host + ':' + config.mongodb.port + '/' + config.mongodb.db;
+
+module.exports = config;

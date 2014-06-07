@@ -1,4 +1,6 @@
 var express = require('express');
+var MongoStore = require('connect-mongo')(express);
+var logger = require('./logger');
 var app = express();
 app.config = require('./config');
 
@@ -13,7 +15,12 @@ var passport = require('./passport')(app);
 
 app.use(express.logger({ immediate: true, format: "\033[37m:method :url\033[37m (:date)\033[0m" }));
 app.use(express.cookieParser());
-app.use(express.session({ secret: app.config.session.secret }));
+app.use(express.session({ 
+  secret: app.config.session.secret,
+  store: new MongoStore({
+    url: app.config.mongodb.url
+  })
+}));
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -24,4 +31,4 @@ var sources = require('./sources')(app, passport, storages);
 
 var server = app.listen(app.config.port);
 
-console.log('listening on', app.config.port);
+logger.info('listening on', app.config.port);

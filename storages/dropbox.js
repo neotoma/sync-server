@@ -24,8 +24,17 @@ module.exports = function(app, passport, User) {
         });
 
         res.on('end', function() {
-          if (callback) {
-            callback(JSON.parse(data));
+          try {
+            if (callback) {
+              var parsedData = JSON.parse(data);
+              callback(parsedData);
+            }
+          } catch(error) {
+            logger.error('failed to parse dropbox saveFile response', { data: data });
+            
+            if (typeof error != 'undefined') {
+              error(error);
+            }
           }
         });
       }).on('error', function(error) {
