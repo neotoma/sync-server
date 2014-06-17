@@ -2,6 +2,7 @@ module.exports = function(mongoose) {
   var logger = require('../logger');
 
   var userSchema = mongoose.Schema({
+    name: String,
     storages: {
       dropbox: {
         token: String,

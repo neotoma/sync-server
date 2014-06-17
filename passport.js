@@ -9,8 +9,8 @@ module.exports = function(app) {
   });
 
   passport.deserializeUser(function(id, done) {
-    app.model.user.findById(id, function(err, user) {
-      done(err, user);
+    app.model.user.findById(id, function(error, user) {
+      done(error, user);
 
       if (user) {
         logger.trace('deserialized passport user', { id: user.id });

@@ -24,10 +24,20 @@ app.use(express.session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.all('/*', function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', 'http://127.0.0.1:9091');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next();
+});
+
+var sessions = require('./sessions')(app);
 var storages = require('./storages')(app, passport);
 app.authFilter = storages.dropbox.authFilter;
-
 var sources = require('./sources')(app, passport, storages);
+var storageSurveys = require('./storageSurveys')(app);
+
 
 var server = app.listen(app.config.port);
 

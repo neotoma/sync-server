@@ -56,7 +56,7 @@ module.exports = function(app, passport, User) {
     if (typeof req.user == 'undefined' || !req.user.storages.dropbox.id) {
       logger.trace('screened request with Dropbox authFilter');
 
-      req.session.storagesDropboxAuthRedirectPath = req.path;
+      req.session.storagesDropboxAuthRedirectURL = req.path;
       res.redirect('/storages/dropbox/auth');
     } else {
       next();
@@ -73,6 +73,7 @@ module.exports = function(app, passport, User) {
 
       app.model.user.findOrCreate({ "storages.dropbox.id": profile.id }, 
         function(error, user) {
+          user.name = profile.displayName;
           user.storages.dropbox.token = accessToken;
           user.save(function(error) {
             if (error) {
@@ -88,11 +89,16 @@ module.exports = function(app, passport, User) {
   ));
 
   app.get('/storages/dropbox/auth', function(req, res) {
+    if (req.query.redirectURL) {
+      req.session.storagesDropboxAuthRedirectURL = req.query.redirectURL;
+      logger.trace('remember to redirect after Dropbox auth', { url: req.session.storagesDropboxAuthRedirectURL });
+    }
+
     logger.trace('redirecting request to Dropbox auth');
     passport.authenticate('dropbox-oauth2')(req, res);
   }); 
 
-  app.get('/storages/dropbox/auth-callback', function(req, res, next) { 
+  app.get('/storages/dropbox/auth-callback', function(req, res) {
     passport.authenticate('dropbox-oauth2', function(error, user, info) {
       if (error) {
         logger.warn('Dropbox auth failed', { error: error });
@@ -103,15 +109,16 @@ module.exports = function(app, passport, User) {
             logger.warn('Dropbox auth session establishment failed', { error: error });
           }
           
-          if (req.session.storagesDropboxAuthRedirectPath) {
-            res.redirect(req.session.storagesDropboxAuthRedirectPath);
-            req.session.storagesDropboxAuthRedirectPath = null;
+          if (req.session.storagesDropboxAuthRedirectURL) {
+            logger.trace('redirect to remembered URL', { url: req.session.storagesDropboxAuthRedirectURL });
+            res.redirect(req.session.storagesDropboxAuthRedirectURL);
+            req.session.storagesDropboxAuthRedirectURL = null;
           } else {
             res.redirect('/storages/dropbox');
           }
         });
       }
-    })(req, res, next);
+    })(req, res);
   });
 
   app.get('/storages/dropbox', dropbox.authFilter, function(req, res) {
