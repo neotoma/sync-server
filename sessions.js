@@ -5,10 +5,16 @@ module.exports = function(app) {
     logger.trace('session', req.session);
 
     var respond = function(userJSON) {
+      var users = [];
+
+      if (userJSON) {
+        users.push(userJSON);
+      }
+
       res.json({
         sessions: [{
           id: req.session.id,
-          users: [userJSON]
+          users: users
         }] 
       });
     };
@@ -22,5 +28,13 @@ module.exports = function(app) {
         respond();
       }
     });
+  });
+
+  app.del('/sessions/:id', function(req, res) {
+    if (req.params.id == req.session.id) {
+      req.logout();
+    }
+
+    res.json(null);
   });
 }
