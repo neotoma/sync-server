@@ -5,23 +5,48 @@ module.exports = function(app, passport, storages) {
   var apiVersion = '20140404';
   var foursquare = {};
 
-  foursquare.authFilter = function(req, res, next) {
-    if (typeof req.user == 'undefined' || !req.user.sources.foursquare.token) {
-      logger.trace('screened request with foursquare authFilter');
+  foursquare.toJSON = function(user) {
+    var json = {
+      id: 'foursquare',
+      name: 'foursquare',
+      totalItemsAvailable: 0,
+      totalItemsSynced: 0,
+      contentTypes: [{
+        id: 'tips',
+        name: 'Tips'
+      }]
+    };
 
-      req.session.sourcesFoursquareAuthRedirectPath = req.path;
-
-      if (req.path == '/sources/foursquare/auth') {
-        req.session.sourcesFoursquareAuthRedirectPath = null;
-      } else {
-        req.session.sourcesFoursquareAuthRedirectPath = req.path;
-      }
-
-      res.redirect('/sources/foursquare/auth');
-      return;
+    if (user) {
+      json.authenticated = null;
     }
 
-    next();
+    return json;
+  }
+
+  foursquare.authFilter = function(req, res, next) {
+    if (req.path == '/sources/foursquare/auth') {
+      req.session.sourcesFoursquareAuthRedirectPath = null;
+    } else {
+      req.session.sourcesFoursquareAuthRedirectPath = req.path;
+    }
+
+    if (typeof req.user == 'undefined') {
+      logger.trace('screened request with foursquare authFilter; no session user');
+      res.redirect('/sources/foursquare/auth');
+    } else {
+      app.model.userSourceAuth.findOne({
+        user_id:    req.user.id,
+        source_id:  "foursquare"
+      }, function(error, userSourceAuth) {
+        if (!userSourceAuth) {
+          logger.trace('screened request with foursquare authFilter; no user source auth');
+          res.redirect('/sources/foursquare/auth');
+        } else {
+          next();
+        }
+      });
+    }
   };
 
   foursquare.sync = function(user) {
@@ -46,62 +71,73 @@ module.exports = function(app, passport, storages) {
           offset: offset
         });
 
-        var options = {
-          host: 'api.foursquare.com',
-          path: '/v2/users/self/' + aspect + '?v=' + apiVersion + '&oauth_token=' + user.sources.foursquare.token + '&limit=250&offset=' + offset,
-        };
+        app.model.userSourceAuth.findOne({
+          user_id:    user.id,
+          source_id: "foursquare"
+        }, function(error, userSourceAuth) {
+          if (!userSourceAuth) {
+            logger.warn('failed to find user source auth', { 
+              error: error
+            });
+          } else {
+            var options = {
+              host: 'api.foursquare.com',
+              path: '/v2/users/self/' + aspect + '?v=' + apiVersion + '&oauth_token=' + userSourceAuth.source_token + '&limit=250&offset=' + offset,
+            };
 
-        https.get(options, function(res) {
-          if (res.statusCode == 401) {
-            throw new Error('unauthorized request');
-          }
-
-          var data = '';
-
-          res.on('data', function(chunk) {
-            data += chunk;
-          });
-
-          res.on('end', function() {
-            try {
-              var json = JSON.parse(data);
-
-              if (typeof json.meta.errorType != 'undefined') {
-                throw new Error(json.meta.errorType + ' - ' + json.meta.errorDetail);
+            https.get(options, function(res) {
+              if (res.statusCode == 401) {
+                throw new Error('unauthorized request');
               }
 
-              var items = json.response[aspect].items;
+              var data = '';
 
-              logger.trace('retrieved foursquare next page of items', { 
-                user_id: user.id, 
-                aspect: aspect,
-                offset: offset,
-                total: items.length
+              res.on('data', function(chunk) {
+                data += chunk;
               });
 
-              if (items.length != 0) {
-                while (items.length > 0) {
-                  foursquare.syncItem(user, aspect, items.shift());
-                  offset++;
-                }
+              res.on('end', function() {
+                try {
+                  var json = JSON.parse(data);
 
-                syncNextPage();
-              } else {
-                logger.trace('finished starting foursquare items sync', { 
-                  user_id: user.id, 
-                  aspect: aspect
-                });
-              }
-            } catch(error) {
-              logger.warn('failed to parse foursquare items data', {
+                  if (typeof json.meta.errorType != 'undefined') {
+                    throw new Error(json.meta.errorType + ' - ' + json.meta.errorDetail);
+                  }
+
+                  var items = json.response[aspect].items;
+
+                  logger.trace('retrieved foursquare next page of items', { 
+                    user_id: user.id, 
+                    aspect: aspect,
+                    offset: offset,
+                    total: items.length
+                  });
+
+                  if (items.length != 0) {
+                    while (items.length > 0) {
+                      foursquare.syncItem(user, aspect, items.shift());
+                      offset++;
+                    }
+
+                    syncNextPage();
+                  } else {
+                    logger.trace('finished starting foursquare items sync', { 
+                      user_id: user.id, 
+                      aspect: aspect
+                    });
+                  }
+                } catch(error) {
+                  logger.warn('failed to parse foursquare items data', {
+                    error: error
+                  });
+                }
+              });
+            }).on('error', function(error) {
+              logger.warn('failed to retrieve next page of foursquare items', {
                 error: error
               });
-            }
-          });
-        }).on('error', function(error) {
-          logger.warn('failed to retrieve next page of foursquare items', {
-            error: error
-          });
+            });
+          }
         });
       };
 
@@ -200,20 +236,34 @@ module.exports = function(app, passport, storages) {
     function(req, accessToken, refreshToken, profile, done) {
       logger.trace('authenticating foursquare user', { foursquare_id: profile.id });
 
-      req.user.sources.foursquare.id = profile.id;
-      req.user.sources.foursquare.token = accessToken;
-      req.user.save(function(error) {
+      app.model.userSourceAuth.findOrCreate({
+        user_id:          req.user.id,
+        source_id:        "foursquare",
+        source_user_id:   profile.id
+      }, function(error, userSourceAuth) {
         if (error) {
-          logger.warn('failed to save foursquare ID and token to user', { 
+          logger.warn('failed to find or create user source auth', { 
             error: error
           });
-        } else {
-          logger.trace('saved foursquare ID and token to user', { 
-            user_id: req.user.id 
-          });
+
+          done(error);
         }
 
-        done(null, req.user);
+        userSourceAuth.source_token = accessToken;
+
+        userSourceAuth.save(function(error) {
+          if (error) {
+            logger.warn('failed to save foursquare token to user source auth', { 
+              error: error
+            });
+          } else {
+            logger.trace('saved foursquare token to user source auth', { 
+              user_id: req.user.id 
+            });
+          }
+
+          done(error, req.user);
+        });
       });
     }
   ));
@@ -235,10 +285,14 @@ module.exports = function(app, passport, storages) {
   });
 
   app.get('/sources/foursquare', app.authFilter, foursquare.authFilter, function(req, res) {
+    logger.trace('finding foursquare items');
+
     items = app.model.item.find({
       user_id: req.user.id,
       source_id: 'foursquare'
     }, function(error, items) {
+      logger.trace('found foursquare items');
+
       if (error) {
         logger.warn('failed to get foursquare items', {
           error: error

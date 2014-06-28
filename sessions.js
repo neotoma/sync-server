@@ -4,19 +4,23 @@ module.exports = function(app) {
   app.get('/sessions', function(req, res) {
     logger.trace('session', req.session);
 
-    app.model.user.findById(req.session.passport.user, function(error, user) {
-      var users = [];
-
-      if (user) {
-        users[0] = user;
-      }
-
-      res.json({ 
+    var respond = function(userJSON) {
+      res.json({
         sessions: [{
           id: req.session.id,
-          users: users
+          users: [userJSON]
         }] 
       });
+    };
+
+    app.model.user.findById(req.session.passport.user, function(error, user) {
+      if (user) {
+        logger.trace('found user by id');
+        respond(user.toObject({ getters: true }));
+      } else {
+        logger.warn('failed to find user by id');
+        respond();
+      }
     });
   });
 }

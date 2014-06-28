@@ -5,61 +5,87 @@ module.exports = function(app, passport, User) {
   var dropbox = {};
 
   dropbox.saveFile = function(user, path, content, callback, error) {
-    var options = {
-      host: 'api-content.dropbox.com',
-      path: '/1/files_put/sandbox/' + path + '?access_token=' + user.storages.dropbox.token,
-      method: 'PUT'
-    };
+    var _error = error;
 
-    try {
-      var req = https.request(options, function(res) {
-        if (res.statusCode == 401) {
-          throw new Error('unauthorized request');
-        }
+    app.model.userStorageAuth.findOne({
+      storage_id: "dropbox",
+      user_id:    user.id
+    }, function(error, userStorageAuth) {
+      if (error) {
+        logger.warn('failed to retrieve user storage auth for user');
+        return _error(error);
+      }
 
-        var data = '';
+      var options = {
+        host: 'api-content.dropbox.com',
+        path: '/1/files_put/sandbox/' + path + '?access_token=' + userStorageAuth.storage_token,
+        method: 'PUT'
+      };
 
-        res.on('data', function(chunk) {
-          data += chunk;
-        });
+      try {
+        var req = https.request(options, function(res) {
+          if (res.statusCode == 401) {
+            throw new Error('unauthorized request');
+          }
 
-        res.on('end', function() {
-          try {
-            if (callback) {
-              var parsedData = JSON.parse(data);
-              callback(parsedData);
+          var data = '';
+
+          res.on('data', function(chunk) {
+            data += chunk;
+          });
+
+          res.on('end', function() {
+            try {
+              if (callback) {
+                var parsedData = JSON.parse(data);
+                callback(parsedData);
+              }
+            } catch(error) {
+              logger.error('failed to parse dropbox saveFile response', { data: data });
+              
+              if (typeof error != 'undefined') {
+                _error(error);
+              }
             }
-          } catch(error) {
-            logger.error('failed to parse dropbox saveFile response', { data: data });
-            
-            if (typeof error != 'undefined') {
-              error(error);
-            }
+          });
+        }).on('error', function(error) {
+          if (typeof error != 'undefined') {
+            _error(error);
           }
         });
-      }).on('error', function(error) {
-        if (typeof error != 'undefined') {
-          error(error);
-        }
-      });
 
-      req.write(content);
-      req.end();
-    } catch (error) {
-      if (typeof error != 'undefined') {
-        error(error);
+        req.write(content);
+        req.end();
+      } catch (error) {
+        if (typeof error != 'undefined') {
+          _error(error);
+        }
       }
-    }
+    });
   };
 
   dropbox.authFilter = function(req, res, next) {
-    if (typeof req.user == 'undefined' || !req.user.storages.dropbox.id) {
-      logger.trace('screened request with Dropbox authFilter');
-
+    if (req.path == '/storages/dropbox/auth') {
+      req.session.storagesDropboxAuthRedirectURL = null;
+    } else {
       req.session.storagesDropboxAuthRedirectURL = req.path;
+    }
+
+    if (typeof req.user == 'undefined') {
+      logger.trace('screened request with Dropbox authFilter; no session user');
       res.redirect('/storages/dropbox/auth');
     } else {
-      next();
+      app.model.userStorageAuth.findOne({
+        user_id:    req.user.id,
+        storage_id: "dropbox"
+      }, function(error, userStorageAuth) {
+        if (!userStorageAuth) {
+          logger.trace('screened request with Dropbox authFilter; no user storage auth');
+          res.redirect('/storages/dropbox/auth');
+        } else {
+          next();
+        }
+      });
     }
   };
 
@@ -71,20 +97,67 @@ module.exports = function(app, passport, User) {
     function(accessToken, refreshToken, profile, done) {
       logger.trace('authenticating Dropbox user', { dropbox_id: profile.id });
 
-      app.model.user.findOrCreate({ "storages.dropbox.id": profile.id }, 
-        function(error, user) {
-          user.name = profile.displayName;
-          user.storages.dropbox.token = accessToken;
-          user.save(function(error) {
+      app.model.userStorageAuth.findOrCreate({
+        storage_id:       "dropbox",
+        storage_user_id:  profile.id
+      }, 
+        function(error, userStorageAuth) {
+          if (error) {
+            logger.warn('failed to find or create user storage auth from Dropbox auth data');
+            return done(error);
+          }
+
+          logger.trace('saving token to user storage auth', { token: accessToken });
+          userStorageAuth.storage_token = accessToken;
+
+          userStorageAuth.save(function(error) {
             if (error) {
-              logger.warn('failed to save Dropbox token to user', { id: user.id });
+              logger.warn('failed to save Dropbox token to user storage auth', { id: userStorageAuth.id });
+              return done(error);
             } else {
-              logger.trace('saved Dropbox token to user', { id: user.id });
+              logger.trace('saved Dropbox token to user storage auth', { id: userStorageAuth.id });
             }
 
-            return done(error, user);
+            if (userStorageAuth.user_id) {
+              app.model.user.findOne({ _id: userStorageAuth.user_id }, function(error, user) {
+                if (error) {
+                  logger.warn('failed to find user from user ID', { id: userStorageAuth.id, error: error });
+                  return done(error);
+                } else if (!user) {
+                  logger.warn('failed to find user from user ID', { id: userStorageAuth.id });
+                  return done(error);
+                }
+
+                return done(error, user);
+              });
+            } else {
+              logger.trace('creating user with profile data', { profile: profile });
+
+              var email;
+
+              if (profile.emails.length) {
+                email = profile.emails[0].value;
+              }
+
+              app.model.user.create({ 
+                name: profile.displayName,
+                email: email
+              }, function(error, user) {
+                if (error || !user) {
+                  logger.warn('failed to create user');
+                  return done(error);
+                }
+
+                userStorageAuth.user_id = user.id;
+
+                userStorageAuth.save(function(error) {
+                  return done(error, user);
+                });
+              });
+            }
           });
-      });
+        }
+      );
     }
   ));
 
@@ -107,67 +180,72 @@ module.exports = function(app, passport, User) {
         req.logIn(user, function(error) {
           if (error) { 
             logger.warn('Dropbox auth session establishment failed', { error: error });
-          }
-          
-          if (req.session.storagesDropboxAuthRedirectURL) {
-            logger.trace('redirect to remembered URL', { url: req.session.storagesDropboxAuthRedirectURL });
-            res.redirect(req.session.storagesDropboxAuthRedirectURL);
-            req.session.storagesDropboxAuthRedirectURL = null;
+            res.redirect('/storages/dropbox/auth');
           } else {
-            res.redirect('/storages/dropbox');
+            if (req.session.storagesDropboxAuthRedirectURL) {
+              logger.trace('redirect to remembered URL', { url: req.session.storagesDropboxAuthRedirectURL });
+              var storagesDropboxAuthRedirectURL = req.session.storagesDropboxAuthRedirectURL;
+              req.session.storagesDropboxAuthRedirectURL = null;
+              res.redirect(storagesDropboxAuthRedirectURL);
+            } else {
+              res.redirect('/sessions');
+            }
           }
         });
       }
     })(req, res);
   });
 
-  app.get('/storages/dropbox', dropbox.authFilter, function(req, res) {
-    res.json({
-      storages: { 
-        dropbox: { 
-          token: req.user.storages.dropbox.token 
-        } 
-      } 
-    });
-  });
-
   app.get('/storages/dropbox/account/info', dropbox.authFilter, function(req, res) {
     try {
-      var options = {
-        host: 'api.dropbox.com',
-        path: '/1/account/info?access_token=' + req.user.storages.dropbox.token
-      };
+      app.model.userStorageAuth.findOne({
+        storage_id: "dropbox",
+        user_id:    req.user.id
+      }, function(error, userStorageAuth) {
+        logger.trace('checkpoint');
 
-      _res = res;
+        if (error) {
+          logger.warn('failed to retrieve user storage auth for user');
+        }
 
-      https.get(options, function(res) {
-        try {
-          if (res.statusCode == 401) {
-            throw new Error('unauthorized request');
+        logger.trace('retrieved userStorageAuth', { userStorageAuth: userStorageAuth.toObject() });
+
+        var options = {
+          host: 'api.dropbox.com',
+          path: '/1/account/info?access_token=' + userStorageAuth.storage_token
+        };
+
+        _res = res;
+
+        https.get(options, function(res) {
+          try {
+            if (res.statusCode == 401) {
+              throw new Error('unauthorized request');
+            }
+
+            var data = '';
+
+            res.on('data', function(chunk) {
+              data += chunk;
+            });
+
+            res.on('end', function() {
+              _res.json({ response: JSON.parse(data) });
+            });
+          } catch (error) {
+            logger.warn('failed to parse dropbox account info', {
+              error: error
+            });
+
+            _res.json({ error: error.message });
           }
-
-          var data = '';
-
-          res.on('data', function(chunk) {
-            data += chunk;
-          });
-
-          res.on('end', function() {
-            _res.json({ response: JSON.parse(data) });
-          });
-        } catch (error) {
-          logger.warn('failed to parse dropbox account info', {
+        }).on('error', function(error) {
+          logger.warn('failed to retrieve dropbox account info', {
             error: error
           });
 
-          _res.json({ error: error.message });
-        }
-      }).on('error', function(error) {
-        logger.warn('failed to retrieve dropbox account info', {
-          error: error
+          res.json({ error: error.message });
         });
-
-        res.json({ error: error.message });
       });
     } catch (error) {
       logger.warn('failed to retrieve dropbox account info', {

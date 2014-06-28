@@ -7,8 +7,10 @@ app.config = require('./config');
 var mongoose = require('./mongoose')(app);
 
 app.model = {
-  user: require('./models/user')(mongoose),
-  item: require('./models/item')(mongoose)
+  user:             require('./models/user')(mongoose),
+  userStorageAuth:  require('./models/user-storage-auth')(mongoose),
+  userSourceAuth:   require('./models/user-source-auth')(mongoose),
+  item:             require('./models/item')(mongoose)
 };
 
 var passport = require('./passport')(app);
@@ -37,7 +39,6 @@ var storages = require('./storages')(app, passport);
 app.authFilter = storages.dropbox.authFilter;
 var sources = require('./sources')(app, passport, storages);
 var storageSurveys = require('./storageSurveys')(app);
-
 
 var server = app.listen(app.config.port);
 

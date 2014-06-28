@@ -1,20 +1,9 @@
-module.exports = function(mongoose) {
-  var logger = require('../logger');
+var logger = require('../logger');
 
+module.exports = function(mongoose) {
   var userSchema = mongoose.Schema({
     name: String,
-    storages: {
-      dropbox: {
-        token: String,
-        id: Number
-      }
-    },
-    sources: {
-      foursquare: {
-        token: String,
-        id: Number
-      }
-    }
+    email: String
   });
 
   userSchema.statics.findOrCreate = function(attributes, callback) {
