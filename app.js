@@ -7,12 +7,15 @@ app.use(express.logger({ immediate: true, format: "\033[37m:method :url\033[37m 
 app.host = process.env.ASHEVILLE_SYNC_HOST || logger.crit('Host not provided by environment for app config');
 app.port = process.env.ASHEVILLE_SYNC_EXPRESS_PORT || 9090;
 
+var MongoStore = new require('connect-mongo')(express);
+var store = new MongoStore({
+  url: require('./lib/mongodb').url
+});
+
 app.use(express.cookieParser());
 app.use(express.session({ 
   secret: process.env.ASHEVILLE_SYNC_SESSIONS_SECRET || logger.crit('Sessions secret not provided by environment for app config'),
-  store: new require('connect-mongo')(express)({
-    url: require('./lib/mongodb').url
-  })
+  store: store
 }));
 
 var passport = require('./lib/passport');
