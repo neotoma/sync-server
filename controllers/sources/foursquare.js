@@ -5,6 +5,15 @@ var Item = require('../../models/item');
 var apiVersion = '20140404';
 var foursquare = {};
 
+foursquare.toObject = function(userSourceAuths) {
+  return {
+    id: 'foursquare',
+    name: 'foursquare',
+    contentTypes: ['checkin','tip','friend'],
+    userSourceAuths: this.userSourceAuthIds(userSourceAuths, 'foursquare')
+  };
+};
+
 foursquare.sync = function(user, storage) {
   foursquare.syncItems(user, storage, 'checkins');
   foursquare.syncItems(user, storage, 'tips');
@@ -32,7 +41,7 @@ foursquare.syncItems = function(user, storage, aspect) {
         source_id: "foursquare"
       }, function(error, userSourceAuth) {
         if (!userSourceAuth) {
-          logger.warn('failed to find user source auth', { 
+          logger.error('failed to find user source auth', { 
             error: error
           });
         } else {
@@ -83,13 +92,13 @@ foursquare.syncItems = function(user, storage, aspect) {
                   });
                 }
               } catch(error) {
-                logger.warn('failed to parse foursquare items data', {
+                logger.error('failed to parse foursquare items data', {
                   error: error
                 });
               }
             });
           }).on('error', function(error) {
-            logger.warn('failed to retrieve next page of foursquare items', {
+            logger.error('failed to retrieve next page of foursquare items', {
               error: error
             });
           });
@@ -99,7 +108,7 @@ foursquare.syncItems = function(user, storage, aspect) {
 
     syncNextPage();
   } catch (error) {
-    logger.warn('failed to sync foursquare items', {
+    logger.error('failed to sync foursquare items', {
       error: error
     });
   }    
@@ -120,14 +129,14 @@ foursquare.syncItem = function(user, storage, aspect, sourceItem) {
     content_type_id: aspect.substring(0, aspect.length - 1)
   }, function(error, item) {
     if (error) {
-      logger.warn('failed to find or create item', { 
+      logger.error('failed to find or create item', { 
         error: error 
       });
     } else {
       item.sync_attempted_at = Date.now();
       item.save(function(error) {
         if (error) {
-          logger.warn('failed to update item with sync_attempted_at', { 
+          logger.error('failed to update item with sync_attempted_at', { 
             error: error 
           });
         }
@@ -150,7 +159,7 @@ foursquare.syncItem = function(user, storage, aspect, sourceItem) {
           item.path = response.path;
           item.save(function(error) {
             if (error) {
-              logger.warn('failed to update item after syncing', { 
+              logger.error('failed to update item after syncing', { 
                 error: error
               });
             } else {
@@ -161,7 +170,7 @@ foursquare.syncItem = function(user, storage, aspect, sourceItem) {
           });
         },
         function(error) {
-          logger.warn('syncing foursquare item failed', { 
+          logger.error('syncing foursquare item failed', { 
             user_id: user.id, 
             aspect: aspect,
             source_item_id: sourceItem.id,
@@ -172,7 +181,7 @@ foursquare.syncItem = function(user, storage, aspect, sourceItem) {
           item.error = error.message;
           item.save(function(error) {
             if (error) {
-              logger.warn('failed to update item after failure to sync', { 
+              logger.error('failed to update item after failure to sync', { 
                 error: error 
               });
             }
@@ -181,6 +190,14 @@ foursquare.syncItem = function(user, storage, aspect, sourceItem) {
       );
     }
   });
+}
+
+foursquare.userSourceAuthIds = function(userSourceAuths, sourceId) {
+  return userSourceAuths.map(function(userSourceAuth) {
+    if (userSourceAuth.source == sourceId) {
+      return userSourceAuth.id;
+    }
+  })
 }
 
 module.exports = foursquare;

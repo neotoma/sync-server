@@ -48,7 +48,7 @@ module.exports = function(app) {
       }, 
         function(error, userStorageAuth) {
           if (error) {
-            logger.warn('failed to find or create user storage auth from Dropbox auth data');
+            logger.error('failed to find or create user storage auth from Dropbox auth data');
             return done(error);
           }
 
@@ -57,7 +57,7 @@ module.exports = function(app) {
 
           userStorageAuth.save(function(error) {
             if (error) {
-              logger.warn('failed to save Dropbox token to user storage auth', { id: userStorageAuth.id });
+              logger.error('failed to save Dropbox token to user storage auth', { id: userStorageAuth.id });
               return done(error);
             } else {
               logger.trace('saved Dropbox token to user storage auth', { id: userStorageAuth.id });
@@ -66,10 +66,10 @@ module.exports = function(app) {
             if (userStorageAuth.user_id) {
               User.findOne({ _id: userStorageAuth.user_id }, function(error, user) {
                 if (error) {
-                  logger.warn('failed to find user from user ID', { id: userStorageAuth.id, error: error });
+                  logger.error('failed to find user from user ID', { id: userStorageAuth.id, error: error });
                   return done(error);
                 } else if (!user) {
-                  logger.warn('failed to find user from user ID', { id: userStorageAuth.id });
+                  logger.error('failed to find user from user ID', { id: userStorageAuth.id });
                   return done(error);
                 }
 
@@ -89,7 +89,7 @@ module.exports = function(app) {
                 email: email
               }, function(error, user) {
                 if (error || !user) {
-                  logger.warn('failed to create user');
+                  logger.error('failed to create user');
                   return done(error);
                 }
 
@@ -119,12 +119,12 @@ module.exports = function(app) {
   app.get('/storages/dropbox/auth-callback', function(req, res) {
     passport.authenticate('dropbox-oauth2', function(error, user, info) {
       if (error) {
-        logger.warn('Dropbox auth failed', { error: error });
+        logger.error('Dropbox auth failed', { error: error });
         res.redirect('/storages/dropbox/auth');
       } else {
         req.logIn(user, function(error) {
           if (error) { 
-            logger.warn('Dropbox auth session establishment failed', { error: error });
+            logger.error('Dropbox auth session establishment failed', { error: error });
             res.redirect('/storages/dropbox/auth');
           } else {
             if (req.session.storagesDropboxAuthRedirectURL) {
@@ -150,7 +150,7 @@ module.exports = function(app) {
         logger.trace('checkpoint');
 
         if (error) {
-          logger.warn('failed to retrieve user storage auth for user');
+          logger.error('failed to retrieve user storage auth for user');
         }
 
         logger.trace('retrieved userStorageAuth', { userStorageAuth: userStorageAuth.toObject() });
@@ -178,14 +178,14 @@ module.exports = function(app) {
               _res.json({ response: JSON.parse(data) });
             });
           } catch (error) {
-            logger.warn('failed to parse dropbox account info', {
+            logger.error('failed to parse dropbox account info', {
               error: error
             });
 
             _res.json({ error: error.message });
           }
         }).on('error', function(error) {
-          logger.warn('failed to retrieve dropbox account info', {
+          logger.error('failed to retrieve dropbox account info', {
             error: error
           });
 
@@ -193,7 +193,7 @@ module.exports = function(app) {
         });
       });
     } catch (error) {
-      logger.warn('failed to retrieve dropbox account info', {
+      logger.error('failed to retrieve dropbox account info', {
         error: error
       });
 

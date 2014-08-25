@@ -15,8 +15,11 @@ module.exports = function(app) {
       res.json({
         sessions: [{
           id: req.session.id,
-          users: users
-        }] 
+          users: users.map(function(user) {
+            return user.id;
+          })
+        }],
+        users: users
       });
     };
 
@@ -26,9 +29,9 @@ module.exports = function(app) {
       User.findById(req.session.passport.user, function(error, user) {
         if (user) {
           logger.trace('found user by ID');
-          respond(user.toObject({ getters: true }));
+          respond(user.toObject());
         } else {
-          logger.warn('failed to find user by ID');
+          logger.error('failed to find user by ID');
           respond();
         }
       });

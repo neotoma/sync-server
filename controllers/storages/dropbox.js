@@ -12,7 +12,7 @@ dropbox.saveFile = function(user, path, content, callback, error) {
     user_id:    user.id
   }, function(error, userStorageAuth) {
     if (error) {
-      logger.warn('failed to retrieve user storage auth for user');
+      logger.error('failed to retrieve user storage auth for user');
       return _error(error);
     }
 

@@ -53,7 +53,7 @@ module.exports = function(app) {
         source_user_id:   profile.id
       }, function(error, userSourceAuth) {
         if (error) {
-          logger.warn('failed to find or create user source auth', { 
+          logger.error('failed to find or create user source auth', { 
             error: error
           });
 
@@ -64,7 +64,7 @@ module.exports = function(app) {
 
         userSourceAuth.save(function(error) {
           if (error) {
-            logger.warn('failed to save foursquare token to user source auth', { 
+            logger.error('failed to save foursquare token to user source auth', { 
               error: error
             });
           } else {
@@ -80,6 +80,11 @@ module.exports = function(app) {
   ));
 
   app.get('/sources/foursquare/auth', app.authFilter, function(req, res) {
+    if (req.query.redirectURL) {
+      req.session.sourcesFoursquareAuthRedirectPath = req.query.redirectURL;
+      logger.trace('remember to redirect after foursquare auth', { url: req.session.sourcesFoursquareAuthRedirectPath });
+    }
+
     logger.trace('redirecting request to foursquare auth');
     passport.authenticate('foursquare')(req, res);
   });
@@ -105,7 +110,7 @@ module.exports = function(app) {
       logger.trace('found foursquare items');
 
       if (error) {
-        logger.warn('failed to get foursquare items', {
+        logger.error('failed to get foursquare items', {
           error: error
         });
 
@@ -158,7 +163,7 @@ module.exports = function(app) {
         });
       });
     } catch (error) {
-      logger.warn('failed to sync foursquare items', {
+      logger.error('failed to sync foursquare items', {
         aspect: aspect,
         error: error
       });

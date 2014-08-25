@@ -8,6 +8,9 @@ var userStorageAuthSchema = mongoose.Schema({
   storage_user_id: String
 });
 
+userStorageAuthSchema.set('toObject', { getters: true });
+userStorageAuthSchema.options.toObject.transform = mongoose.transform;
+
 userStorageAuthSchema.statics.findOrCreate = function(attributes, callback) {
   _this = this;
   logger.trace('finding or creating user storage auth', { attributes: attributes });
@@ -19,7 +22,7 @@ userStorageAuthSchema.statics.findOrCreate = function(attributes, callback) {
     } else {
       _this.create(attributes, function(error, userStorageAuth) {
         if (error) {
-          logger.warn('failed to create new user storage auth', { error: error.message });
+          logger.error('failed to create new user storage auth', { error: error.message });
         } else {
           logger.trace('created new user storage auth', { id: userStorageAuth.id });
         }

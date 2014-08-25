@@ -16,6 +16,9 @@ var itemSchema = mongoose.Schema({
   error: String
 });
 
+itemSchema.set('toObject', { getters: true });
+itemSchema.options.toObject.transform = mongoose.transform;
+
 itemSchema.statics.findOrCreate = function(attributes, callback) {
   _this = this;
   logger.trace('finding or creating item', { attributes: attributes });
@@ -27,7 +30,7 @@ itemSchema.statics.findOrCreate = function(attributes, callback) {
     } else {
       _this.create(attributes, function(error, item) {
         if (error) {
-          logger.warn('failed to create new item', { error: error.message });
+          logger.error('failed to create new item', { error: error.message });
         } else {
           logger.trace('created new item', { id: item.id });
         }

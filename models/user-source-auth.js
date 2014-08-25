@@ -8,6 +8,9 @@ var userSourceAuthSchema = mongoose.Schema({
   source_user_id: String
 });
 
+userSourceAuthSchema.set('toObject', { getters: true });
+userSourceAuthSchema.options.toObject.transform = mongoose.transform;
+
 userSourceAuthSchema.statics.findOrCreate = function(attributes, callback) {
   _this = this;
   logger.trace('finding or creating user source auth', { attributes: attributes });
@@ -19,7 +22,7 @@ userSourceAuthSchema.statics.findOrCreate = function(attributes, callback) {
     } else {
       _this.create(attributes, function(error, userSourceAuth) {
         if (error) {
-          logger.warn('failed to create new user source auth', { error: error.message });
+          logger.error('failed to create new user source auth', { error: error.message });
         } else {
           logger.trace('created new user source auth', { id: userSourceAuth.id });
         }
