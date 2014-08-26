@@ -35,17 +35,14 @@ module.exports = function(app) {
       _id: id
     }, function(error, userSourceAuth) {
       if (error) {
-        return res.json({
-          error: error
-        });
+        logger.error('failed to find userSourceAuth object for deletion', { error: error });
+      } else {
+        if (userSourceAuth) {
+          userSourceAuth.remove();
+        }
       }
 
-      if (userSourceAuth) {
-        userSourceAuth.remove();
-        res.json({ message: 'userSourceAuth object removed' });
-      } else {
-        res.json({ error: 'userSourceAuth object with id provided not found' });
-      }
+      res.status(204).json();
     });
   });
 }
