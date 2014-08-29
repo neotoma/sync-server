@@ -3,5 +3,6 @@ module.exports = function(app) {
   require('./storage-surveys')(app);
   require('./storages')(app);
   require('./sources')(app);
+  require('./user-storage-auths')(app);
   require('./user-source-auths')(app);
 }

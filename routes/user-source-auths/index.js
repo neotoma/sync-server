@@ -29,7 +29,6 @@ module.exports = function(app) {
 
   app.delete('/userSourceAuths/:id', function(req, res) {
     var id = req.params.id;
-    console.log('id', id);
     
     UserSourceAuths.findOne({
       _id: id

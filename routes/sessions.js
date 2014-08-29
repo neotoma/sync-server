@@ -4,8 +4,6 @@ var UserStorageAuth = require('../models/user-storage-auth');
 
 module.exports = function(app) {
   app.get('/sessions', function(req, res) {
-    logger.trace('session', req.session);
-
     var respond = function(user, userStorageAuth) {
       var users = [];
       var userStorageAuths = [];
@@ -33,25 +31,16 @@ module.exports = function(app) {
       });
     };
 
-    var user_id = req.session.passport.user;
+    if (req.user) {
+      logger.trace('found user by ID');
 
-    if (user_id) {
-      User.findById(req.session.passport.user, function(error, user) {
-        if (user) {
-          logger.trace('found user by ID');
-
-          UserStorageAuth.findOne({
-            user_id: user.id
-          }, function(error, userStorageAuth) {
-            respond(user, userStorageAuth);
-          });
-        } else {
-          logger.error('failed to find user by ID');
-          respond();
-        }
+      UserStorageAuth.findOne({
+        user_id: req.user.id
+      }, function(error, userStorageAuth) {
+        respond(req.user, userStorageAuth);
       });
     } else {
-      logger.trace('no user ID stored in session');
+      logger.trace('no user stored in session');
       respond();
     }
   });

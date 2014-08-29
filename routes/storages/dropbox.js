@@ -37,9 +37,10 @@ module.exports = function(app) {
   passport.use(new dropboxPassport.Strategy({
       clientID: process.env.ASHEVILLE_SYNC_STORAGES_DROPBOX_APP_KEY || logger.crit('App key not provided by environment for Dropbox config'),
       clientSecret: process.env.ASHEVILLE_SYNC_STORAGES_DROPBOX_APP_SECRET || logger.crit('App secret not provided by environment for Dropbox config'),
-      callbackURL: app.host + '/storages/dropbox/auth-callback'
+      callbackURL: app.host + '/storages/dropbox/auth-callback',
+      passReqToCallback: true
     },
-    function(accessToken, refreshToken, profile, done) {
+    function(req, accessToken, refreshToken, profile, done) {
       logger.trace('authenticating Dropbox user', { dropbox_id: profile.id });
 
       UserStorageAuth.findOrCreate({
@@ -64,41 +65,55 @@ module.exports = function(app) {
             }
 
             if (userStorageAuth.user_id) {
+              logger.trace('user id found for user storage auth', { user_id: userStorageAuth.user_id });
+              
               User.findOne({ _id: userStorageAuth.user_id }, function(error, user) {
                 if (error) {
-                  logger.error('failed to find user from user ID', { id: userStorageAuth.id, error: error });
+                  logger.error('failed to find user from userStorageAuth user ID', { id: userStorageAuth.id, error: error });
                   return done(error);
                 } else if (!user) {
-                  logger.error('failed to find user from user ID', { id: userStorageAuth.id });
+                  logger.error('failed to find user from userStorageAuth user ID', { id: userStorageAuth.id });
                   return done(error);
                 }
 
                 return done(error, user);
               });
             } else {
-              logger.trace('creating user with profile data', { profile: profile });
-
-              var email;
-
-              if (profile.emails.length) {
-                email = profile.emails[0].value;
-              }
-
-              User.create({ 
-                name: profile.displayName,
-                email: email
-              }, function(error, user) {
-                if (error || !user) {
-                  logger.error('failed to create user');
-                  return done(error);
-                }
-
-                userStorageAuth.user_id = user.id;
+              if (req.user) {
+                userStorageAuth.user_id = req.user.id;
 
                 userStorageAuth.save(function(error) {
-                  return done(error, user);
+                  logger.trace('associated user storage auth with session user');
+
+                  return done(error, req.user);
                 });
-              });
+              } else {
+                logger.trace('creating user with profile data', { profile: profile });
+
+                var email;
+
+                if (profile.emails.length) {
+                  email = profile.emails[0].value;
+                }
+
+                User.create({ 
+                  name: profile.displayName,
+                  email: email
+                }, function(error, user) {
+                  if (error || !user) {
+                    logger.error('failed to create user');
+                    return done(error);
+                  }
+
+                  userStorageAuth.user_id = user.id;
+
+                  userStorageAuth.save(function(error) {
+                    logger.trace('associated user storage auth with new user');
+
+                    return done(error, user);
+                  });
+                });
+              }
             }
           });
         }
