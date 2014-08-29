@@ -1,14 +1,23 @@
 var logger = require('../lib/logger');
 var User = require('../models/user');
+var UserStorageAuth = require('../models/user-storage-auth');
 
 module.exports = function(app) {
   app.get('/sessions', function(req, res) {
     logger.trace('session', req.session);
 
-    var respond = function(userJSON) {
+    var respond = function(user, userStorageAuth) {
       var users = [];
+      var userStorageAuths = [];
 
-      if (userJSON) {
+      if (user) {
+        var userJSON = user.toObject();
+
+        if (userStorageAuth) {
+          userJSON.userStorageAuths = [userStorageAuth.id];
+          userStorageAuths.push(userStorageAuth.toObject());
+        }
+
         users.push(userJSON);
       }
 
@@ -19,7 +28,8 @@ module.exports = function(app) {
             return user.id;
           })
         }],
-        users: users
+        users: users,
+        userStorageAuths: userStorageAuths
       });
     };
 
@@ -29,7 +39,12 @@ module.exports = function(app) {
       User.findById(req.session.passport.user, function(error, user) {
         if (user) {
           logger.trace('found user by ID');
-          respond(user.toObject());
+
+          UserStorageAuth.findOne({
+            user_id: user.id
+          }, function(error, userStorageAuth) {
+            respond(user, userStorageAuth);
+          });
         } else {
           logger.error('failed to find user by ID');
           respond();
@@ -41,11 +56,11 @@ module.exports = function(app) {
     }
   });
 
-  app.del('/sessions/:id', function(req, res) {
+  app.delete('/sessions/:id', function(req, res) {
     if (req.params.id == req.session.id) {
       req.logout();
     }
 
-    res.json(null);
+    res.status(204).json(null);
   });
 }
