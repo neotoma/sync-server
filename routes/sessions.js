@@ -1,19 +1,38 @@
 var logger = require('../lib/logger');
 var User = require('../models/user');
 var UserStorageAuth = require('../models/user-storage-auth');
+var UserSourceAuth = require('../models/user-source-auth');
 
 module.exports = function(app) {
   app.get('/sessions', function(req, res) {
-    var respond = function(user, userStorageAuth) {
+    var respond = function(user, userStorageAuths, userSourceAuths) {
       var users = [];
-      var userStorageAuths = [];
+      
+      var userStorageAuthObjects = [];
+      var userStorageAuthIds = [];
+
+      var userSourceAuthObjects = [];
+      var userSourceAuthIds = [];
 
       if (user) {
         var userJSON = user.toObject();
 
-        if (userStorageAuth) {
-          userJSON.userStorageAuths = [userStorageAuth.id];
-          userStorageAuths.push(userStorageAuth.toObject());
+        if (userStorageAuths) {
+          userStorageAuths.forEach(function(userStorageAuth) {
+            userStorageAuthObjects.push(userStorageAuth.toObject());
+            userStorageAuthIds.push(userStorageAuth.id);
+          });
+
+          userJSON.userStorageAuths = userStorageAuthIds;
+        }
+
+        if (userSourceAuths) {
+          userSourceAuths.forEach(function(userSourceAuth) {
+            userSourceAuthObjects.push(userSourceAuth.toObject());
+            userSourceAuthIds.push(userSourceAuth.id);
+          });
+
+          userJSON.userSourceAuths = userSourceAuthIds;
         }
 
         users.push(userJSON);
@@ -27,17 +46,22 @@ module.exports = function(app) {
           })
         }],
         users: users,
-        userStorageAuths: userStorageAuths
+        userStorageAuths: userStorageAuthObjects,
+        userSourceAuths: userSourceAuthObjects
       });
     };
 
     if (req.user) {
       logger.trace('found user by ID');
 
-      UserStorageAuth.findOne({
+      UserStorageAuth.find({
         user_id: req.user.id
-      }, function(error, userStorageAuth) {
-        respond(req.user, userStorageAuth);
+      }, function(error, userStorageAuths) {
+        UserSourceAuth.find({
+          user_id: req.user.id
+        }, function(error, userSourceAuths) {
+          respond(req.user, userStorageAuths, userSourceAuths);
+        });
       });
     } else {
       logger.trace('no user stored in session');
