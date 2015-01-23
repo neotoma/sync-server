@@ -5,4 +5,5 @@ module.exports = function(app) {
   require('./sources')(app);
   require('./user-storage-auths')(app);
   require('./user-source-auths')(app);
+  require('./statuses')(app);
 }

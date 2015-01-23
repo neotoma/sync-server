@@ -156,7 +156,7 @@ module.exports = function(app) {
 
         var storage = require('../../controllers/storages/' + userStorageAuth.storage_id);
 
-        foursquare.syncItems(req.user, storage, aspect);
+        foursquare.syncItems(app, req.user, storage, aspect);
         res.json({ 
           msg: 'foursquare sync started',
           aspect: aspect

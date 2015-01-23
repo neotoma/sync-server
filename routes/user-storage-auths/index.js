@@ -1,4 +1,4 @@
-var UserStorageAuths = require('../../models/user-storage-auth');
+var UserStorageAuth = require('../../models/user-storage-auth');
 
 module.exports = function(app) {
   app.get('/userStorageAuths', function(req, res) {
@@ -8,7 +8,7 @@ module.exports = function(app) {
       });
     }
 
-    UserStorageAuths.find({
+    UserStorageAuth.find({
       user_id: req.user.id
     }, function(error, UserStorageAuths) {
       if (error) {
@@ -30,7 +30,7 @@ module.exports = function(app) {
   app.delete('/userStorageAuths/:id', function(req, res) {
     var id = req.params.id;
     
-    UserStorageAuths.findOne({
+    UserStorageAuth.findOne({
       _id: id
     }, function(error, userStorageAuth) {
       if (error) {
