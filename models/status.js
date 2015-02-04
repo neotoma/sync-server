@@ -8,6 +8,7 @@ var statusSchema = mongoose.Schema({
   content_type_id: String,
   total_items_available: Number,
   total_items_synced: Number,
+  total_items_pending: Number,
   last_synced_item_id: String
 });
 

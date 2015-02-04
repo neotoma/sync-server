@@ -8,16 +8,16 @@ module.exports = {
         sources: this.sourceIds(sources, 'checkin')
       },
       {
-        id: 'tip',
-        name: 'Tip',
-        pluralName: 'Tips',
-        sources: this.sourceIds(sources, 'tip')
-      },
-      {
         id: 'friend',
         name: 'Friend',
         pluralName: 'Friends',
         sources: this.sourceIds(sources, 'friend')
+      },
+      {
+        id: 'tip',
+        name: 'Tip',
+        pluralName: 'Tips',
+        sources: this.sourceIds(sources, 'tip')
       }
     ];
   },

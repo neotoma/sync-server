@@ -92,6 +92,8 @@ module.exports = function(app) {
   app.get('/sources/foursquare/auth-callback', app.authFilter, passport.authenticate('foursquare', { 
     failureRedirect: '/sources/foursquare/auth'
   }), function(req, res) {
+    foursquare.syncAll(app, req.user);
+
     if (req.session.sourcesFoursquareAuthRedirectPath) {
       res.redirect(req.session.sourcesFoursquareAuthRedirectPath);
       req.session.sourcesFoursquareAuthRedirectPath = null;

@@ -2,6 +2,7 @@ var EventEmitter = require('events').EventEmitter;
 var logger = require('../../lib/logger');
 var https = require('https');
 var UserSourceAuth = require('../../models/user-source-auth');
+var UserStorageAuth = require('../../models/user-storage-auth');
 var Item = require('../../models/item');
 var Status = require('../../models/status');
 var apiVersion = '20140404';
@@ -38,6 +39,28 @@ foursquare.toObject = function(userSourceAuths) {
     contentTypes: ['checkin','tip','friend'],
     userSourceAuths: this.userSourceAuthIds(userSourceAuths, 'foursquare')
   };
+};
+
+foursquare.syncAll = function(app, user) {
+  try {
+    UserStorageAuth.findOne({
+      user_id: user.id,
+    }, function(error, userStorageAuth) {
+      if (error) {
+        return logger.error('failed to find user storage auth for user', { error: error });
+      }
+
+      var storage = require('../../controllers/storages/' + userStorageAuth.storage_id);
+
+      foursquare.syncItems(app, user, storage, 'checkins');
+      foursquare.syncItems(app, user, storage, 'friends');
+      foursquare.syncItems(app, user, storage, 'tips');
+    });
+  } catch (error) {
+    logger.error('failed to sync all foursquare content types', {
+      error: error
+    });
+  }
 };
 
 foursquare.syncItems = function(app, user, storage, aspect) {
@@ -132,7 +155,8 @@ foursquare.syncItems = function(app, user, storage, aspect) {
                   } catch(error) {
                     logger.error('failed to parse foursquare items data', {
                       error: error,
-                      options: options
+                      options: options,
+                      data: data
                     });
                   }
                 });
