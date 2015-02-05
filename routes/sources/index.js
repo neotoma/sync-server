@@ -30,24 +30,4 @@ module.exports = function(app) {
       res.json(json);
     });
   });
-
-  app.post('/sources/sync', function(req, res) {
-    var json = { sources: [] };
-
-    UserStorageAuth.find({
-      user_id: req.user.id
-    }, function(error, userStorageAuths) {
-      if (error || !userStorageAuths.length) {
-        logger.error('failed to find user storage auths for session user');
-      }
-
-      var sources = require('../../controllers/sources');
-
-      json.sources = sources.map(function(source) {
-        return source.sync(req.user, require('../../controllers/storages/' + userStorageAuths[0].storage_id));
-      });
-
-      res.json(json);
-    });
-  });
 }

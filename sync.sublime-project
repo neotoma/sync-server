@@ -1,0 +1,10 @@
+{
+  "folders":
+  [
+    {
+      "path": "./",
+      "folder_exclude_patterns": ["node_modules", "logs"],
+      "file_exclude_patterns": ["sync.sublime-workspace"]
+    }
+  ]
+}

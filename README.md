@@ -4,17 +4,17 @@ This is an API-centric service for synchronizing data between sources and storag
 
 # Host
 
-Configuration relies on knowing the host URL as reported by the following environment variable:
+The host URL must be indicated by the following environment variable:
 
 ```
-ASHEVILLE_SYNC_HOST_URL=<web server URL>
+ASHEVILLE_SYNC_HOST=<sync web server URL>
 ```
 
 Example: `http://localhost:9090`
 
-## MongoDB
+## Database
 
-User data is stored in MongoDB, which relies on the following environment variable:
+User data is managed by [MongoDB](http://www.mongodb.org/), the host of which must be indicated by the following environment variables:
 
 ```
 ASHEVILLE_SYNC_MONGODB_HOST=<mongodb service host>
@@ -30,7 +30,7 @@ Example: `27017`
 
 ## Sessions
 
-Express sessions rely on the following environment variable:
+User sessions are handled by [Express](http://expressjs.com/) and [Passport](http://passportjs.org/), which rely on the following environment variable:
 
 ```
 ASHEVILLE_SYNC_SESSIONS_SECRET=<secret passphrase>
@@ -40,7 +40,12 @@ Use a randomly generated, secure, alphanumeric string for this value.
 
 ## Storages
 
-Storages are points of destination for syncronizing data from sources.
+Storages are points of destination for syncronizing data from sources. Users can authenticate them to initiate syncing.
+
+#### Endpoints
+
+- GET `/userStorageAuths`: retrieve all storage authentications for session user
+- GET `/userStorageAuths/:id`: retrieve data about a storage authentication
 
 ### Dropbox
 
@@ -53,17 +58,22 @@ ASHEVILLE_SYNC_STORAGES_DROPBOX_APP_KEY=<dropbox developer app key>
 ASHEVILLE_SYNC_STORAGES_DROPBOX_APP_SECRET=<dropbox developer app secret>
 ```
 
-You can find these on the Dropbox developer website at [https://dropbox.com/developers/apps](https://dropbox.com/developers/apps). Register an app for Asheville if you haven't already and set a redirect URI as your host suffixed with `/storages/dropbox/auth-callback` (e.g. `http://localhost:9090/storages/dropbox/auth-callback`).
+You can find these on the Dropbox developer website at [https://dropbox.com/developers/apps](https://dropbox.com/developers/apps). Register an app for Asheville and configure the redirect URI to be the app host plus the path `/storages/dropbox/auth-callback` (e.g. `http://localhost:9090/storages/dropbox/auth-callback`).
 
 #### Endpoints
 
 - GET `/storages/dropbox/auth`: authenticate Dropbox account
-- GET `/storages/dropbox`: Dropbox access token
-- GET `/storages/dropbox/account/info`: basic Dropbox account info
+- GET `/storages/dropbox/auth-callback`: process Dropbox account authentication
 
 ## Sources
 
-Sources are points of origin for syncronizing data to storage.
+Sources are points of origin for syncronizing data to storage. Users can authenticate them to initiate syncing.
+
+#### Endpoints
+
+- GET `/sources`: retrieve all available sources
+- GET `/userSourceAuths`: retrieve all source authentications for session user
+- GET `/userSourceAuths/:id`: retrieve data about a storage authentication
 
 ### foursquare
 
@@ -74,7 +84,6 @@ The foursquare source module relies on the following environment variables:
 ```
 ASHEVILLE_SYNC_SOURCES_FOURSQUARE_CLIENT_ID=<foursquare developer app client ID>
 ASHEVILLE_SYNC_SOURCES_FOURSQUARE_CLIENT_SECRET=<foursquare developer app client secret>
-ASHEVILLE_SYNC_SOURCES_FOURSQUARE_CALLBACK_URL=<foursquare auth callback URL>
 ```
 
 You can find these on the foursquare developer website at [https://foursquare.com/developers/apps](https://foursquare.com/developers/apps). Register an app for Asheville if you haven't already and set a redirect URI as your host suffixed with `/sources/foursquare/auth-callback` (e.g. `http://localhost:9090/sources/foursquare/auth-callback`).
@@ -82,7 +91,12 @@ You can find these on the foursquare developer website at [https://foursquare.co
 #### Endpoints
 
 - GET `/sources/foursquare/auth`: authenticate foursquare account
-- GET `/sources/foursquare`: view data about items available and synced from foursquare
-- GET `/sources/foursquare/sync/checkins`: sync all of authenticated user's checkins to Dropbox
-- GET `/sources/foursquare/sync/tips`: sync all of authenticated user's tips to Dropbox
-- GET `/sources/foursquare/sync/friends`: sync all of authenticated user's friends to Dropbox
+- GET `/sources/foursquare/auth-callback`: process foursquare account authentication
+
+## Statuses
+
+Statuses are objects that report the latest sync status for a particular user, source and content type.
+
+#### Endpoints
+
+- GET `/statuses`: retrieve all statuses for session user

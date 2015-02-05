@@ -1,6 +1,5 @@
 .DS_Store
-logs/*
-public/
+sync.sublime-workspace
+logs/
 node_modules/
-data/
 npm-debug.log
