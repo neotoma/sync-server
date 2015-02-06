@@ -1,4 +1,5 @@
 .DS_Store
+ssl/
 sync.sublime-workspace
 logs/
 node_modules/

@@ -5,7 +5,7 @@ var UserStorageAuth = require('../../models/user-storage-auth');
 module.exports = function(app) {
   require('./foursquare')(app);
 
-  app.get('/sources', function(req, res) {
+  app.get('/sources', app.authFilter, function(req, res) {
     var json = { sources: [] };
 
     UserSourceAuth.find({

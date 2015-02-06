@@ -2,15 +2,18 @@
 
 This is an API-centric service for synchronizing data between sources and storages per the [Asheville specification](http://asheville.io).
 
-# Host
+# Hosts
 
-The host URL must be indicated by the following environment variable:
+Hosts must support SSL and be configured with the following environment variables:
 
 ```
-ASHEVILLE_SYNC_HOST=<sync web server URL>
+ASHEVILLE_SYNC_HOST=<host address>
+ASHEVILLE_SYNC_DEPLOY_HOST=<host address for deployment elsewhere>
+ASHEVILLE_SYNC_DEPLOY_HOST_DIR=<host directory for deployment elsewhere>
+ASHEVILLE_SYNC_DEPLOY_HOST_USERNAME=<host username for deployment elsewhere>
+ASHEVILLE_SYNC_SSL_KEY=<path to file with SSL key>
+ASHEVILLE_SYNC_SSL_CRT=<path to file with SSL certificate>
 ```
-
-Example: `http://localhost:9090`
 
 ## Database
 

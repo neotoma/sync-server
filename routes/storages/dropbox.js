@@ -37,7 +37,7 @@ module.exports = function(app) {
   passport.use(new dropboxPassport.Strategy({
       clientID: process.env.ASHEVILLE_SYNC_STORAGES_DROPBOX_APP_KEY || logger.crit('App key not provided by environment for Dropbox config'),
       clientSecret: process.env.ASHEVILLE_SYNC_STORAGES_DROPBOX_APP_SECRET || logger.crit('App secret not provided by environment for Dropbox config'),
-      callbackURL: app.host + '/storages/dropbox/auth-callback',
+      callbackURL: 'https://' + app.host + '/storages/dropbox/auth-callback',
       passReqToCallback: true
     },
     function(req, accessToken, refreshToken, profile, done) {

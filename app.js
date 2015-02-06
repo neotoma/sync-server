@@ -1,4 +1,6 @@
 var express = require('express');
+var https = require('https');
+var fs = require('fs');
 var app = express();
 
 var passportSocketIo = require('passport.socketio');
@@ -29,7 +31,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.all('/*', function(req, res, next) {
-  res.header('Access-Control-Allow-Origin', 'http://127.0.0.1:9091');
+  res.header('Access-Control-Allow-Origin', 'https://127.0.0.1:9091');
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
   res.header('Access-Control-Allow-Credentials', 'true');
@@ -38,7 +40,11 @@ app.all('/*', function(req, res, next) {
 
 require('./routes')(app);
 
-var server = app.listen(app.port);
+var server = https.createServer({
+  key: fs.readFileSync(process.env.ASHEVILLE_SYNC_SSL_KEY, 'utf8'),
+  cert: fs.readFileSync(process.env.ASHEVILLE_SYNC_SSL_CRT, 'utf8')
+}, app).listen(app.port);
+
 logger.info('listening on', app.port);
 
 app.io = require('socket.io')(server);

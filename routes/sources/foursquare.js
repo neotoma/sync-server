@@ -11,7 +11,7 @@ module.exports = function(app) {
 
   var clientID = process.env.ASHEVILLE_SYNC_SOURCES_FOURSQUARE_CLIENT_ID || logger.crit('Client ID not provided by environment for foursquare config');
   var clientSecret = process.env.ASHEVILLE_SYNC_SOURCES_FOURSQUARE_CLIENT_SECRET || logger.crit('Client secret not provided by environment for foursquare config');
-  var callbackURL = app.host + '/sources/foursquare/auth-callback';
+  var callbackURL = 'https://' + app.host + '/sources/foursquare/auth-callback';
 
   var authFilter = function(req, res, next) {
     if (req.path == '/sources/foursquare/auth') {
@@ -98,7 +98,7 @@ module.exports = function(app) {
       res.redirect(req.session.sourcesFoursquareAuthRedirectPath);
       req.session.sourcesFoursquareAuthRedirectPath = null;
     } else {
-      res.redirect('/sources/foursquare');
+      res.redirect('/sessions');
     }
   });
 

@@ -1,7 +1,7 @@
 var UserSourceAuth = require('../../models/user-source-auth');
 
 module.exports = function(app) {
-  app.get('/userSourceAuths', function(req, res) {
+  app.get('/userSourceAuths', app.authFilter, function(req, res) {
     if (!req.user) {
       return res.json({
         user_source_auths: []
@@ -27,7 +27,7 @@ module.exports = function(app) {
     });
   });
 
-  app.delete('/userSourceAuths/:id', function(req, res) {
+  app.delete('/userSourceAuths/:id', app.authFilter, function(req, res) {
     var id = req.params.id;
     
     UserSourceAuth.findOne({
