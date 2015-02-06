@@ -31,7 +31,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.all('/*', function(req, res, next) {
-  res.header('Access-Control-Allow-Origin', 'https://127.0.0.1:9091');
+  res.header('Access-Control-Allow-Origin', process.env.ASHEVILLE_SYNC_WEB_HOST);
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
   res.header('Access-Control-Allow-Credentials', 'true');

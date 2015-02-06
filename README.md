@@ -8,6 +8,7 @@ Hosts must support SSL and be configured with the following environment variable
 
 ```
 ASHEVILLE_SYNC_HOST=<host address>
+ASHEVILLE_SYNC_WEB_HOST=<web app host address>
 ASHEVILLE_SYNC_DEPLOY_HOST=<host address for deployment elsewhere>
 ASHEVILLE_SYNC_DEPLOY_HOST_DIR=<host directory for deployment elsewhere>
 ASHEVILLE_SYNC_DEPLOY_HOST_USERNAME=<host username for deployment elsewhere>
