@@ -7,9 +7,9 @@ This is an API-centric service for synchronizing data between sources and storag
 Hosts must support SSL and be configured with the following environment variables:
 
 ```
-ASHEVILLE_SYNC_HOST=<host address>
-ASHEVILLE_SYNC_WEB_HOST=<web app host address>
-ASHEVILLE_SYNC_DEPLOY_HOST=<host address for deployment elsewhere>
+ASHEVILLE_SYNC_HOST=<host for this app, including port>
+ASHEVILLE_SYNC_WEB_HOST=<host for web app, including port>
+ASHEVILLE_SYNC_DEPLOY_HOST=<host for web app deployment elsewhere>
 ASHEVILLE_SYNC_DEPLOY_HOST_DIR=<host directory for deployment elsewhere>
 ASHEVILLE_SYNC_DEPLOY_HOST_USERNAME=<host username for deployment elsewhere>
 ASHEVILLE_SYNC_SSL_KEY=<path to file with SSL key>

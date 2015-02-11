@@ -3,7 +3,7 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
     nodemon: {
-      dev: {
+      main: {
         script: 'app.js'
       }
     },
@@ -34,7 +34,7 @@ module.exports = function(grunt) {
         command: 'cd ' + process.env.ASHEVILLE_SYNC_DEPLOY_HOST_DIR + ' && npm install --production'
       },
       foreverRestartAll: {
-        command: 'cd ' + process.env.ASHEVILLE_SYNC_DEPLOY_HOST_DIR + ' && forever restartall'
+        command: 'cd ' + process.env.ASHEVILLE_SYNC_DEPLOY_HOST_DIR + ' && forever restart app.js'
       }
     }
   });
