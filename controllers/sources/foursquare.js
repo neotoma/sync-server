@@ -52,9 +52,9 @@ foursquare.syncAll = function(app, user) {
 
       var storage = require('../../controllers/storages/' + userStorageAuth.storage_id);
 
-      //foursquare.syncItems(app, user, storage, 'checkins');
+      foursquare.syncItems(app, user, storage, 'checkins');
       foursquare.syncItems(app, user, storage, 'friends');
-      //foursquare.syncItems(app, user, storage, 'tips');
+      foursquare.syncItems(app, user, storage, 'tips');
     });
   } catch (error) {
     logger.error('failed to sync all foursquare content types', {
