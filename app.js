@@ -1,7 +1,10 @@
 var express = require('express');
 var https = require('https');
 var fs = require('fs');
+var compression = require('compression');
 var app = express();
+
+app.use(compression());
 
 var passportSocketIo = require('passport.socketio');
 
