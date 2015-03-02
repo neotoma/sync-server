@@ -20,10 +20,16 @@ var sourceItemDescription = function(content_type_id, item) {
       return name;
       break;
     case 'checkin':
-      return item.venue.name;
+      if (item.venue) {
+        return item.venue.name;
+      }
+
       break;
     case 'tip':
-      return item.venue.name;
+      if (item.venue) {
+        return item.venue.name;
+      }
+
       break;
     default:
       return;
@@ -141,14 +147,24 @@ foursquare.syncItems = function(app, user, storage, aspect) {
 
                     if (items.length != 0) {
                       while (items.length > 0) {
-                        foursquare.syncItem(app, user, storage, aspect, items.shift());
+                        var item = items.shift();
+
+                        try {
+                          foursquare.syncItem(app, user, storage, aspect, item);
+                        } catch(error) {
+                          logger.error('failed to sync foursquare item', {
+                            user_id: user.id,
+                            source_item_id: item.id
+                          });
+                        }
+
                         offset++;
                       }
 
                       syncNextPage();
                     } else {
                       logger.trace('finished starting foursquare items sync', { 
-                        user_id: user.id, 
+                        user_id: user.id,
                         aspect: aspect
                       });
                     }
