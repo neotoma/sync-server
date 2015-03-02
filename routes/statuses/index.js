@@ -2,7 +2,7 @@ var statusController = require('../../controllers/status');
 
 module.exports = function(app) {
   app.get('/statuses', app.authFilter, function(req, res) {
-    statusController.dataForUser(req.user, function(error, data) {
+    statusController.json(function(error, data) {
       if (error) {
         res.json({
           error: error
@@ -10,6 +10,6 @@ module.exports = function(app) {
       } else {
         res.json(data);
       }
-    });
+    }, { user_id: req.user.id });
   });
 }

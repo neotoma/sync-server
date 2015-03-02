@@ -1,3 +1,3 @@
 module.exports = function(app, socket) {
-  require('./status')(app, socket);
+  return require('./status')(app, socket);
 }

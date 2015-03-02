@@ -53,7 +53,15 @@ logger.info('listening on', app.port);
 app.io = require('socket.io')(server);
 
 app.io.on('connection', function(socket) {
-  require('./socket_events')(app, socket);
+  var listeners = require('./socket_events')(app, socket);
+
+  socket.on('disconnect', function() {
+    logger.trace('io disconnect');
+
+    Object.keys(listeners).forEach(function(key) {
+      app.removeListener(key, listeners[key]);
+    });
+  });
 });
 
 app.io.set('authorization', passportSocketIo.authorize({

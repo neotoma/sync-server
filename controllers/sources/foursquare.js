@@ -239,6 +239,7 @@ foursquare.syncItem = function(app, user, storage, aspect, sourceItem) {
                 error: error
               });
             } else {
+              logger.trace('emit itemSyncVerified', { item_id: item.id });
               app.emit('itemSyncVerified', item);
 
               logger.trace('updated item', { 

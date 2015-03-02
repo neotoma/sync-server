@@ -4,16 +4,8 @@ var async = require('async');
 var logger = require('../lib/logger');
 
 module.exports = {
-  dataForUser: function(user, callback) {
-    if (!user) {
-      return callback({
-        statuses: []
-      });
-    }
-
-    Status.find({
-      user_id: user.id
-    }, function(error, statuses) {
+  json: function(callback, attributes) {
+    Status.find(attributes, function(error, statuses) {
       if (error) {
         return res.json({
           error: error
