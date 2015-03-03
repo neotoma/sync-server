@@ -2,9 +2,11 @@ var express = require('express');
 var https = require('https');
 var fs = require('fs');
 var compression = require('compression');
+var bodyParser = require('body-parser')
 var app = express();
 
 app.use(compression());
+app.use(bodyParser.json());
 
 var passportSocketIo = require('passport.socketio');
 
