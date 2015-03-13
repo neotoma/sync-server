@@ -47,7 +47,8 @@ require('./routes')(app);
 
 var server = https.createServer({
   key: fs.readFileSync(process.env.ASHEVILLE_SYNC_SSL_KEY, 'utf8'),
-  cert: fs.readFileSync(process.env.ASHEVILLE_SYNC_SSL_CRT, 'utf8')
+  cert: fs.readFileSync(process.env.ASHEVILLE_SYNC_SSL_CRT, 'utf8'),
+  ca: fs.readFileSync(process.env.ASHEVILLE_SYNC_SSL_INT_CRT, 'utf8')
 }, app).listen(app.port);
 
 logger.info('listening on', app.port);

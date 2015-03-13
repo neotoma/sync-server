@@ -14,6 +14,7 @@ ASHEVILLE_SYNC_DEPLOY_HOST_DIR=<host directory for deployment elsewhere>
 ASHEVILLE_SYNC_DEPLOY_HOST_USERNAME=<host username for deployment elsewhere>
 ASHEVILLE_SYNC_SSL_KEY=<path to file with SSL key>
 ASHEVILLE_SYNC_SSL_CRT=<path to file with SSL certificate>
+ASHEVILLE_SYNC_SSL_INT_CRT=<path to file with SSL intermediate CA certificate>
 ```
 
 ## Database
