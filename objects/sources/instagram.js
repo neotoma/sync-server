@@ -1,6 +1,6 @@
 var instagram = {};
 
-instagram.toObject = function(userSourceAuths) {
+instagram.toObject = function() {
   return {
     id: 'instagram',
     name: 'Instagram',

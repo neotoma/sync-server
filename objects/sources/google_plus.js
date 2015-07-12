@@ -1,6 +1,6 @@
 var googlePlus = {};
 
-googlePlus.toObject = function(userSourceAuths) {
+googlePlus.toObject = function() {
   return {
     id: 'googlePlus',
     name: 'Google+',

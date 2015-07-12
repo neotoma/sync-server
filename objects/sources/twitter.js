@@ -1,6 +1,6 @@
 var twitter = {};
 
-twitter.toObject = function(userSourceAuths) {
+twitter.toObject = function() {
   return {
     id: 'twitter',
     name: 'Twitter',

@@ -1,6 +1,6 @@
 var tumblr = {};
 
-tumblr.toObject = function(userSourceAuths) {
+tumblr.toObject = function() {
   return {
     id: 'tumblr',
     name: 'Tumblr',

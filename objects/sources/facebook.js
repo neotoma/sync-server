@@ -1,6 +1,6 @@
 var facebook = {};
 
-facebook.toObject = function(userSourceAuths) {
+facebook.toObject = function() {
   return {
     id: 'facebook',
     name: 'Facebook',

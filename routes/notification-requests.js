@@ -20,7 +20,7 @@ module.exports = function(app) {
   });
 
   app.post('/notificationRequests', app.authFilter, function(req, res) {
-    NotificationRequest.create({
+    new NotificationRequest({
       user_id: req.user.id,
       source_id: req.body.notificationRequest.source,
       event: req.body.notificationRequest.event

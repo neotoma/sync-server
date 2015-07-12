@@ -1,6 +1,6 @@
 var wordpress = {};
 
-wordpress.toObject = function(userSourceAuths) {
+wordpress.toObject = function() {
   return {
     id: 'wordpress',
     name: 'WordPress',

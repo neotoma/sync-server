@@ -1,7 +1,6 @@
 var logger = require('../../lib/logger');
 var passport = require('../../lib/passport');
 var dropboxPassport = require('passport-dropbox-oauth2');
-var https = require('https');
 
 var UserStorageAuth = require('../../models/user-storage-auth');
 var User = require('../../models/user');
@@ -96,7 +95,7 @@ module.exports = function(app) {
                   email = profile.emails[0].value;
                 }
 
-                User.create({ 
+                new User({ 
                   name: profile.displayName,
                   email: email
                 }, function(error, user) {

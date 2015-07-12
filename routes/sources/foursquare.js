@@ -2,12 +2,14 @@ module.exports = function(app) {
   var logger = require('../../lib/logger');
   var passport = require('../../lib/passport');
   var foursquarePassport = require('passport-foursquare');
-  var foursquare = require('../../controllers/sources/foursquare');
+  var foursquare = require('../../objects/sources/foursquare');
 
   var UserSourceAuth = require('../../models/user-source-auth');
   var UserStorageAuth = require('../../models/user-storage-auth');
   var User = require('../../models/user');
   var Item = require('../../models/item');
+
+  var itemController = require('../../controllers/item');
 
   var clientID = process.env.ASHEVILLE_SYNC_SOURCES_FOURSQUARE_CLIENT_ID || logger.crit('Client ID not provided by environment for foursquare config');
   var clientSecret = process.env.ASHEVILLE_SYNC_SOURCES_FOURSQUARE_CLIENT_SECRET || logger.crit('Client secret not provided by environment for foursquare config');
@@ -92,14 +94,26 @@ module.exports = function(app) {
   app.get('/sources/foursquare/auth-callback', app.authFilter, passport.authenticate('foursquare', { 
     failureRedirect: '/sources/foursquare/auth'
   }), function(req, res) {
-    foursquare.syncAll(app, req.user);
+    UserStorageAuth.findOne({
+      user_id: req.user.id,
+    }, function(error, userStorageAuth) {
+      if (error) {
+        logger.error('failed to find userStorageAuth for user', {
+          user_id: user.id,
+          error: error
+        });
+      } else {
+        var storage = require('../../objects/storages/' + userStorageAuth.storage_id);
+        itemController.syncAllForAllContentTypes(app, req.user, storage, foursquare);
+      }
 
-    if (req.session.sourcesFoursquareAuthRedirectPath) {
-      res.redirect(req.session.sourcesFoursquareAuthRedirectPath);
-      req.session.sourcesFoursquareAuthRedirectPath = null;
-    } else {
-      res.redirect('/sessions');
-    }
+      if (req.session.sourcesFoursquareAuthRedirectPath) {
+        res.redirect(req.session.sourcesFoursquareAuthRedirectPath);
+        req.session.sourcesFoursquareAuthRedirectPath = null;
+      } else {
+        res.redirect('/sessions');
+      }
+    });
   });
 
   return foursquare;

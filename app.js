@@ -13,7 +13,7 @@ var passportSocketIo = require('passport.socketio');
 var logger = require('./lib/logger');
 app.use(express.logger({ immediate: true, format: "\033[37m:method :url\033[37m (:date)\033[0m" }));
 
-app.host = process.env.ASHEVILLE_SYNC_HOST || logger.crit('Host not provided by environment for app config');
+app.host = process.env.ASHEVILLE_SYNC_HOST || logger.fatal('failed to configure host for app from environment');
 app.port = process.env.ASHEVILLE_SYNC_EXPRESS_PORT || 9090;
 
 var MongoStore = new require('connect-mongo')(express);
@@ -21,7 +21,7 @@ var store = new MongoStore({
   url: require('./lib/mongodb').url
 });
 
-var secret = process.env.ASHEVILLE_SYNC_SESSIONS_SECRET || logger.crit('Sessions secret not provided by environment for app config');
+var secret = process.env.ASHEVILLE_SYNC_SESSIONS_SECRET || logger.fatal('failed to configure sessions secret for app from environment');
 
 app.use(express.cookieParser());
 app.use(express.session({ 
@@ -51,15 +51,17 @@ var server = https.createServer({
   ca: fs.readFileSync(process.env.ASHEVILLE_SYNC_SSL_INT_CRT, 'utf8')
 }, app).listen(app.port);
 
-logger.info('listening on', app.port);
+logger.trace('started listening for HTTPS requests', { port: app.port });
 
 app.io = require('socket.io')(server);
 
 app.io.on('connection', function(socket) {
+  logger.trace('opened WebSocket connection');
+
   var listeners = require('./socket_events')(app, socket);
 
   socket.on('disconnect', function() {
-    logger.trace('io disconnect');
+    logger.trace('closed WebSocket connection');
 
     Object.keys(listeners).forEach(function(key) {
       app.removeListener(key, listeners[key]);
@@ -74,4 +76,4 @@ app.io.set('authorization', passportSocketIo.authorize({
   cookieParser: express.cookieParser
 }));
 
-logger.info('listening for socket events');
+logger.trace('started listening for WebSocket connections');

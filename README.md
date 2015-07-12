@@ -50,7 +50,7 @@ Storages are points of destination for syncronizing data from sources. Users can
 #### Endpoints
 
 - GET `/userStorageAuths`: retrieve all storage authentications for session user
-- GET `/userStorageAuths/:id`: retrieve data about a storage authentication
+- DELETE `/userStorageAuths/:id`: delete a storage authentication
 
 ### Dropbox
 
@@ -78,7 +78,7 @@ Sources are points of origin for syncronizing data to storage. Users can authent
 
 - GET `/sources`: retrieve all available sources
 - GET `/userSourceAuths`: retrieve all source authentications for session user
-- GET `/userSourceAuths/:id`: retrieve data about a storage authentication
+- DELETE `/userSourceAuths/:id`: delete a source authentication
 
 ### foursquare
 

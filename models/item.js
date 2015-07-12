@@ -13,7 +13,8 @@ var itemSchema = mongoose.Schema({
   bytes: Number,
   path: String,
   description: String,
-  error: String
+  error: String,
+  data: Object
 });
 
 itemSchema.set('toObject', { getters: true });
