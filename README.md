@@ -63,7 +63,7 @@ ASHEVILLE_SYNC_STORAGES_DROPBOX_APP_KEY=<dropbox developer app key>
 ASHEVILLE_SYNC_STORAGES_DROPBOX_APP_SECRET=<dropbox developer app secret>
 ```
 
-You can find these on the Dropbox developer website at [https://dropbox.com/developers/apps](https://dropbox.com/developers/apps). Register an app for Asheville and configure the redirect URI to be the app host plus the path `/storages/dropbox/auth-callback` (e.g. `http://localhost:9090/storages/dropbox/auth-callback`).
+You can find these on the [Dropbox developer website](https://dropbox.com/developers/apps). Register an app for Asheville and configure the redirect URI to be the app host plus the path `/storages/dropbox/auth-callback` (e.g. `http://localhost:9090/storages/dropbox/auth-callback`).
 
 #### Endpoints
 
@@ -91,12 +91,30 @@ ASHEVILLE_SYNC_SOURCES_FOURSQUARE_CLIENT_ID=<foursquare developer app client ID>
 ASHEVILLE_SYNC_SOURCES_FOURSQUARE_CLIENT_SECRET=<foursquare developer app client secret>
 ```
 
-You can find these on the foursquare developer website at [https://foursquare.com/developers/apps](https://foursquare.com/developers/apps). Register an app for Asheville if you haven't already and set a redirect URI as your host suffixed with `/sources/foursquare/auth-callback` (e.g. `http://localhost:9090/sources/foursquare/auth-callback`).
+You can find these on the [foursquare developer website](https://foursquare.com/developers/apps). Register an app for Asheville if you haven't already and set a redirect URI as your host suffixed with `/sources/foursquare/auth-callback` (e.g. `http://localhost:9090/sources/foursquare/auth-callback`).
 
 #### Endpoints
 
 - GET `/sources/foursquare/auth`: authenticate foursquare account
 - GET `/sources/foursquare/auth-callback`: process foursquare account authentication
+
+### Instagram
+
+#### Environment Variables
+
+The Instagram source module relies on the following environment variables:
+
+```
+ASHEVILLE_SYNC_SOURCES_INSTAGRAM_CLIENT_ID=<instagram developer app client ID>
+ASHEVILLE_SYNC_SOURCES_INSTAGRAM_CLIENT_SECRET=<instagram developer app client secret>
+```
+
+You can find these on the [Instagram developer website](https://instagram.com/developer). Register an app for Asheville if you haven't already and set a redirect URI as your host suffixed with `/sources/instagram/auth-callback` (e.g. `http://localhost:9090/sources/instagram/auth-callback`).
+
+#### Endpoints
+
+- GET `/sources/instagram/auth`: authenticate instagram account
+- GET `/sources/instagram/auth-callback`: process instagram account authentication
 
 ## Statuses
 

@@ -13,17 +13,38 @@ module.exports = function(properties) {
   };
 
   this.toObject = function(userSourceAuths) {
+    var contentTypeIds;
+    var self = this;
+
+    if (typeof this.contentTypes !== 'undefined') {
+      contentTypeIds = this.contentTypes.map(function(contentType) {
+        return contentType.id;
+      });
+    }
+
+    var userSourceAuthIds;
+
+    if (typeof userSourceAuths !== 'undefined') {
+      userSourceAuthIds = userSourceAuths.map(function(userSourceAuth) {
+        if (userSourceAuth.source == self.id) {
+          return userSourceAuth.id;
+        }
+      })
+
+      userSourceAuthIds = userSourceAuthIds.filter(function(n) { return n != undefined });
+
+      if (userSourceAuthIds.length == 0) {
+        userSourceAuthIds = null;
+      }
+    }
+
     return {
       id: this.id,
       name: this.name,
       enabled: this.enabled,
       logoGlyphPath: this.logoGlyphPath,
-      contentTypes: this.contentTypes,
-      userSourceAuths: userSourceAuths.map(function(userSourceAuth) {
-        if (userSourceAuth.source == source.id) {
-          return userSourceAuth.id;
-        }
-      })
+      contentTypes: contentTypeIds,
+      userSourceAuths: userSourceAuthIds
     };
   };
 }

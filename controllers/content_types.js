@@ -18,6 +18,18 @@ module.exports = {
         name: 'Tip',
         pluralName: 'Tips',
         sources: this.sourceIds(sources, 'tip')
+      },
+      {
+        id: 'image',
+        name: 'Image',
+        pluralName: 'Images',
+        sources: this.sourceIds(sources, 'image')
+      },
+      {
+        id: 'video',
+        name: 'Video',
+        pluralName: 'Videos',
+        sources: this.sourceIds(sources, 'video')
       }
     ];
   },

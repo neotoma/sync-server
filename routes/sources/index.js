@@ -3,7 +3,8 @@ var UserSourceAuth = require('../../models/user-source-auth');
 var UserStorageAuth = require('../../models/user-storage-auth');
 
 module.exports = function(app) {
-  require('./foursquare')(app);
+  require('./router')(app, foursquare);
+  require('./router')(app, instagram);
 
   app.get('/sources', app.authFilter, function(req, res) {
     var json = { sources: [] };

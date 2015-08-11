@@ -156,7 +156,7 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
                 return callback(error);
               }
 
-              var itemsJSON = dataJSON.response[contentType.plural_name].items;
+              var itemsJSON = dataJSON.response[contentType.plural_id].items;
               
               logger.trace('parsed page of items to sync', {
                 user_id: user.id,
@@ -168,7 +168,7 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
               });
 
               if (offset == 0) {
-                status.total_items_available = dataJSON.response[contentType.plural_name].count;
+                status.total_items_available = dataJSON.response[contentType.plural_id].count;
                 status.save();
               }
 
@@ -388,7 +388,7 @@ itemController.storeItem = function(app, user, storage, source, contentType, ite
 
     var options = {
       host: storage.host,
-      path: storage.path('/' + contentType.plural_name + '/' + source.id + '-' + item.id + '.json', userStorageAuth),
+      path: storage.path('/' + contentType.plural_id + '/' + source.id + '-' + item.id + '.json', userStorageAuth),
       method: 'PUT'
     };
 

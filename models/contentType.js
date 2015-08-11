@@ -1,4 +1,4 @@
-module.exports = function ContentType(id, plural_name) {
+module.exports = function ContentType(id, plural_id) {
   this.id = id;
-  this.plural_name = plural_name;
+  this.plural_id = plural_id;
 }
