@@ -1,6 +1,7 @@
 var UserSourceAuth = require('../../models/user-source-auth');
 var Source = require('../../models/source');
 var ContentType = require('../../models/contentType');
+var logger = require('../../lib/logger');
 
 var contentTypes = [
   new ContentType('checkin', 'checkins'), 
@@ -12,11 +13,13 @@ var foursquare = new Source({
   id: 'foursquare',
   name: 'foursquare',
   enabled: true,
-  logoGlyphPath: '/images/logos/foursquare-glyph.svg',
-  contentTypes: contentTypes,
+  logo_glyph_path: '/images/logos/foursquare-glyph.svg',
+  content_types: contentTypes,
   host: 'api.foursquare.com',
-  apiVersion: '20150712',
-  defaultItemsLimit: 250
+  api_version: '20150712',
+  default_items_limit: 250,
+  client_id: process.env.ASHEVILLE_SYNC_SOURCES_FOURSQUARE_CLIENT_ID || logger.crit('Client ID not provided by environment for foursquare config'),
+  client_secret: process.env.ASHEVILLE_SYNC_SOURCES_FOURSQUARE_CLIENT_SECRET || logger.crit('Client secret not provided by environment for foursquare config')
 });
 
 foursquare.itemsPagePath = function(contentType, userSourceAuth, offset) {

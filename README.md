@@ -25,7 +25,7 @@ User data is managed by [MongoDB](http://www.mongodb.org/), the host of which mu
 ASHEVILLE_SYNC_MONGODB_HOST=<mongodb service host>
 ```
 
-Example: `mongodb://127.0.0.1`
+Example: `127.0.0.1`
 
 ```
 ASHEVILLE_SYNC_MONGODB_PORT=<mongodb service port>

@@ -1,10 +1,14 @@
 var logger = require('../../lib/logger');
 var UserSourceAuth = require('../../models/user-source-auth');
 var UserStorageAuth = require('../../models/user-storage-auth');
+var foursquare = require('../../objects/sources/foursquare');
+var instagram = require('../../objects/sources/instagram');
+var twitter = require('../../objects/sources/twitter');
 
 module.exports = function(app) {
   require('./router')(app, foursquare);
   require('./router')(app, instagram);
+  require('./router')(app, twitter);
 
   app.get('/sources', app.authFilter, function(req, res) {
     var json = { sources: [] };

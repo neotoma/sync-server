@@ -1,5 +1,5 @@
 module.exports = function(app, source) {
-  var sourceId = properties.source_id;
+  var sourceId = source.id;
   var logger = require('../../lib/logger');
   var passport = require('../../lib/passport');
   var sourcePassport = require('passport-' + sourceId);
@@ -12,8 +12,8 @@ module.exports = function(app, source) {
 
   var itemController = require('../../controllers/item');
 
-  var clientID = properties.client_id;
-  var clientSecret = properties.client_secret;
+  var clientID = source.clientId;
+  var clientSecret = source.clientSecret;
   var callbackURL = 'https://' + app.host + '/sources/' + sourceId + '/auth-callback';
 
   var authFilter = function(req, res, next) {

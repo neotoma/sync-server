@@ -12,11 +12,11 @@ var instagram = new Source({
   id: 'instagram',
   name: 'Instagram',
   enabled: true,
-  logoGlyphPath: '/images/logos/instagram-glyph.svg',
-  contentTypes: contentTypes,
+  logo_glyph_path: '/images/logos/instagram-glyph.svg',
+  content_types: contentTypes,
   host: 'api.instagram.com',
-  clientId: process.env.ASHEVILLE_SYNC_SOURCES_INSTAGRAM_CLIENT_ID || logger.crit('Client ID not provided by environment for Instagram config'),
-  clientSecret: process.env.ASHEVILLE_SYNC_SOURCES_INSTAGRAM_CLIENT_SECRET || logger.crit('Client secret not provided by environment for Instagram config')
+  client_id: process.env.ASHEVILLE_SYNC_SOURCES_INSTAGRAM_CLIENT_ID || logger.crit('Client ID not provided by environment for Instagram config'),
+  client_secret: process.env.ASHEVILLE_SYNC_SOURCES_INSTAGRAM_CLIENT_SECRET || logger.crit('Client secret not provided by environment for Instagram config')
 });
 
 instagram.itemsPagePath = function(contentType, userSourceAuth) {
