@@ -18,11 +18,10 @@ var foursquare = new Source({
   host: 'api.foursquare.com',
   api_version: '20150712',
   default_items_limit: 250,
-  client_id: process.env.ASHEVILLE_SYNC_SOURCES_FOURSQUARE_CLIENT_ID || logger.crit('Client ID not provided by environment for foursquare config'),
-  client_secret: process.env.ASHEVILLE_SYNC_SOURCES_FOURSQUARE_CLIENT_SECRET || logger.crit('Client secret not provided by environment for foursquare config')
 });
 
-foursquare.itemsPagePath = function(contentType, userSourceAuth, offset) {
+foursquare.itemsPagePath = function(contentType, userSourceAuth, pagination) {
+  var offset = (typeof pagination === 'undefined') ? 0 : pagination.offset;
   return '/v2/users/self/' + contentType.plural_id + '?v=' + this.apiVersion + '&oauth_token=' + userSourceAuth.source_token + '&limit=' + this.defaultItemsLimit + '&offset=' + offset;
 }
 

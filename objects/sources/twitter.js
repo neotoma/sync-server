@@ -11,9 +11,7 @@ var twitter = new Source({
   enabled: true,
   logo_glyph_path: '/images/logos/twitter-glyph.svg',
   content_types: contentTypes,
-  host: 'api.twitter.com',
-  client_id: process.env.ASHEVILLE_SYNC_SOURCES_TWITTER_CLIENT_ID || logger.crit('Client ID not provided by environment for Twitter config'),
-  client_secret: process.env.ASHEVILLE_SYNC_SOURCES_TWITTER_CLIENT_SECRET || logger.crit('Client secret not provided by environment for Twitter config')
+  host: 'api.twitter.com'
 });
 
 twitter.itemsPagePath = function(contentType, userSourceAuth) {

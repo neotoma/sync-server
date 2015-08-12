@@ -40,7 +40,7 @@ itemController.syncAll = function(app, user, storage, source, contentType) {
     content_type_id: contentType.id
   });
 
-  var syncPage = function myself(error, offset) {
+  var syncPage = function myself(error, pagination) {
     if (error) {
       logger.error('failed to sync page of items', {
         user_id: user.id,
@@ -50,14 +50,14 @@ itemController.syncAll = function(app, user, storage, source, contentType) {
         error: error
       });
     } else {
-      self.syncPage(app, user, storage, source, contentType, offset, myself);
+      self.syncPage(app, user, storage, source, contentType, pagination, myself);
     }
   }
 
-  syncPage(null, 0);    
+  syncPage(null, { offset: 0 });
 }
 
-itemController.syncPage = function(app, user, storage, source, contentType, offset, callback) {
+itemController.syncPage = function(app, user, storage, source, contentType, pagination, callback) {
   var self = this;
 
   try {
@@ -66,7 +66,7 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
       storage_id: storage.id,
       source_id: source.id,
       content_type_id: contentType.id,
-      offset: offset
+      pagination: pagination
     });
 
     Status.findOrCreate({
@@ -81,7 +81,7 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
           storage_id: storage.id,
           source_id: source.id,
           content_type_id: contentType.id,
-          offset: offset
+          pagination: pagination
         });
 
         return callback(error);
@@ -97,7 +97,7 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
             storage_id: storage.id,
             source_id: source.id,
             content_type_id: contentType.id,
-            offset: offset,
+            pagination: pagination,
             error: error
           });
 
@@ -110,8 +110,12 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
 
         var options = {
           host: source.host,
-          path: source.itemsPagePath(contentType, userSourceAuth, offset),
+          path: source.itemsPagePath(contentType, userSourceAuth, pagination),
         };
+
+        if (!options.path) {
+          return;
+        }
 
         https.get(options, function(res) {
           if (res.statusCode != 200) {
@@ -122,7 +126,7 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
               storage_id: storage.id,
               source_id: source.id,
               content_type_id: contentType.id,
-              offset: offset,
+              pagination: pagination,
               statusCode: res.statusCode
             });
 
@@ -147,7 +151,7 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
                   storage_id: storage.id,
                   source_id: source.id,
                   content_type_id: contentType.id,
-                  offset: offset,
+                  pagination: pagination,
                   errorType: dataJSON.meta.errorType,
                   errorDetail: dataJSON.meta.errorDetail,
                   errorType: dataJSON.meta.errorType
@@ -156,19 +160,26 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
                 return callback(error);
               }
 
-              var itemsJSON = dataJSON.response[contentType.plural_id].items;
+              if (typeof dataJSON.response !== 'undefined') {
+                var itemsJSON = dataJSON.response[contentType.plural_id].items;
+              } else if (typeof dataJSON.data !== 'undefined') {
+                var itemsJSON = dataJSON.data;
+              }
               
               logger.trace('parsed page of items to sync', {
                 user_id: user.id,
                 storage_id: storage.id,
                 source_id: source.id,
                 content_type_id: contentType.id,
-                offset: offset,
+                pagination: pagination,
                 total: itemsJSON.length
               });
 
-              if (offset == 0) {
-                status.total_items_available = dataJSON.response[contentType.plural_id].count;
+              if (pagination.offset == 0) {
+                if (typeof dataJSON.response !== 'undefined') {
+                  status.total_items_available = dataJSON.response[contentType.plural_id].count;
+                }
+
                 status.save();
               }
 
@@ -181,9 +192,24 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
                   }
                 }
 
+                var offset = pagination.offset;
+
                 async.each(itemsJSON, syncItem, function(error) {
-                  offset = offset + itemsJSON.length;
-                  callback(null, offset);
+                  var pagination = {
+                    offset: offset + itemsJSON.length
+                  };
+
+                  if (typeof dataJSON.pagination !== 'undefined') {
+                    if (typeof dataJSON.pagination.next_url !== 'undefined') {
+                      pagination.next_url = dataJSON.pagination.next_url;
+                    }
+
+                    if (typeof dataJSON.pagination.next_max_id !== 'undefined') {
+                      pagination.next_max_id = dataJSON.pagination.next_max_id;
+                    }
+                  }
+
+                  callback(null, pagination);
                 });
               } else {
                 logger.trace('found no items to sync in page', { 
@@ -191,7 +217,7 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
                   storage_id: storage.id,
                   source_id: source.id,
                   content_type_id: contentType.id,
-                  offset: offset
+                  pagination: pagination
                 });
               }
             } catch(error) {
@@ -201,7 +227,7 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
                 storage_id: storage.id,
                 source_id: source.id,
                 content_type_id: contentType.id,
-                offset: offset
+                pagination: pagination
               });
             }
           });
@@ -211,7 +237,7 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
             storage_id: storage.id,
             source_id: source.id,
             content_type_id: contentType.id,
-            offset: offset,
+            pagination: pagination,
             error: error
           });
         });
@@ -223,7 +249,7 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
       storage_id: storage.id,
       source_id: source.id,
       content_type_id: contentType.id,
-      offset: offset,
+      pagination: pagination,
       error: error
     });
   }
@@ -231,6 +257,10 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
 
 itemController.syncItem = function(app, user, storage, source, contentType, itemJSON, callback) {
   var self = this;
+
+  if (typeof source.isValidItemJSON !== 'undefined' && !source.isValidItemJSON(itemJSON, contentType)) {
+    return callback();
+  }
 
   logger.trace('started to sync item', {
     user_id: user.id,
@@ -267,7 +297,7 @@ itemController.syncItem = function(app, user, storage, source, contentType, item
         callback();
       } else {
         item.data = itemJSON;
-        item.description = source.itemDescription(contentType.id, itemJSON);
+        item.description = source.itemDescription(item);
         item.sync_attempted_at = Date.now();
         item.save(function(error) {
           if (error) {
