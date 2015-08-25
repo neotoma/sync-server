@@ -9,6 +9,7 @@ module.exports = function(properties) {
   this.defaultItemsLimit    = typeof properties.default_items_limit !== 'undefined' ? properties.default_items_limit : 250;
   this.clientId             = properties.client_id;
   this.clientSecret         = properties.client_secret;
+  this.itemAssetLinks       = properties.item_asset_links;
 
   this.itemsRemotePath = function(contentType, userSourceAuth, offset) {
     return;

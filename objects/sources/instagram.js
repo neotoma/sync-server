@@ -15,6 +15,9 @@ var instagram = new Source({
   logo_glyph_path: '/images/logos/instagram-glyph.svg',
   content_types: contentTypes,
   host: 'api.instagram.com',
+  item_asset_links: {
+    standard_resolution_image: 'images.standard_resolution.url'
+  }
 });
 
 instagram.itemsPagePath = function(contentType, userSourceAuth, pagination) {
