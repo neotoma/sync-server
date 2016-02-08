@@ -109,12 +109,25 @@ ASHEVILLE_SYNC_SOURCES_INSTAGRAM_CLIENT_ID=<instagram developer app client ID>
 ASHEVILLE_SYNC_SOURCES_INSTAGRAM_CLIENT_SECRET=<instagram developer app client secret>
 ```
 
-You can find these on the [Instagram developer website](https://instagram.com/developer). Register an app for Asheville if you haven't already and set a redirect URI as your host suffixed with `/sources/instagram/auth-callback` (e.g. `http://localhost:9090/sources/instagram/auth-callback`).
+You can find these on the [Instagram developer website](https://instagram.com/developer). Register an app for Asheville if you haven't already and set the redirect URI as your host suffixed with `/sources/instagram/auth-callback` (e.g. `http://localhost:9090/sources/instagram/auth-callback`).
+
+### Twitter
+
+#### Environment Variables
+
+The Twitter source module relies on the following environment variables:
+
+```
+ASHEVILLE_SYNC_SOURCES_TWITTER_CONSUMER_KEY=<twitter developer app consumer key>
+ASHEVILLE_SYNC_SOURCES_TWITTER_CONSUMER_SECRET=<twitter developer app consumer secret>
+```
+
+You can find these on the [Twitter application management website](https://apps.twitter.com/). Register an app for Asheville if you haven't already and set the callback URL as your host suffixed with `/sources/twitter/auth-callback` (e.g. `http://localhost:9090/sources/twitter/auth-callback`).
 
 #### Endpoints
 
-- GET `/sources/instagram/auth`: authenticate instagram account
-- GET `/sources/instagram/auth-callback`: process instagram account authentication
+- GET `/sources/twitter/auth`: authenticate twitter account
+- GET `/sources/twitter/auth-callback`: process twitter account authentication
 
 ## Statuses
 
