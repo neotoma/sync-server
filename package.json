@@ -1,6 +1,9 @@
 {
   "name": "sync",
   "version": "1.0.0",
+  "scripts": {
+    "test": "node test/index.js"
+  },
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-nodemon": "~0.2.1",
