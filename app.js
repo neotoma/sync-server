@@ -18,7 +18,7 @@ app.port = process.env.SYNC_EXPRESS_PORT || 9090;
 
 var MongoStore = new require('connect-mongo')(express);
 var store = new MongoStore({
-  url: require('./lib/mongodb').url
+  url: require('./lib/mongodb')().url
 });
 
 var secret = process.env.SYNC_SESSIONS_SECRET || logger.fatal('failed to configure sessions secret for app from environment');
