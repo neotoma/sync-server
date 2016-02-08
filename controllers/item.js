@@ -7,6 +7,25 @@ var https = require('https');
 var async = require('async');
 var itemController = {};
 
+var fs = require('fs');
+
+Object.byString = function(o, s) {
+  // From: http://stackoverflow.com/questions/6491463/accessing-nested-javascript-objects-with-string-key
+
+  s = s.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
+  s = s.replace(/^\./, '');           // strip a leading dot
+  var a = s.split('.');
+  for (var i = 0, n = a.length; i < n; ++i) {
+      var k = a[i];
+      if (k in o) {
+          o = o[k];
+      } else {
+          return;
+      }
+  }
+  return o;
+}
+
 itemController.syncAllForAllContentTypes = function(app, user, storage, source) {
   var self = this;
 
@@ -40,7 +59,7 @@ itemController.syncAll = function(app, user, storage, source, contentType) {
     content_type_id: contentType.id
   });
 
-  var syncPage = function myself(error, offset) {
+  var syncPage = function myself(error, pagination) {
     if (error) {
       logger.error('failed to sync page of items', {
         user_id: user.id,
@@ -50,14 +69,14 @@ itemController.syncAll = function(app, user, storage, source, contentType) {
         error: error
       });
     } else {
-      self.syncPage(app, user, storage, source, contentType, offset, myself);
+      self.syncPage(app, user, storage, source, contentType, pagination, myself);
     }
   }
 
-  syncPage(null, 0);    
+  syncPage(null, { offset: 0 });
 }
 
-itemController.syncPage = function(app, user, storage, source, contentType, offset, callback) {
+itemController.syncPage = function(app, user, storage, source, contentType, pagination, callback) {
   var self = this;
 
   try {
@@ -66,7 +85,7 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
       storage_id: storage.id,
       source_id: source.id,
       content_type_id: contentType.id,
-      offset: offset
+      pagination: pagination
     });
 
     Status.findOrCreate({
@@ -81,7 +100,7 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
           storage_id: storage.id,
           source_id: source.id,
           content_type_id: contentType.id,
-          offset: offset
+          pagination: pagination
         });
 
         return callback(error);
@@ -97,7 +116,7 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
             storage_id: storage.id,
             source_id: source.id,
             content_type_id: contentType.id,
-            offset: offset,
+            pagination: pagination,
             error: error
           });
 
@@ -108,13 +127,16 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
           return callback(error);
         }
 
-        var options = {
-          host: source.host,
-          path: source.itemsPagePath(contentType, userSourceAuth, offset),
-        };
+        var path = source.itemsPagePath(contentType, userSourceAuth, pagination);
 
-        https.get(options, function(res) {
-          if (res.statusCode != 200) {
+        if (!path) {
+          return;
+        }
+
+        var url = 'https://' + source.host + path;
+
+        self.getFile(url, function(error, data) {
+          if (error) {
             var error = new Error('failed to retrieve page of items to sync');
 
             logger.error(error.message, {
@@ -122,20 +144,12 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
               storage_id: storage.id,
               source_id: source.id,
               content_type_id: contentType.id,
-              offset: offset,
-              statusCode: res.statusCode
+              pagination: pagination,
+              error: error
             });
 
             return callback(error);
-          }
-
-          var data = '';
-
-          res.on('data', function(chunk) {
-            data += chunk;
-          });
-
-          res.on('end', function() {
+          } else {
             try {
               var dataJSON = JSON.parse(data);
               
@@ -147,7 +161,7 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
                   storage_id: storage.id,
                   source_id: source.id,
                   content_type_id: contentType.id,
-                  offset: offset,
+                  pagination: pagination,
                   errorType: dataJSON.meta.errorType,
                   errorDetail: dataJSON.meta.errorDetail,
                   errorType: dataJSON.meta.errorType
@@ -156,19 +170,26 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
                 return callback(error);
               }
 
-              var itemsJSON = dataJSON.response[contentType.plural_id].items;
+              if (typeof dataJSON.response !== 'undefined') {
+                var itemsJSON = dataJSON.response[contentType.plural_id].items;
+              } else if (typeof dataJSON.data !== 'undefined') {
+                var itemsJSON = dataJSON.data;
+              }
               
               logger.trace('parsed page of items to sync', {
                 user_id: user.id,
                 storage_id: storage.id,
                 source_id: source.id,
                 content_type_id: contentType.id,
-                offset: offset,
+                pagination: pagination,
                 total: itemsJSON.length
               });
 
-              if (offset == 0) {
-                status.total_items_available = dataJSON.response[contentType.plural_id].count;
+              if (pagination.offset == 0) {
+                if (typeof dataJSON.response !== 'undefined') {
+                  status.total_items_available = dataJSON.response[contentType.plural_id].count;
+                }
+
                 status.save();
               }
 
@@ -181,9 +202,24 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
                   }
                 }
 
+                var offset = pagination.offset;
+
                 async.each(itemsJSON, syncItem, function(error) {
-                  offset = offset + itemsJSON.length;
-                  callback(null, offset);
+                  var pagination = {
+                    offset: offset + itemsJSON.length
+                  };
+
+                  if (typeof dataJSON.pagination !== 'undefined') {
+                    if (typeof dataJSON.pagination.next_url !== 'undefined') {
+                      pagination.next_url = dataJSON.pagination.next_url;
+                    }
+
+                    if (typeof dataJSON.pagination.next_max_id !== 'undefined') {
+                      pagination.next_max_id = dataJSON.pagination.next_max_id;
+                    }
+                  }
+
+                  callback(null, pagination);
                 });
               } else {
                 logger.trace('found no items to sync in page', { 
@@ -191,7 +227,7 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
                   storage_id: storage.id,
                   source_id: source.id,
                   content_type_id: contentType.id,
-                  offset: offset
+                  pagination: pagination
                 });
               }
             } catch(error) {
@@ -201,20 +237,11 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
                 storage_id: storage.id,
                 source_id: source.id,
                 content_type_id: contentType.id,
-                offset: offset
+                pagination: pagination
               });
             }
-          });
-        }).on('error', function(error) {
-          logger.error('failed to retrieve page of items to sync', {
-            user_id: user.id,
-            storage_id: storage.id,
-            source_id: source.id,
-            content_type_id: contentType.id,
-            offset: offset,
-            error: error
-          });
-        });
+          }
+        })
       });
     });
   } catch (error) {
@@ -223,7 +250,7 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
       storage_id: storage.id,
       source_id: source.id,
       content_type_id: contentType.id,
-      offset: offset,
+      pagination: pagination,
       error: error
     });
   }
@@ -231,6 +258,10 @@ itemController.syncPage = function(app, user, storage, source, contentType, offs
 
 itemController.syncItem = function(app, user, storage, source, contentType, itemJSON, callback) {
   var self = this;
+
+  if (typeof source.isValidItemJSON !== 'undefined' && !source.isValidItemJSON(itemJSON, contentType)) {
+    return callback();
+  }
 
   logger.trace('started to sync item', {
     user_id: user.id,
@@ -267,7 +298,7 @@ itemController.syncItem = function(app, user, storage, source, contentType, item
         callback();
       } else {
         item.data = itemJSON;
-        item.description = source.itemDescription(contentType.id, itemJSON);
+        item.description = source.itemDescription(item);
         item.sync_attempted_at = Date.now();
         item.save(function(error) {
           if (error) {
@@ -292,6 +323,8 @@ itemController.syncItem = function(app, user, storage, source, contentType, item
 }
 
 itemController.storeItem = function(app, user, storage, source, contentType, item, callback) {
+  var self = this;
+
   logger.trace('started to store item', {
     user_id: user.id,
     storage_id: storage.id,
@@ -300,7 +333,42 @@ itemController.storeItem = function(app, user, storage, source, contentType, ite
     item_id: item.id
   });
 
-  var storeCallback = function(response) {
+  var storeCallback = function(error, response) {
+    if (error) {
+      logger.error('failed to store item', { 
+        user_id: user.id,
+        storage_id: storage.id,
+        source_id: source.id,
+        content_type_id: contentType.id,
+        item_id: item.id,
+        message: error.message
+      });
+
+      item.sync_failed_at = Date.now();
+      item.error = error.message;
+      item.save(function(saveError) {
+        if (saveError) {
+          logger.error('failed to update item after failure to store it', {
+            user_id: user.id,
+            storage_id: storage.id,
+            source_id: source.id,
+            content_type_id: contentType.id,
+            item_id: item.id,
+            error: saveError 
+          });
+        }
+
+        return callback(error);
+      });
+    }
+
+    try {
+      response = JSON.parse(JSON.stringify(response));
+    } catch(error) {
+      logger.error('failed to parse store item response', { response: response });
+      return callback(error);
+    }
+
     logger.trace('stored item', { 
       user_id: user.id,
       storage_id: storage.id,
@@ -341,61 +409,135 @@ itemController.storeItem = function(app, user, storage, source, contentType, ite
     });
   };
 
-  var error = function(error) {
-    var message;
+  var path = '/' + contentType.plural_id + '/raw-synced-meta/' + item.id + '.json';
+  this.storeFile(user, storage, path, item.data, 'utf8', storeCallback);
 
-    if (typeof error != 'undefined') {
-      message = error.message;
+  if (typeof source.itemAssetLinks !== 'undefined') {
+    for (var key in source.itemAssetLinks) {
+      var url = Object.byString(item.data, source.itemAssetLinks[key]);
+      var extension = url.split('.').pop();
+
+      this.getFile(url, function(error, data) {
+        if (error) {
+          logger.error('failed to get item asset', {
+            item_id: item.id,
+            asset_url: url
+          });
+
+          callback(error);
+        } else {
+          var path = '/' + contentType.plural_id + '/' + item.id + '.' + extension;
+          self.storeFile(user, storage, path, data, 'binary', function(error, response) {
+            if (error) {
+              logger.error('failed to store item asset', {
+                item_id: item.id,
+                asset_url: url
+              });
+            } else {
+              logger.trace('stored item asset', {
+                item_id: item.id,
+                asset_key: key,
+                asset_url: url
+              });
+            }
+          });
+        }
+      });
+    }
+  }
+}
+
+itemController.getFile = function(url, callback) {
+  var extension = url.split('.').pop();
+  var parsedUrl = require('url').parse(url);
+  var contentType;
+
+  if (extension == 'jpg') {
+    contentType = 'image/jpeg';
+  } else {
+    contentType = 'application/json';
+  }
+
+  https.get({
+    hostname: parsedUrl.hostname,
+    path: parsedUrl.path,
+    headers: {
+      'Content-Type': contentType
+    }
+  }, function(res) {
+    if (res.statusCode != 200) {
+      logger.error('failed to get file with status code 200', {
+        url: url
+      });
+
+      return callback(new Error('failed to get file'));
     }
 
-    logger.error('failed to store item', { 
-      user_id: user.id,
-      storage_id: storage.id,
-      source_id: source.id,
-      content_type_id: contentType.id,
-      item_id: item.id,
-      message: message
+    var data = '';
+
+    if (extension == 'jpg') {
+      res.setEncoding('binary');
+    }
+
+    res.on('data', function(chunk) {
+      data += chunk;
     });
 
-    item.sync_failed_at = Date.now();
-    item.error = message;
-    item.save(function(saveError) {
-      if (saveError) {
-        logger.error('failed to update item after failure to store it', {
-          user_id: user.id,
-          storage_id: storage.id,
-          source_id: source.id,
-          content_type_id: contentType.id,
-          item_id: item.id,
-          error: saveError 
-        });
-      }
-
-      callback(error);
+    res.on('end', function() {
+      callback(null, data);
     });
-  };
+  }).on('error', function(error) {
+    logger.error('failed to get file', {
+      error: error,
+      url: url
+    });
 
-  var _error = error;
+    callback(error);
+  });
+}
+
+itemController.storeFile = function(user, storage, path, data, encoding, callback) {
+  var extension = path.split('.').pop();
+  var contentType;
+
+  if (extension == 'jpg') {
+    contentType = 'image/jpeg';
+  } else {
+    contentType = 'application/json';
+  }
 
   UserStorageAuth.findOne({
     storage_id: storage.id,
     user_id:    user.id
   }, function(error, userStorageAuth) {
     if (error) {
-      logger.error('failed to retrieve userStorageAuth for user while storing item');
-      return _error(error);
+      logger.error('failed to retrieve userStorageAuth for user while storing file');
+      return callback(error);
+    }
+
+    if (encoding == 'binary') {
+      fs.writeFile('/Users/markhendrickson/Desktop/binary/1.jpg', data, 'binary', function(error) {
+        if (error) { 
+          logger.error('failed to write binary file to disk');
+        } else {
+          logger.trace('wrote binary file to disk');
+        }
+      });
     }
 
     var options = {
       host: storage.host,
-      path: storage.path('/' + contentType.plural_id + '/' + source.id + '-' + item.id + '.json', userStorageAuth),
-      method: 'PUT'
+      path: storage.path(path, userStorageAuth),
+      method: 'PUT',
+      headers: {
+        'Content-Type': contentType
+      }
     };
 
     try {
       var req = https.request(options, function(res) {
         if (res.statusCode == 401) {
-          _error(new Error('unauthorized request'));
+          return callback(new Error('unauthorized request'));
         }
 
         var data = '';
@@ -405,22 +547,20 @@ itemController.storeItem = function(app, user, storage, source, contentType, ite
         });
 
         res.on('end', function() {
-          try {
-            storeCallback(JSON.parse(data));
-          } catch(error) {
-            logger.error('failed to parse store item response', { data: data });
-            _error(error);
-          }
+          callback(null, data);
         });
       }).on('error', function(error) {
-        _error(error);
+        return callback(error);
       });
 
-      req.write(JSON.stringify(item.data));
+      if (encoding == 'utf8') {
+        data = JSON.stringify(data);
+      }
 
+      req.write(data);
       req.end();
     } catch (error) {
-      _error(error);
+      return callback(error);
     }
   });
 }

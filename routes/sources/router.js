@@ -13,6 +13,26 @@ module.exports = function(app, source) {
   var itemController = require('../../controllers/item');
   var callbackURL = 'https://' + app.host + '/sources/' + sourceId + '/auth-callback';
 
+  var strategyParams = {
+    callbackURL: callbackURL,
+    passReqToCallback: true
+  };
+
+  var clientId = process.env['ASHEVILLE_SYNC_SOURCES_' + source.id.toUpperCase() + '_CLIENT_ID'];
+  var clientSecret = process.env['ASHEVILLE_SYNC_SOURCES_' + source.id.toUpperCase() + '_CLIENT_SECRET'];
+  var consumerKey = process.env['ASHEVILLE_SYNC_SOURCES_' + source.id.toUpperCase() + '_CONSUMER_KEY'];
+  var consumerSecret = process.env['ASHEVILLE_SYNC_SOURCES_' + source.id.toUpperCase() + '_CONSUMER_SECRET'];
+
+  if (clientId && clientSecret) {
+    strategyParams.clientID = clientId;
+    strategyParams.clientSecret = clientSecret;
+  } else if (consumerKey && consumerSecret) {
+    strategyParams.consumerKey = consumerKey;
+    strategyParams.consumerSecret = consumerSecret;
+  } else {
+    logger.fatal('Passport parameters not provided by environment for ' + source.name + ' config');
+  }
+
   var authFilter = function(req, res, next) {
     if (req.path == '/sources/' + sourceId + '/auth') {
       req.session.sourceAuthRedirectPath = null;

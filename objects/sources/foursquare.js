@@ -22,7 +22,8 @@ var foursquare = new Source({
   client_secret: process.env.ASHEVILLE_SYNC_SOURCES_FOURSQUARE_CLIENT_SECRET || logger.fatal('Client secret not provided by environment for foursquare config')
 });
 
-foursquare.itemsPagePath = function(contentType, userSourceAuth, offset) {
+foursquare.itemsPagePath = function(contentType, userSourceAuth, pagination) {
+  var offset = (typeof pagination === 'undefined') ? 0 : pagination.offset;
   return '/v2/users/self/' + contentType.plural_id + '?v=' + this.apiVersion + '&oauth_token=' + userSourceAuth.source_token + '&limit=' + this.defaultItemsLimit + '&offset=' + offset;
 }
 

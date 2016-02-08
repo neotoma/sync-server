@@ -1,4 +1,6 @@
 var UserSourceAuth = require('../../models/user-source-auth');
+var Status = require('../../models/status');
+var Item = require('../../models/item');
 
 module.exports = function(app) {
   app.get('/userSourceAuths', app.authFilter, function(req, res) {
@@ -37,11 +39,21 @@ module.exports = function(app) {
         logger.error('failed to find userSourceAuth object for deletion', { error: error });
       } else {
         if (userSourceAuth) {
-          userSourceAuth.remove();
+          userSourceAuth.remove(function(error) {
+            Item.remove({
+              user_id: req.user.id,
+              source_id: userSourceAuth.source_id
+            }, function(error) {
+              Status.remove({
+                user_id: req.user.id,
+                source_id: userSourceAuth.source_id
+              }, function(error) {
+                res.status(204).json();
+              });
+            });
+          });
         }
       }
-
-      res.status(204).json();
     });
   });
 }

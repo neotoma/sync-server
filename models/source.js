@@ -11,6 +11,7 @@ module.exports = function(properties) {
   this.clientSecret         = properties.client_secret;
   this.consumerKey          = properties.consumer_key;
   this.consumerSecret       = properties.consumer_secret;
+  this.itemAssetLinks       = properties.item_asset_links;
 
   this.itemsRemotePath = function(contentType, userSourceAuth, offset) {
     return;
