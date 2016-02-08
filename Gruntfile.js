@@ -18,23 +18,23 @@ module.exports = function(grunt) {
           ],
           recursive: true,
           src: './',
-          dest: process.env.ASHEVILLE_SYNC_DEPLOY_HOST_DIR,
-          host: process.env.ASHEVILLE_SYNC_DEPLOY_HOST_USERNAME + '@' + process.env.ASHEVILLE_SYNC_DEPLOY_HOST
+          dest: process.env.SYNC_DEPLOY_HOST_DIR,
+          host: process.env.SYNC_DEPLOY_HOST_USERNAME + '@' + process.env.SYNC_DEPLOY_HOST
         }
       }
     },
     sshexec: {
       options: {
-        host: process.env.ASHEVILLE_SYNC_DEPLOY_HOST,
+        host: process.env.SYNC_DEPLOY_HOST,
         port: 22,
-        username: process.env.ASHEVILLE_SYNC_DEPLOY_HOST_USERNAME,
+        username: process.env.SYNC_DEPLOY_HOST_USERNAME,
         agent: process.env.SSH_AUTH_SOCK
       },
       npmInstall: {
-        command: 'cd ' + process.env.ASHEVILLE_SYNC_DEPLOY_HOST_DIR + ' && npm install --production'
+        command: 'cd ' + process.env.SYNC_DEPLOY_HOST_DIR + ' && npm install --production'
       },
       foreverRestartAll: {
-        command: 'cd ' + process.env.ASHEVILLE_SYNC_DEPLOY_HOST_DIR + ' && forever restart app.js'
+        command: 'cd ' + process.env.SYNC_DEPLOY_HOST_DIR + ' && forever restart app.js'
       }
     }
   });

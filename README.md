@@ -1,20 +1,20 @@
-# Asheville Sync
+# Sync
 
-This is an API-centric service for synchronizing data between sources and storages per the [Asheville specification](http://asheville.io).
+This is an API-centric service for synchronizing data between sources and storages per the [Asheville project specification](https://github.com/asheville/spec).
 
 # Hosts
 
 Hosts must support SSL and be configured with the following environment variables:
 
 ```
-ASHEVILLE_SYNC_HOST=<host for this app, including port>
-ASHEVILLE_SYNC_WEB_HOST=<host for web app, including port>
-ASHEVILLE_SYNC_DEPLOY_HOST=<host for web app deployment elsewhere>
-ASHEVILLE_SYNC_DEPLOY_HOST_DIR=<host directory for deployment elsewhere>
-ASHEVILLE_SYNC_DEPLOY_HOST_USERNAME=<host username for deployment elsewhere>
-ASHEVILLE_SYNC_SSL_KEY=<path to file with SSL key>
-ASHEVILLE_SYNC_SSL_CRT=<path to file with SSL certificate>
-ASHEVILLE_SYNC_SSL_INT_CRT=<path to file with SSL intermediate CA certificate>
+SYNC_HOST=<host for this app, including port>
+SYNC_WEB_HOST=<host for web app, including port>
+SYNC_DEPLOY_HOST=<host for web app deployment elsewhere>
+SYNC_DEPLOY_HOST_DIR=<host directory for deployment elsewhere>
+SYNC_DEPLOY_HOST_USERNAME=<host username for deployment elsewhere>
+SYNC_SSL_KEY=<path to file with SSL key>
+SYNC_SSL_CRT=<path to file with SSL certificate>
+SYNC_SSL_INT_CRT=<path to file with SSL intermediate CA certificate>
 ```
 
 ## Database
@@ -22,13 +22,13 @@ ASHEVILLE_SYNC_SSL_INT_CRT=<path to file with SSL intermediate CA certificate>
 User data is managed by [MongoDB](http://www.mongodb.org/), the host of which must be indicated by the following environment variables:
 
 ```
-ASHEVILLE_SYNC_MONGODB_HOST=<mongodb service host>
+SYNC_MONGODB_HOST=<mongodb service host>
 ```
 
 Example: `127.0.0.1`
 
 ```
-ASHEVILLE_SYNC_MONGODB_PORT=<mongodb service port>
+SYNC_MONGODB_PORT=<mongodb service port>
 ```
 
 Example: `27017`
@@ -38,7 +38,7 @@ Example: `27017`
 User sessions are handled by [Express](http://expressjs.com/) and [Passport](http://passportjs.org/), which rely on the following environment variable:
 
 ```
-ASHEVILLE_SYNC_SESSIONS_SECRET=<secret passphrase>
+SYNC_SESSIONS_SECRET=<secret passphrase>
 ```
 
 Use a randomly generated, secure, alphanumeric string for this value.
@@ -59,8 +59,8 @@ Storages are points of destination for syncronizing data from sources. Users can
 The Dropbox storage module relies on the following environment variables:
 
 ```
-ASHEVILLE_SYNC_STORAGES_DROPBOX_APP_KEY=<dropbox developer app key>
-ASHEVILLE_SYNC_STORAGES_DROPBOX_APP_SECRET=<dropbox developer app secret>
+SYNC_STORAGES_DROPBOX_APP_KEY=<dropbox developer app key>
+SYNC_STORAGES_DROPBOX_APP_SECRET=<dropbox developer app secret>
 ```
 
 You can find these on the [Dropbox developer website](https://dropbox.com/developers/apps). Register an app for Asheville and configure the redirect URI to be the app host plus the path `/storages/dropbox/auth-callback` (e.g. `http://localhost:9090/storages/dropbox/auth-callback`).
@@ -87,8 +87,8 @@ Sources are points of origin for syncronizing data to storage. Users can authent
 The foursquare source module relies on the following environment variables:
 
 ```
-ASHEVILLE_SYNC_SOURCES_FOURSQUARE_CLIENT_ID=<foursquare developer app client ID>
-ASHEVILLE_SYNC_SOURCES_FOURSQUARE_CLIENT_SECRET=<foursquare developer app client secret>
+SYNC_SOURCES_FOURSQUARE_CLIENT_ID=<foursquare developer app client ID>
+SYNC_SOURCES_FOURSQUARE_CLIENT_SECRET=<foursquare developer app client secret>
 ```
 
 You can find these on the [foursquare developer website](https://foursquare.com/developers/apps). Register an app for Asheville if you haven't already and set a redirect URI as your host suffixed with `/sources/foursquare/auth-callback` (e.g. `http://localhost:9090/sources/foursquare/auth-callback`).
@@ -105,8 +105,8 @@ You can find these on the [foursquare developer website](https://foursquare.com/
 The Instagram source module relies on the following environment variables:
 
 ```
-ASHEVILLE_SYNC_SOURCES_INSTAGRAM_CLIENT_ID=<instagram developer app client ID>
-ASHEVILLE_SYNC_SOURCES_INSTAGRAM_CLIENT_SECRET=<instagram developer app client secret>
+SYNC_SOURCES_INSTAGRAM_CLIENT_ID=<instagram developer app client ID>
+SYNC_SOURCES_INSTAGRAM_CLIENT_SECRET=<instagram developer app client secret>
 ```
 
 You can find these on the [Instagram developer website](https://instagram.com/developer). Register an app for Asheville if you haven't already and set the redirect URI as your host suffixed with `/sources/instagram/auth-callback` (e.g. `http://localhost:9090/sources/instagram/auth-callback`).
@@ -118,8 +118,8 @@ You can find these on the [Instagram developer website](https://instagram.com/de
 The Twitter source module relies on the following environment variables:
 
 ```
-ASHEVILLE_SYNC_SOURCES_TWITTER_CONSUMER_KEY=<twitter developer app consumer key>
-ASHEVILLE_SYNC_SOURCES_TWITTER_CONSUMER_SECRET=<twitter developer app consumer secret>
+SYNC_SOURCES_TWITTER_CONSUMER_KEY=<twitter developer app consumer key>
+SYNC_SOURCES_TWITTER_CONSUMER_SECRET=<twitter developer app consumer secret>
 ```
 
 You can find these on the [Twitter application management website](https://apps.twitter.com/). Register an app for Asheville if you haven't already and set the callback URL as your host suffixed with `/sources/twitter/auth-callback` (e.g. `http://localhost:9090/sources/twitter/auth-callback`).

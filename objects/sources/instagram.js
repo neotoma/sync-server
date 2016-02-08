@@ -15,8 +15,8 @@ var instagram = new Source({
   logo_glyph_path: '/images/logos/instagram-glyph.svg',
   content_types: contentTypes,
   host: 'api.instagram.com',
-  client_id: process.env.ASHEVILLE_SYNC_SOURCES_INSTAGRAM_CLIENT_ID || logger.fatal('Client ID not provided by environment for Instagram config'),
-  client_secret: process.env.ASHEVILLE_SYNC_SOURCES_INSTAGRAM_CLIENT_SECRET || logger.fatal('Client secret not provided by environment for Instagram config'),
+  client_id: process.env.SYNC_SOURCES_INSTAGRAM_CLIENT_ID || logger.fatal('Client ID not provided by environment for Instagram config'),
+  client_secret: process.env.SYNC_SOURCES_INSTAGRAM_CLIENT_SECRET || logger.fatal('Client secret not provided by environment for Instagram config'),
   item_asset_links: {
     standard_resolution_image: 'images.standard_resolution.url'
   }
