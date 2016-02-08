@@ -2,7 +2,7 @@ module.exports = function(app, source) {
   var sourceId = source.id;
   var logger = require('../../lib/logger');
   var passport = require('../../lib/passport');
-  var sourcePassport = require('passport-' + sourceId);
+  var sourcePassportStrategy = require('passport-' + sourceId).Strategy;
   var source = require('../../objects/sources/' + sourceId);
 
   var UserSourceAuth = require('../../models/user-source-auth');
@@ -11,9 +11,6 @@ module.exports = function(app, source) {
   var Item = require('../../models/item');
 
   var itemController = require('../../controllers/item');
-
-  var clientID = source.clientId;
-  var clientSecret = source.clientSecret;
   var callbackURL = 'https://' + app.host + '/sources/' + sourceId + '/auth-callback';
 
   var authFilter = function(req, res, next) {
@@ -41,46 +38,59 @@ module.exports = function(app, source) {
     }
   };
 
-  passport.use(new sourcePassport.Strategy({
-      clientID: clientID,
-      clientSecret: clientSecret,
-      callbackURL: callbackURL,
-      passReqToCallback: true
-    },
-    function(req, accessToken, refreshToken, profile, done) {
-      logger.trace('authenticating ' + sourceId + ' user', { source_user_id: profile.id });
+  var verifyCallback = function(req, accessToken, refreshToken, profile, done) {
+    logger.trace('authenticating ' + sourceId + ' user', { source_user_id: profile.id });
 
-      UserSourceAuth.findOrCreate({
-        user_id:          req.user.id,
-        source_id:        sourceId,
-        source_user_id:   profile.id
-      }, function(error, userSourceAuth) {
+    UserSourceAuth.findOrCreate({
+      user_id:          req.user.id,
+      source_id:        sourceId,
+      source_user_id:   profile.id
+    }, function(error, userSourceAuth) {
+      if (error) {
+        logger.error('failed to find or create user source auth', { 
+          error: error
+        });
+
+        done(error);
+      }
+
+      userSourceAuth.source_token = accessToken;
+
+      userSourceAuth.save(function(error) {
         if (error) {
-          logger.error('failed to find or create user source auth', { 
+          logger.error('failed to save ' + sourceId + ' token to user source auth', { 
             error: error
           });
-
-          done(error);
+        } else {
+          logger.trace('saved ' + sourceId + ' token to user source auth', { 
+            user_id: req.user.id 
+          });
         }
 
-        userSourceAuth.source_token = accessToken;
-
-        userSourceAuth.save(function(error) {
-          if (error) {
-            logger.error('failed to save ' + sourceId + ' token to user source auth', { 
-              error: error
-            });
-          } else {
-            logger.trace('saved ' + sourceId + ' token to user source auth', { 
-              user_id: req.user.id 
-            });
-          }
-
-          done(error, req.user);
-        });
+        done(error, req.user);
       });
-    }
-  ));
+    });
+  };
+
+  if (source.clientId && source.clientSecret) {
+    var strategy = new sourcePassportStrategy({
+      clientID: source.clientId,
+      clientSecret: source.clientSecret,
+      callbackURL: callbackURL,
+      passReqToCallback: true
+    }, verifyCallback);
+  } else if (source.consumerKey && source.consumerSecret) {
+    var strategy = new sourcePassportStrategy({
+      consumerKey: source.consumerKey,
+      consumerSecret: source.consumerSecret,
+      callbackURL: callbackURL,
+      passReqToCallback: true
+    }, verifyCallback);
+  } else {
+    logger.fatal('failed to find auth tokens for ' + sourceId);
+  }
+
+  passport.use(strategy);
 
   app.get('/sources/' + sourceId + '/auth', app.authFilter, function(req, res) {
     if (req.query.redirectURL) {
