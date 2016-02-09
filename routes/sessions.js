@@ -1,5 +1,5 @@
 var logger = require('../lib/logger');
-var User = require('../models/user');
+var User = require('../models/user')();
 var UserStorageAuth = require('../models/user_storage_auth');
 var UserSourceAuth = require('../models/user_source_auth');
 

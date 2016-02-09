@@ -1,5 +1,5 @@
 var logger = require('../lib/logger');
-var mongoose = require('../lib/mongoose');
+var mongoose = require('../lib/mongoose')();
   
 var itemSchema = mongoose.Schema({
   user_id: String,

@@ -7,7 +7,7 @@ module.exports = function(app, source) {
 
   var UserSourceAuth = require('../../models/user_source_auth');
   var UserStorageAuth = require('../../models/user_storage_auth');
-  var User = require('../../models/user');
+  var User = require('../../models/user')();
   var Item = require('../../models/item');
 
   var itemController = require('../../controllers/item');
