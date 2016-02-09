@@ -1,4 +1,6 @@
-module.exports = function ContentType(id, plural_id) {
+var pluralize = require('pluralize'); 
+
+module.exports = function ContentType(id) {
   this.id = id;
-  this.plural_id = plural_id;
+  this.plural_id = pluralize(id);
 }

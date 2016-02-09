@@ -4,8 +4,8 @@ var ContentType = require('../../models/contentType');
 var logger = require('../../lib/logger');
 
 var contentTypes = [
-  new ContentType('image', 'images'),
-  new ContentType('video', 'videos'),
+  new ContentType('image'),
+  new ContentType('video'),
 ];
 
 var instagram = new Source({

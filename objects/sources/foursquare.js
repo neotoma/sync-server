@@ -4,9 +4,9 @@ var ContentType = require('../../models/contentType');
 var logger = require('../../lib/logger');
 
 var contentTypes = [
-  new ContentType('checkin', 'checkins'), 
-  new ContentType('tip', 'tips'), 
-  new ContentType('friend', 'friends')
+  new ContentType('checkin'),
+  new ContentType('tip'),
+  new ContentType('friend')
 ];
 
 var foursquare = new Source({
