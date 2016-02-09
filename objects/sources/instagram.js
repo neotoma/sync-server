@@ -1,6 +1,6 @@
-var UserSourceAuth = require('../../models/user-source-auth');
+var UserSourceAuth = require('../../models/user_source_auth');
 var Source = require('../../models/source');
-var ContentType = require('../../models/contentType');
+var ContentType = require('../../models/content_type');
 var logger = require('../../lib/logger');
 
 var contentTypes = [

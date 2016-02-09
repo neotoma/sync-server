@@ -13,8 +13,8 @@ module.exports = function(app) {
   require('./sessions')(app);
   require('./storages')(app);
   require('./sources')(app);
-  require('./user-storage-auths')(app);
-  require('./user-source-auths')(app);
+  require('./user_storage_auths')(app);
+  require('./user_source_auths')(app);
   require('./statuses')(app);
-  require('./notification-requests')(app);
+  require('./notification_requests')(app);
 }

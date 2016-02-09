@@ -1,4 +1,4 @@
-var ContentType = require('../models/contentType');
+var ContentType = require('../models/content_type');
 
 module.exports = {
   toObject: function(sources) {

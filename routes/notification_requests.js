@@ -1,4 +1,4 @@
-var NotificationRequest = require('../models/notification-request');
+var NotificationRequest = require('../models/notification_request');
 
 module.exports = function(app) {
   app.get('/notificationRequests', app.authFilter, function(req, res) {
