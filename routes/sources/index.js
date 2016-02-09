@@ -25,12 +25,7 @@ module.exports = function(app) {
       }
 
       var sources = require('../../objects/sources');
-
-      json.sources = sources.map(function(source) {
-        return source.toObject(json.userSourceAuths);
-      });
-
-      json.contentTypes = require('../../controllers/content_types').toObject(json.sources);
+      json.contentTypes = require('../../controllers/content_types').toObject(sources);
 
       res.json(json);
     });

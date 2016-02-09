@@ -1,4 +1,6 @@
-var pluralize = require('pluralize'); 
+var pluralize = require('pluralize');
+var prototype = require('../lib/prototypes/array');
+var prototype = require('../lib/prototypes/string');
 
 module.exports = function ContentType(id) {
   this.id = id;
@@ -10,13 +12,13 @@ module.exports = function ContentType(id) {
     var sourceIds;
     var self = this;
 
-    if (typeof sources === 'array' && sources.length > 0) {
-      sourceIds = [];
-      sources.forEach(function(source) {
-        if (source.contentTypes && source.contentTypes.indexOf(self.id) > -1) {
-          sourceIds.push(source.id);
+    if (typeof sources !== 'undefined' && sources.length > 0) {
+      sourceIds = sources.map(function(source) {
+        var sourceObject = source.toObject();
+        if (sourceObject.contentTypes && sourceObject.contentTypes.indexOf(self.id) > -1) {
+          return sourceObject.id;
         }
-      });
+      }).clean();
     }
 
     return {

@@ -4,7 +4,6 @@ var fs = require('fs');
 var compression = require('compression');
 var bodyParser = require('body-parser')
 var app = express();
-var prototype = require('./lib/prototype');
 
 app.use(compression());
 app.use(bodyParser.json());
