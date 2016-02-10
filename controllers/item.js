@@ -1,6 +1,6 @@
 var logger = require('../lib/logger');
 var Status = require('../models/status');
-var Item = require('../models/item')();
+var Item = require('../models/item');
 var UserSourceAuth = require('../models/user_source_auth');
 var UserStorageAuth = require('../models/user_storage_auth');
 var https = require('https');

@@ -1,7 +1,7 @@
 var config = require('../config');
 var assert = require('assert');
-var Item = require('../../models/item')(config.database);
-var mongoose = require('../../lib/mongoose')(config.database);
+var Item = require('../../models/item');
+var mongoose = require('../../lib/mongoose');
 
 var itemAttributes = {
   userId: 'itemUserId',
@@ -22,10 +22,6 @@ var itemAttributes = {
 };
 
 describe('new item', function() {
-  before(function(done) {
-    mongoose.connection.db.dropDatabase(done);
-  });
-
   before(function() {
     this.item = new Item(itemAttributes);
   });

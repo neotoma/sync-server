@@ -1,5 +1,5 @@
 var logger = require('../lib/logger');
-var mongoose = require('../lib/mongoose')();
+var mongoose = require('../lib/mongoose');
 
 var userSourceAuthSchema = mongoose.Schema({
   userId: String,

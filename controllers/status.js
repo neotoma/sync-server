@@ -1,5 +1,5 @@
 var Status = require('../models/status');
-var Item = require('../models/item')();
+var Item = require('../models/item');
 var async = require('async');
 var logger = require('../lib/logger');
 

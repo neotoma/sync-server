@@ -3,7 +3,7 @@ var passport = require('../../lib/passport');
 var dropboxPassport = require('passport-dropbox-oauth2');
 
 var UserStorageAuth = require('../../models/user_storage_auth');
-var User = require('../../models/user')();
+var User = require('../../models/user');
 
 module.exports = function(app) {
   var authFilter = function(req, res, next) {

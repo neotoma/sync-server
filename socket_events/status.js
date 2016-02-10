@@ -1,5 +1,5 @@
 var logger = require('../lib/logger');
-var Item = require('../models/item')();
+var Item = require('../models/item');
 var statusController = require('../controllers/status.js');
 
 module.exports = function(app, socket) {

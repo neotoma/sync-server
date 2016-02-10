@@ -1,7 +1,7 @@
 var config = require('../config');
 var assert = require('assert');
-var User = require('../../models/user')(config.database);
-var mongoose = require('../../lib/mongoose')(config.database);
+var User = require('../../models/user');
+var mongoose = require('../../lib/mongoose');
 
 var userAttributes = {
   name: 'Jordan Mills',
@@ -9,10 +9,6 @@ var userAttributes = {
 };
 
 describe('new user', function() {
-  before(function(done) {
-    mongoose.connection.db.dropDatabase(done);
-  });
-
   before(function() {
     this.user = new User(userAttributes);
   });

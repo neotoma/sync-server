@@ -1,6 +1,6 @@
 var UserSourceAuth = require('../../models/user_source_auth');
 var Status = require('../../models/status');
-var Item = require('../../models/item')();
+var Item = require('../../models/item');
 
 module.exports = function(app) {
   app.get('/userSourceAuths', app.authFilter, function(req, res) {
