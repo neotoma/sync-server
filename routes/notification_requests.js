@@ -3,7 +3,7 @@ var NotificationRequest = require('../models/notification_request');
 module.exports = function(app) {
   app.get('/notificationRequests', app.authFilter, function(req, res) {
     NotificationRequest.find({
-      user_id: req.user.id
+      userId: req.user.id
     }, function(error, notificationRequests) {
       if (error) {
         res.json({
@@ -21,8 +21,8 @@ module.exports = function(app) {
 
   app.post('/notificationRequests', app.authFilter, function(req, res) {
     new NotificationRequest({
-      user_id: req.user.id,
-      source_id: req.body.notificationRequest.source,
+      userId: req.user.id,
+      sourceId: req.body.notificationRequest.source,
       event: req.body.notificationRequest.event
     }, function(error, notificationRequest) {
       res.json({

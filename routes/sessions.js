@@ -55,10 +55,10 @@ module.exports = function(app) {
       logger.trace('found user by ID');
 
       UserStorageAuth.find({
-        user_id: req.user.id
+        userId: req.user.id
       }, function(error, userStorageAuths) {
         UserSourceAuth.find({
-          user_id: req.user.id
+          userId: req.user.id
         }, function(error, userSourceAuths) {
           respond(req.user, userStorageAuths, userSourceAuths);
         });

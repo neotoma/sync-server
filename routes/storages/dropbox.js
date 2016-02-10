@@ -18,8 +18,8 @@ module.exports = function(app) {
       res.redirect('/storages/dropbox/auth');
     } else {
       UserStorageAuth.findOne({
-        user_id:    req.user.id,
-        storage_id: "dropbox"
+        userId:    req.user.id,
+        storageId: "dropbox"
       }, function(error, userStorageAuth) {
         if (!userStorageAuth) {
           logger.trace('screened request with Dropbox authFilter; no user storage auth');
@@ -43,8 +43,8 @@ module.exports = function(app) {
       logger.trace('authenticating Dropbox user', { dropbox_id: profile.id });
 
       UserStorageAuth.findOrCreate({
-        storage_id:       "dropbox",
-        storage_user_id:  profile.id
+        storageId:       "dropbox",
+        storage_userId:  profile.id
       }, 
         function(error, userStorageAuth) {
           if (error) {
@@ -53,7 +53,7 @@ module.exports = function(app) {
           }
 
           logger.trace('saving token to user storage auth', { token: accessToken });
-          userStorageAuth.storage_token = accessToken;
+          userStorageAuth.storageToken = accessToken;
 
           userStorageAuth.save(function(error) {
             if (error) {
@@ -63,10 +63,10 @@ module.exports = function(app) {
               logger.trace('saved Dropbox token to user storage auth', { id: userStorageAuth.id });
             }
 
-            if (userStorageAuth.user_id) {
-              logger.trace('user id found for user storage auth', { user_id: userStorageAuth.user_id });
+            if (userStorageAuth.userId) {
+              logger.trace('user id found for user storage auth', { userId: userStorageAuth.userId });
               
-              User.findOne({ _id: userStorageAuth.user_id }, function(error, user) {
+              User.findOne({ _id: userStorageAuth.userId }, function(error, user) {
                 if (error) {
                   logger.error('failed to find user from userStorageAuth user ID', { id: userStorageAuth.id, error: error });
                   return done(error);
@@ -79,7 +79,7 @@ module.exports = function(app) {
               });
             } else {
               if (req.user) {
-                userStorageAuth.user_id = req.user.id;
+                userStorageAuth.userId = req.user.id;
 
                 userStorageAuth.save(function(error) {
                   logger.trace('associated user storage auth with session user');
@@ -104,7 +104,7 @@ module.exports = function(app) {
                     return done(error);
                   }
 
-                  userStorageAuth.user_id = user.id;
+                  userStorageAuth.userId = user.id;
 
                   userStorageAuth.save(function(error) {
                     logger.trace('associated user storage auth with new user');

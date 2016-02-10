@@ -3,23 +3,23 @@ var assert = require('assert');
 var Source = require('../../models/source');
 var ContentType = require('../../models/content_type');
 
-describe('source', function() {
+describe('new source', function() {
   before(function() {
     this.source = new Source({
       id: 'megaplex',
       name: 'Megaplex',
       enabled: true,
-      logo_glyph_path: '/images/logos/megaplex.svg',
-      content_types: [
+      logoGlyphPath: '/images/logos/megaplex.svg',
+      contentTypes: [
         new ContentType('widget'),
         new ContentType('gadget')
       ],
       host: 'megaplex.example.com',
-      api_version: 5,
-      default_items_limit: 98,
-      client_id: 'megaplexClientId',
-      client_secret: 'megaplexClientSecret',
-      item_asset_links: []
+      apiVersion: 5,
+      defaultItemsLimit: 98,
+      clientId: 'megaplexClientId',
+      clientSecret: 'megaplexClientSecret',
+      itemAssetLinks: []
     });
   });
 

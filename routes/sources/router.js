@@ -8,7 +8,7 @@ module.exports = function(app, source) {
   var UserSourceAuth = require('../../models/user_source_auth');
   var UserStorageAuth = require('../../models/user_storage_auth');
   var User = require('../../models/user')();
-  var Item = require('../../models/item');
+  var Item = require('../../models/item')();
 
   var itemController = require('../../controllers/item');
   var callbackURL = 'https://' + app.host + '/sources/' + sourceId + '/auth-callback';
@@ -45,8 +45,8 @@ module.exports = function(app, source) {
       res.redirect('/sources/' + sourceId + '/auth');
     } else {
       UserSourceAuth.findOne({
-        user_id:    req.user.id,
-        source_id:  sourceId
+        userId:    req.user.id,
+        sourceId:  sourceId
       }, function(error, userSourceAuth) {
         if (!userSourceAuth) {
           logger.trace('screened request with ' + sourceId + ' authFilter; no user source auth');
@@ -59,12 +59,12 @@ module.exports = function(app, source) {
   };
 
   var verifyCallback = function(req, accessToken, refreshToken, profile, done) {
-    logger.trace('authenticating ' + sourceId + ' user', { source_user_id: profile.id });
+    logger.trace('authenticating ' + sourceId + ' user', { source_userId: profile.id });
 
     UserSourceAuth.findOrCreate({
-      user_id:          req.user.id,
-      source_id:        sourceId,
-      source_user_id:   profile.id
+      userId:          req.user.id,
+      sourceId:        sourceId,
+      source_userId:   profile.id
     }, function(error, userSourceAuth) {
       if (error) {
         logger.error('failed to find or create user source auth', { 
@@ -74,7 +74,7 @@ module.exports = function(app, source) {
         done(error);
       }
 
-      userSourceAuth.source_token = accessToken;
+      userSourceAuth.sourceToken = accessToken;
 
       userSourceAuth.save(function(error) {
         if (error) {
@@ -83,7 +83,7 @@ module.exports = function(app, source) {
           });
         } else {
           logger.trace('saved ' + sourceId + ' token to user source auth', { 
-            user_id: req.user.id 
+            userId: req.user.id 
           });
         }
 
@@ -126,15 +126,15 @@ module.exports = function(app, source) {
     failureRedirect: '/sources/' + sourceId + '/auth'
   }), function(req, res) {
     UserStorageAuth.findOne({
-      user_id: req.user.id,
+      userId: req.user.id,
     }, function(error, userStorageAuth) {
       if (error) {
         logger.error('failed to find userStorageAuth for user', {
-          user_id: user.id,
+          userId: user.id,
           error: error
         });
       } else {
-        var storage = require('../../objects/storages/' + userStorageAuth.storage_id);
+        var storage = require('../../objects/storages/' + userStorageAuth.storageId);
         itemController.syncAllForAllContentTypes(app, req.user, storage, source);
       }
 

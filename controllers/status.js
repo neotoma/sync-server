@@ -1,5 +1,5 @@
 var Status = require('../models/status');
-var Item = require('../models/item');
+var Item = require('../models/item')();
 var async = require('async');
 var logger = require('../lib/logger');
 
@@ -16,36 +16,36 @@ module.exports = {
 
       var findItems = function(status, callback) {
         Item.count({
-          user_id: status.user_id,
-          source_id: status.source_id,
-          content_type_id: status.content_type_id,
-          sync_attempted_at: { '$ne': null },
+          userId: status.userId,
+          sourceId: status.sourceId,
+          contentTypeId: status.contentTypeId,
+          syncAttemptedAt: { '$ne': null },
           '$and': [{
-            sync_verified_at: null
+            syncVerifiedAt: null
           }, {
-            sync_failed_at: null
+            syncFailedAt: null
           }]
         }, function(error, count) {
           if (error) {
             return callback(error);
           } else {
-            status.total_items_pending = count;
+            status.totalItemsPending = count;
             
             Item.count({
-              user_id: status.user_id,
-              source_id: status.source_id,
-              content_type_id: status.content_type_id,
-              sync_verified_at: { '$ne': null }
+              userId: status.userId,
+              sourceId: status.sourceId,
+              contentTypeId: status.contentTypeId,
+              syncVerifiedAt: { '$ne': null }
             }, function(error, count) {
               if (error) {
                 return callback(error);
               } else {
-                status.total_items_synced = count;
+                status.totalItemsSynced = count;
 
                 if (count) {
-                  Item.findOne({ source_id: status.source_id, content_type_id: status.content_type_id }).sort({ sync_verified_at: -1 }).exec(function(error, item) {
+                  Item.findOne({ sourceId: status.sourceId, contentTypeId: status.contentTypeId }).sort({ syncVerifiedAt: -1 }).exec(function(error, item) {
                     if (item) {
-                      status.last_synced_item_id = item.get('id');
+                      status.lastSyncedItemId = item.get('id');
                       items.push(item);
                     }
 

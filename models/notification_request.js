@@ -2,9 +2,9 @@ var logger = require('../lib/logger');
 var mongoose = require('../lib/mongoose')();
 
 var notificationRequestSchema = mongoose.Schema({
-  user_id: String,
-  source_id: String,
-  storage_id: String,
+  userId: String,
+  sourceId: String,
+  storageId: String,
   event: String
 });
 

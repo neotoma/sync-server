@@ -4,9 +4,9 @@ var prototype = require('../lib/prototypes/string');
 
 module.exports = function ContentType(id) {
   this.id = id;
-  this.plural_id = pluralize(id);
+  this.pluralId = pluralize(id);
   this.name = id.capitalizeFirstLetter();
-  this.plural_name = this.plural_id.capitalizeFirstLetter();
+  this.pluralName = this.pluralId.capitalizeFirstLetter();
 
   this.toObject = function(sources) {
     var sourceIds;
@@ -23,9 +23,9 @@ module.exports = function ContentType(id) {
 
     return {
       id: this.id,
-      pluralId: this.plural_id,
+      pluralId: this.pluralId,
       name: this.name,
-      pluralName: this.plural_name,
+      pluralName: this.pluralName,
       sourceIds: sourceIds
     };
   };

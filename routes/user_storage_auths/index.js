@@ -9,7 +9,7 @@ module.exports = function(app) {
     }
 
     UserStorageAuth.find({
-      user_id: req.user.id
+      userId: req.user.id
     }, function(error, UserStorageAuths) {
       if (error) {
         return res.json({

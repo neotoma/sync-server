@@ -1,29 +1,31 @@
-var test_database = 'sync_test';
+var config = require('../config');
 var assert = require('assert');
-var User = require('../../models/user')(test_database);
-var mongoose = require('../../lib/mongoose')(test_database);
+var User = require('../../models/user')(config.database);
+var mongoose = require('../../lib/mongoose')(config.database);
 
-describe('user', function() {
+var userAttributes = {
+  name: 'Jordan Mills',
+  email: 'jordan.mills@example.com'
+};
+
+describe('new user', function() {
   before(function(done) {
-    mongoose.connection.db.dropDatabase(done)
+    mongoose.connection.db.dropDatabase(done);
   });
 
   before(function() {
-    this.user = new User({
-      name: 'Jordan Mills',
-      email: 'jordan.mills@example.com'
-    });
+    this.user = new User(userAttributes);
   });
 
   it('has name', function() {
-    assert.equal(this.user.name, 'Jordan Mills');
+    assert.equal(this.user.name, userAttributes.name);
   });
 
   it('has email', function() {
-    assert.equal(this.user.email, 'jordan.mills@example.com');
+    assert.equal(this.user.email, userAttributes.email);
   });
 
-  it('can save and get id', function(done) {
+  it('can save and has id', function(done) {
     var user = this.user;
     this.user.save(function(error) {
       assert.equal(typeof user.id, 'string');
@@ -33,21 +35,18 @@ describe('user', function() {
 
   it('can be found with findOrCreate', function(done) {
     var self = this;
-    User.findOrCreate({
-      name: 'Jordan Mills',
-      email: 'jordan.mills@example.com'
-    }, function(error, user) {
+    User.findOrCreate(userAttributes, function(error, user) {
       assert.equal(user.id, self.user.id);
       done(error);
     });
   });
 
   it('can be created with findOrCreate', function(done) {
+    var newUserAttributes = userAttributes;
+    newUserAttributes.name = 'Chris Mills';
+
     var self = this;
-    User.findOrCreate({
-      name: 'Chris Mills',
-      email: 'chris.mills@example.com'
-    }, function(error, user) {
+    User.findOrCreate(newUserAttributes, function(error, user) {
       assert.equal(typeof user.id, 'string');
       assert.notEqual(user.id, self.user.id);
       done(error);

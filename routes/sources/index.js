@@ -14,7 +14,7 @@ module.exports = function(app) {
     var json = { sources: [] };
 
     UserSourceAuth.find({
-      user_id: req.user.id
+      userId: req.user.id
     }, function(error, userSourceAuths) {
       if (error) {
         logger.error('failed to find user source auths for session user');
@@ -25,7 +25,7 @@ module.exports = function(app) {
       }
 
       var sources = require('../../objects/sources');
-      json.contentTypes = require('../../controllers/content_types').toObject(sources);
+      json.contentTypes = require('../../controllers/contentTypes').toObject(sources);
 
       res.json(json);
     });
