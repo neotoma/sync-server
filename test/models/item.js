@@ -78,7 +78,7 @@ describe('new item', function() {
     assert.equal(this.item.data, itemAttributes.data);
   });
 
-  it('can save and has id', function(done) {
+  it('can save and have id', function(done) {
     var item = this.item;
     this.item.save(function(error) {
       assert.equal(typeof item.id, 'string');

@@ -1,4 +1,3 @@
-var test_database = 'sync_test';
 var assert = require('assert');
 var Source = require('../../models/source');
 var ContentType = require('../../models/content_type');

@@ -21,7 +21,7 @@ describe('new user', function() {
     assert.equal(this.user.email, userAttributes.email);
   });
 
-  it('can save and has id', function(done) {
+  it('can save and have id', function(done) {
     var user = this.user;
     this.user.save(function(error) {
       assert.equal(typeof user.id, 'string');
