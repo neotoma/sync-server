@@ -1,7 +1,7 @@
 var logger = require('../lib/logger');
 var User = require('../models/user');
-var UserStorageAuth = require('../models/user_storage_auth');
-var UserSourceAuth = require('../models/user_source_auth');
+var UserStorageAuth = require('../models/userStorageAuth');
+var UserSourceAuth = require('../models/userSourceAuth');
 
 module.exports = function(app) {
   app.get('/sessions', function(req, res) {

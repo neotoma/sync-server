@@ -1,4 +1,4 @@
-var UserSourceAuth = require('../../models/user_source_auth');
+var UserSourceAuth = require('../../models/userSourceAuth');
 var Status = require('../../models/status');
 var Item = require('../../models/item');
 

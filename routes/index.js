@@ -16,5 +16,5 @@ module.exports = function(app) {
   require('./user_storage_auths')(app);
   require('./user_source_auths')(app);
   require('./statuses')(app);
-  require('./notification_requests')(app);
+  require('./notificationRequests')(app);
 }

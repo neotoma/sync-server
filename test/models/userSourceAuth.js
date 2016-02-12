@@ -1,6 +1,6 @@
 var config = require('../config');
 var assert = require('assert');
-var UserSourceAuth = require('../../models/user_source_auth');
+var UserSourceAuth = require('../../models/userSourceAuth');
 var mongoose = require('../../lib/mongoose');
 
 var userSourceAuthAttributes = {

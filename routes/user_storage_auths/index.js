@@ -1,4 +1,4 @@
-var UserStorageAuth = require('../../models/user_storage_auth');
+var UserStorageAuth = require('../../models/userStorageAuth');
 
 module.exports = function(app) {
   app.get('/userStorageAuths', app.authFilter, function(req, res) {

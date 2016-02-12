@@ -1,6 +1,6 @@
 var assert = require('assert');
 var Source = require('../../models/source');
-var ContentType = require('../../models/content_type');
+var ContentType = require('../../models/contentType');
 
 describe('new source', function() {
   before(function() {

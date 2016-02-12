@@ -1,6 +1,6 @@
 var config = require('../config');
 var assert = require('assert');
-var UserStorageAuth = require('../../models/user_storage_auth');
+var UserStorageAuth = require('../../models/userStorageAuth');
 var mongoose = require('../../lib/mongoose');
 
 var userStorageAuthAttributes = {

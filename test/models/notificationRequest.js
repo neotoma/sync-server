@@ -1,5 +1,5 @@
 var assert = require('assert');
-var NotificationRequest = require('../../models/notification_request');
+var NotificationRequest = require('../../models/notificationRequest');
 
 var notificationRequestAttributes = {
   userId: 'notificationRequestUserId',

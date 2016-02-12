@@ -5,8 +5,8 @@ module.exports = function(app, source) {
   var sourcePassportStrategy = require('passport-' + sourceId).Strategy;
   var source = require('../../objects/sources/' + sourceId);
 
-  var UserSourceAuth = require('../../models/user_source_auth');
-  var UserStorageAuth = require('../../models/user_storage_auth');
+  var UserSourceAuth = require('../../models/userSourceAuth');
+  var UserStorageAuth = require('../../models/userStorageAuth');
   var User = require('../../models/user');
   var Item = require('../../models/item');
 
