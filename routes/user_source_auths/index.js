@@ -1,4 +1,4 @@
-var UserSourceAuth = require('../../models/user-source-auth');
+var UserSourceAuth = require('../../models/userSourceAuth');
 var Status = require('../../models/status');
 var Item = require('../../models/item');
 
@@ -11,7 +11,7 @@ module.exports = function(app) {
     }
 
     UserSourceAuth.find({
-      user_id: req.user.id
+      userId: req.user.id
     }, function(error, userSourceAuths) {
       if (error) {
         return res.json({
@@ -41,12 +41,12 @@ module.exports = function(app) {
         if (userSourceAuth) {
           userSourceAuth.remove(function(error) {
             Item.remove({
-              user_id: req.user.id,
-              source_id: userSourceAuth.source_id
+              userId: req.user.id,
+              sourceId: userSourceAuth.sourceId
             }, function(error) {
               Status.remove({
-                user_id: req.user.id,
-                source_id: userSourceAuth.source_id
+                userId: req.user.id,
+                sourceId: userSourceAuth.sourceId
               }, function(error) {
                 res.status(204).json();
               });

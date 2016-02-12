@@ -2,10 +2,10 @@ var logger = require('../lib/logger');
 var mongoose = require('../lib/mongoose');
 
 var userSourceAuthSchema = mongoose.Schema({
-  user_id: String,
-  source_id: String,
-  source_token: String,
-  source_user_id: String
+  userId: String,
+  sourceId: String,
+  sourceToken: String,
+  sourceUserId: String
 });
 
 userSourceAuthSchema.set('toObject', { getters: true });

@@ -4,7 +4,7 @@ var storage = {
 };
 
 storage.path = function(subPath, userStorageAuth) {
-  return '/1/files_put/sandbox/' + subPath + '?access_token=' + userStorageAuth.storage_token;
+  return '/1/files_put/sandbox/' + subPath + '?access_token=' + userStorageAuth.storageToken;
 };
 
 module.exports = storage;

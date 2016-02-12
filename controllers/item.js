@@ -1,8 +1,8 @@
 var logger = require('../lib/logger');
 var Status = require('../models/status');
 var Item = require('../models/item');
-var UserSourceAuth = require('../models/user-source-auth');
-var UserStorageAuth = require('../models/user-storage-auth');
+var UserSourceAuth = require('../models/userSourceAuth');
+var UserStorageAuth = require('../models/userStorageAuth');
 var https = require('https');
 var async = require('async');
 var itemController = {};
@@ -31,9 +31,9 @@ itemController.syncAllForAllContentTypes = function(app, user, storage, source) 
 
   try {
     logger.info('started to sync all items for all content types', {
-      user_id: user.id,
-      storage_id: storage.id,
-      source_id: source.id
+      userId: user.id,
+      storageId: storage.id,
+      sourceId: source.id
     });
 
     source.contentTypes.forEach(function(contentType) {
@@ -41,9 +41,9 @@ itemController.syncAllForAllContentTypes = function(app, user, storage, source) 
     });
   } catch (error) {
     logger.error('failed to sync all items for all content types', {
-      user_id: user.id,
-      storage_id: storage.id,
-      source_id: source.id,
+      userId: user.id,
+      storageId: storage.id,
+      sourceId: source.id,
       error: error
     });
   }
@@ -53,19 +53,19 @@ itemController.syncAll = function(app, user, storage, source, contentType) {
   var self = this;
 
   logger.info('started to sync all items', {
-    user_id: user.id,
-    storage_id: storage.id,
-    source_id: source.id,
-    content_type_id: contentType.id
+    userId: user.id,
+    storageId: storage.id,
+    sourceId: source.id,
+    contentTypeId: contentType.id
   });
 
   var syncPage = function myself(error, pagination) {
     if (error) {
       logger.error('failed to sync page of items', {
-        user_id: user.id,
-        storage_id: storage.id,
-        source_id: source.id,
-        content_type_id: contentType.id,
+        userId: user.id,
+        storageId: storage.id,
+        sourceId: source.id,
+        contentTypeId: contentType.id,
         error: error
       });
     } else {
@@ -81,25 +81,25 @@ itemController.syncPage = function(app, user, storage, source, contentType, pagi
 
   try {
     logger.trace('started to sync page of items', { 
-      user_id: user.id,
-      storage_id: storage.id,
-      source_id: source.id,
-      content_type_id: contentType.id,
+      userId: user.id,
+      storageId: storage.id,
+      sourceId: source.id,
+      contentTypeId: contentType.id,
       pagination: pagination
     });
 
     Status.findOrCreate({
-      user_id: user.id,
-      storage_id: storage.id,
-      source_id: source.id,
-      content_type_id: contentType.id
+      userId: user.id,
+      storageId: storage.id,
+      sourceId: source.id,
+      contentTypeId: contentType.id
     }, function(error, status) {
       if (error) {
         logger.error('failed to find or create status while syncing page of items', {
-          user_id: user.id,
-          storage_id: storage.id,
-          source_id: source.id,
-          content_type_id: contentType.id,
+          userId: user.id,
+          storageId: storage.id,
+          sourceId: source.id,
+          contentTypeId: contentType.id,
           pagination: pagination
         });
 
@@ -107,15 +107,15 @@ itemController.syncPage = function(app, user, storage, source, contentType, pagi
       }
          
       UserSourceAuth.findOne({
-        user_id: user.id,
-        source_id: source.id
+        userId: user.id,
+        sourceId: source.id
       }, function(error, userSourceAuth) {
         if (error || !userSourceAuth) {
           logger.error('failed to find userSourceAuth while syncing page of items', {
-            user_id: user.id,
-            storage_id: storage.id,
-            source_id: source.id,
-            content_type_id: contentType.id,
+            userId: user.id,
+            storageId: storage.id,
+            sourceId: source.id,
+            contentTypeId: contentType.id,
             pagination: pagination,
             error: error
           });
@@ -140,10 +140,10 @@ itemController.syncPage = function(app, user, storage, source, contentType, pagi
             var error = new Error('failed to retrieve page of items to sync');
 
             logger.error(error.message, {
-              user_id: user.id,
-              storage_id: storage.id,
-              source_id: source.id,
-              content_type_id: contentType.id,
+              userId: user.id,
+              storageId: storage.id,
+              sourceId: source.id,
+              contentTypeId: contentType.id,
               pagination: pagination,
               error: error
             });
@@ -157,10 +157,10 @@ itemController.syncPage = function(app, user, storage, source, contentType, pagi
                 var error = new Error('failed to retrieve valid page of items to sync');
                 
                 logger.error(error.message, {
-                  user_id: user.id,
-                  storage_id: storage.id,
-                  source_id: source.id,
-                  content_type_id: contentType.id,
+                  userId: user.id,
+                  storageId: storage.id,
+                  sourceId: source.id,
+                  contentTypeId: contentType.id,
                   pagination: pagination,
                   errorType: dataJSON.meta.errorType,
                   errorDetail: dataJSON.meta.errorDetail,
@@ -171,23 +171,23 @@ itemController.syncPage = function(app, user, storage, source, contentType, pagi
               }
 
               if (typeof dataJSON.response !== 'undefined') {
-                var itemsJSON = dataJSON.response[contentType.plural_id].items;
+                var itemsJSON = dataJSON.response[contentType.pluralId].items;
               } else if (typeof dataJSON.data !== 'undefined') {
                 var itemsJSON = dataJSON.data;
               }
               
               logger.trace('parsed page of items to sync', {
-                user_id: user.id,
-                storage_id: storage.id,
-                source_id: source.id,
-                content_type_id: contentType.id,
+                userId: user.id,
+                storageId: storage.id,
+                sourceId: source.id,
+                contentTypeId: contentType.id,
                 pagination: pagination,
                 total: itemsJSON.length
               });
 
               if (pagination.offset == 0) {
                 if (typeof dataJSON.response !== 'undefined') {
-                  status.total_items_available = dataJSON.response[contentType.plural_id].count;
+                  status.totalItemsAvailable = dataJSON.response[contentType.pluralId].count;
                 }
 
                 status.save();
@@ -223,20 +223,20 @@ itemController.syncPage = function(app, user, storage, source, contentType, pagi
                 });
               } else {
                 logger.trace('found no items to sync in page', { 
-                  user_id: user.id,
-                  storage_id: storage.id,
-                  source_id: source.id,
-                  content_type_id: contentType.id,
+                  userId: user.id,
+                  storageId: storage.id,
+                  sourceId: source.id,
+                  contentTypeId: contentType.id,
                   pagination: pagination
                 });
               }
             } catch(error) {
               logger.error('failed to sync page of items', {
                 error: error,
-                user_id: user.id,
-                storage_id: storage.id,
-                source_id: source.id,
-                content_type_id: contentType.id,
+                userId: user.id,
+                storageId: storage.id,
+                sourceId: source.id,
+                contentTypeId: contentType.id,
                 pagination: pagination
               });
             }
@@ -246,10 +246,10 @@ itemController.syncPage = function(app, user, storage, source, contentType, pagi
     });
   } catch (error) {
     logger.error('failed to sync page of items', {
-      user_id: user.id,
-      storage_id: storage.id,
-      source_id: source.id,
-      content_type_id: contentType.id,
+      userId: user.id,
+      storageId: storage.id,
+      sourceId: source.id,
+      contentTypeId: contentType.id,
       pagination: pagination,
       error: error
     });
@@ -264,19 +264,19 @@ itemController.syncItem = function(app, user, storage, source, contentType, item
   }
 
   logger.trace('started to sync item', {
-    user_id: user.id,
-    storage_id: storage.id,
-    source_id: source.id,
-    content_type_id: contentType.id,
-    source_item_id: itemJSON.id
+    userId: user.id,
+    storageId: storage.id,
+    sourceId: source.id,
+    contentTypeId: contentType.id,
+    sourceItemId: itemJSON.id
   });
 
   Item.findOrCreate({
-    user_id: user.id,
-    storage_id: storage.id,
-    source_id: source.id,
-    content_type_id: contentType.id,
-    source_item_id: itemJSON.id
+    userId: user.id,
+    storageId: storage.id,
+    sourceId: source.id,
+    contentTypeId: contentType.id,
+    sourceItemId: itemJSON.id
   }, function(error, item) {
     if (error) {
       logger.error('failed to find or create item while syncing', { 
@@ -285,13 +285,13 @@ itemController.syncItem = function(app, user, storage, source, contentType, item
 
       callback(error);
     } else {
-      if (item.sync_verified_at) {
+      if (item.syncVerifiedAt) {
         logger.trace('skipped syncing item because it is already verified', {
-          user_id: user.id,
-          storage_id: storage.id,
-          source_id: source.id,
-          content_type_id: contentType.id,
-          source_item_id: item.source_item_id,
+          userId: user.id,
+          storageId: storage.id,
+          sourceId: source.id,
+          contentTypeId: contentType.id,
+          sourceItemId: item.sourceItemId,
           item_id: item.id
         });
 
@@ -299,15 +299,15 @@ itemController.syncItem = function(app, user, storage, source, contentType, item
       } else {
         item.data = itemJSON;
         item.description = source.itemDescription(item);
-        item.sync_attempted_at = Date.now();
+        item.syncAttemptedAt = Date.now();
         item.save(function(error) {
           if (error) {
             logger.error('failed to save item while syncing', {
-              user_id: user.id,
-              storage_id: storage.id,
-              source_id: source.id,
-              content_type_id: contentType.id,
-              source_item_id: item.source_item_id,
+              userId: user.id,
+              storageId: storage.id,
+              sourceId: source.id,
+              contentTypeId: contentType.id,
+              sourceItemId: item.sourceItemId,
               item_id: item.id,
               error: error
             });
@@ -326,33 +326,33 @@ itemController.storeItem = function(app, user, storage, source, contentType, ite
   var self = this;
 
   logger.trace('started to store item', {
-    user_id: user.id,
-    storage_id: storage.id,
-    source_id: source.id,
-    content_type_id: contentType.id,
+    userId: user.id,
+    storageId: storage.id,
+    sourceId: source.id,
+    contentTypeId: contentType.id,
     item_id: item.id
   });
 
   var storeCallback = function(error, response) {
     if (error) {
       logger.error('failed to store item', { 
-        user_id: user.id,
-        storage_id: storage.id,
-        source_id: source.id,
-        content_type_id: contentType.id,
+        userId: user.id,
+        storageId: storage.id,
+        sourceId: source.id,
+        contentTypeId: contentType.id,
         item_id: item.id,
         message: error.message
       });
 
-      item.sync_failed_at = Date.now();
+      item.syncFailedAt = Date.now();
       item.error = error.message;
       item.save(function(saveError) {
         if (saveError) {
           logger.error('failed to update item after failure to store it', {
-            user_id: user.id,
-            storage_id: storage.id,
-            source_id: source.id,
-            content_type_id: contentType.id,
+            userId: user.id,
+            storageId: storage.id,
+            sourceId: source.id,
+            contentTypeId: contentType.id,
             item_id: item.id,
             error: saveError 
           });
@@ -370,24 +370,24 @@ itemController.storeItem = function(app, user, storage, source, contentType, ite
     }
 
     logger.trace('stored item', { 
-      user_id: user.id,
-      storage_id: storage.id,
-      source_id: source.id,
-      content_type_id: contentType.id,
+      userId: user.id,
+      storageId: storage.id,
+      sourceId: source.id,
+      contentTypeId: contentType.id,
       item_id: item.id,
       response: response
     });
 
-    item.sync_verified_at = Date.now();
+    item.syncVerifiedAt = Date.now();
     item.bytes = response.bytes;
     item.path = response.path;
     item.save(function(error) {
       if (error) {
         logger.error('failed to update item after storing it', {
-          user_id: user.id,
-          storage_id: storage.id,
-          source_id: source.id,
-          content_type_id: contentType.id,
+          userId: user.id,
+          storageId: storage.id,
+          sourceId: source.id,
+          contentTypeId: contentType.id,
           item_id: item.id,
           error: error
         });
@@ -397,10 +397,10 @@ itemController.storeItem = function(app, user, storage, source, contentType, ite
         app.emit('itemSyncVerified', item);
 
         logger.trace('updated item after storing it', {
-          user_id: user.id,
-          storage_id: storage.id,
-          source_id: source.id,
-          content_type_id: contentType.id,
+          userId: user.id,
+          storageId: storage.id,
+          sourceId: source.id,
+          contentTypeId: contentType.id,
           item_id: item.id
         });
 
@@ -409,7 +409,7 @@ itemController.storeItem = function(app, user, storage, source, contentType, ite
     });
   };
 
-  var path = '/' + contentType.plural_id + '/raw-synced-meta/' + item.id + '.json';
+  var path = '/' + contentType.pluralId + '/raw-synced-meta/' + item.id + '.json';
   this.storeFile(user, storage, path, item.data, 'utf8', storeCallback);
 
   if (typeof source.itemAssetLinks !== 'undefined') {
@@ -426,7 +426,7 @@ itemController.storeItem = function(app, user, storage, source, contentType, ite
 
           callback(error);
         } else {
-          var path = '/' + contentType.plural_id + '/' + item.id + '.' + extension;
+          var path = '/' + contentType.pluralId + '/' + item.id + '.' + extension;
           self.storeFile(user, storage, path, data, 'binary', function(error, response) {
             if (error) {
               logger.error('failed to store item asset', {
@@ -507,8 +507,8 @@ itemController.storeFile = function(user, storage, path, data, encoding, callbac
   }
 
   UserStorageAuth.findOne({
-    storage_id: storage.id,
-    user_id:    user.id
+    storageId: storage.id,
+    userId:    user.id
   }, function(error, userStorageAuth) {
     if (error) {
       logger.error('failed to retrieve userStorageAuth for user while storing file');

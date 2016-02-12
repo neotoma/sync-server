@@ -1,6 +1,6 @@
 var logger = require('../../lib/logger');
-var UserSourceAuth = require('../../models/user-source-auth');
-var UserStorageAuth = require('../../models/user-storage-auth');
+var UserSourceAuth = require('../../models/userSourceAuth');
+var UserStorageAuth = require('../../models/userStorageAuth');
 var foursquare = require('../../objects/sources/foursquare');
 var instagram = require('../../objects/sources/instagram');
 var twitter = require('../../objects/sources/twitter');
@@ -14,7 +14,7 @@ module.exports = function(app) {
     var json = { sources: [] };
 
     UserSourceAuth.find({
-      user_id: req.user.id
+      userId: req.user.id
     }, function(error, userSourceAuths) {
       if (error) {
         logger.error('failed to find user source auths for session user');
@@ -25,12 +25,7 @@ module.exports = function(app) {
       }
 
       var sources = require('../../objects/sources');
-
-      json.sources = sources.map(function(source) {
-        return source.toObject(json.userSourceAuths);
-      });
-
-      json.contentTypes = require('../../controllers/content_types').toObject(json.sources);
+      json.contentTypes = require('../../controllers/contentTypes').toObject(sources);
 
       res.json(json);
     });

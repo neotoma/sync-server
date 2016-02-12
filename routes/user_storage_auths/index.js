@@ -1,4 +1,4 @@
-var UserStorageAuth = require('../../models/user-storage-auth');
+var UserStorageAuth = require('../../models/userStorageAuth');
 
 module.exports = function(app) {
   app.get('/userStorageAuths', app.authFilter, function(req, res) {
@@ -9,7 +9,7 @@ module.exports = function(app) {
     }
 
     UserStorageAuth.find({
-      user_id: req.user.id
+      userId: req.user.id
     }, function(error, UserStorageAuths) {
       if (error) {
         return res.json({

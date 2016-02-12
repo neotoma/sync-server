@@ -1,7 +1,7 @@
 var logger = require('../lib/logger');
 var User = require('../models/user');
-var UserStorageAuth = require('../models/user-storage-auth');
-var UserSourceAuth = require('../models/user-source-auth');
+var UserStorageAuth = require('../models/userStorageAuth');
+var UserSourceAuth = require('../models/userSourceAuth');
 
 module.exports = function(app) {
   app.get('/sessions', function(req, res) {
@@ -55,10 +55,10 @@ module.exports = function(app) {
       logger.trace('found user by ID');
 
       UserStorageAuth.find({
-        user_id: req.user.id
+        userId: req.user.id
       }, function(error, userStorageAuths) {
         UserSourceAuth.find({
-          user_id: req.user.id
+          userId: req.user.id
         }, function(error, userSourceAuths) {
           respond(req.user, userStorageAuths, userSourceAuths);
         });

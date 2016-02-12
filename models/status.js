@@ -2,14 +2,14 @@ var logger = require('../lib/logger');
 var mongoose = require('../lib/mongoose');
 
 var statusSchema = mongoose.Schema({
-  user_id: String,
-  storage_id: String,
-  source_id: String,
-  content_type_id: String,
-  total_items_available: Number,
-  total_items_synced: Number,
-  total_items_pending: Number,
-  last_synced_item_id: String
+  userId: String,
+  storageId: String,
+  sourceId: String,
+  contentTypeId: String,
+  totalItemsAvailable: Number,
+  totalItemsSynced: Number,
+  totalItemsPending: Number,
+  lastSyncedItemId: String
 });
 
 statusSchema.set('toObject', { getters: true });

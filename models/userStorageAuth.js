@@ -2,10 +2,10 @@ var logger = require('../lib/logger');
 var mongoose = require('../lib/mongoose');
 
 var userStorageAuthSchema = mongoose.Schema({
-  user_id: String,
-  storage_id: String,
-  storage_token: String,
-  storage_user_id: String
+  userId: String,
+  storageId: String,
+  storageToken: String,
+  storageUserId: String
 });
 
 userStorageAuthSchema.set('toObject', { getters: true });

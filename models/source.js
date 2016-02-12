@@ -2,16 +2,16 @@ module.exports = function(properties) {
   this.id                   = properties.id,
   this.name                 = properties.name,
   this.enabled              = properties.enabled,
-  this.logoGlyphPath        = properties.logo_glyph_path,
-  this.contentTypes         = properties.content_types,
+  this.logoGlyphPath        = properties.logoGlyphPath,
+  this.contentTypes         = properties.contentTypes,
   this.host                 = properties.host,
-  this.apiVersion           = properties.api_version;
-  this.defaultItemsLimit    = typeof properties.default_items_limit !== 'undefined' ? properties.default_items_limit : 250;
-  this.clientId             = properties.client_id;
-  this.clientSecret         = properties.client_secret;
-  this.consumerKey          = properties.consumer_key;
-  this.consumerSecret       = properties.consumer_secret;
-  this.itemAssetLinks       = properties.item_asset_links;
+  this.apiVersion           = properties.apiVersion;
+  this.defaultItemsLimit    = typeof properties.defaultItemsLimit !== 'undefined' ? properties.defaultItemsLimit : 250;
+  this.clientId             = properties.clientId;
+  this.clientSecret         = properties.clientSecret;
+  this.consumerKey          = properties.consumerKey;
+  this.consumerSecret       = properties.consumerSecret;
+  this.itemAssetLinks       = properties.itemAssetLinks;
 
   this.itemsRemotePath = function(contentType, userSourceAuth, offset) {
     return;

@@ -10,6 +10,6 @@ module.exports = function(app) {
       } else {
         res.json(data);
       }
-    }, { user_id: req.user.id });
+    }, { userId: req.user.id });
   });
 }

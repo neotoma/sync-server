@@ -2,14 +2,14 @@ var logger = require('../lib/logger');
 var mongoose = require('../lib/mongoose');
   
 var itemSchema = mongoose.Schema({
-  user_id: String,
-  storage_id: String,
-  source_id: String,
-  source_item_id: String,
-  content_type_id: String,
-  sync_attempted_at: Date,
-  sync_verified_at: Date,
-  sync_failed_at: Date,
+  userId: String,
+  storageId: String,
+  sourceId: String,
+  sourceItemId: String,
+  contentTypeId: String,
+  syncAttemptedAt: Date,
+  syncVerifiedAt: Date,
+  syncFailedAt: Date,
   bytes: Number,
   path: String,
   description: String,
