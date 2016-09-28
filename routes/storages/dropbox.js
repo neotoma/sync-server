@@ -7,27 +7,17 @@ var User = require('../../models/user');
 
 module.exports = function(app) {
   var authFilter = function(req, res, next) {
-    if (req.path == '/storages/dropbox/auth') {
+    if (req.path === '/storages/dropbox/auth') {
       req.session.storagesDropboxAuthRedirectURL = null;
     } else {
       req.session.storagesDropboxAuthRedirectURL = req.path;
     }
 
-    if (typeof req.user == 'undefined') {
+    if (typeof req.user === 'undefined') {
       logger.trace('screened request with Dropbox authFilter; no session user');
       res.redirect('/storages/dropbox/auth');
     } else {
-      UserStorageAuth.findOne({
-        userId:    req.user.id,
-        storageId: "dropbox"
-      }, function(error, userStorageAuth) {
-        if (!userStorageAuth) {
-          logger.trace('screened request with Dropbox authFilter; no user storage auth');
-          res.redirect('/storages/dropbox/auth');
-        } else {
-          next();
-        }
-      });
+      next();
     }
   };
 
@@ -43,8 +33,8 @@ module.exports = function(app) {
       logger.trace('authenticating Dropbox user', { dropbox_id: profile.id });
 
       UserStorageAuth.findOrCreate({
-        storageId:       "dropbox",
-        storage_userId:  profile.id
+        storageId:       'dropbox',
+        storageUserId:  profile.id
       }, 
         function(error, userStorageAuth) {
           if (error) {
@@ -132,7 +122,6 @@ module.exports = function(app) {
 
   app.get('/storages/dropbox/auth-callback', function(req, res) {
     passport.authenticate('dropbox-oauth2', function(error, user, info) {
-      console.log("post authenticate");
       if (error) {
         logger.error('Dropbox auth failed', { error: error });
         res.redirect('/storages/dropbox/auth');

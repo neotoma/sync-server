@@ -1,24 +1,6 @@
 var NotificationRequest = require('../models/notificationRequest');
 
 module.exports = function(app) {
-  app.get('/notificationRequests', app.authFilter, function(req, res) {
-    NotificationRequest.find({
-      userId: req.user.id
-    }, function(error, notificationRequests) {
-      if (error) {
-        res.json({
-          error: error
-        });
-      } else {
-        res.json({
-          'notificationRequests': notificationRequests.map(function(notificationRequest) {
-            return notificationRequest.toObject();
-          })
-        });
-      }
-    });
-  });
-
   app.post('/notificationRequests', app.authFilter, function(req, res) {
     new NotificationRequest({
       userId: req.user.id,

@@ -4,6 +4,21 @@ var UserStorageAuth = require('../models/userStorageAuth');
 var UserSourceAuth = require('../models/userSourceAuth');
 
 module.exports = function(app) {
+  app.adminAuthFilter = function(req, res, next) {
+    User.findOne({
+      _id: req.user.id
+    }, function(error, user) {
+      if (!user) {
+        logger.trace('screened request with adminAuthFilter; user in session invalid');
+        res.redirect('/storages/dropbox/auth');
+      } else if (!user.admin) {
+        res.status(403).send('403 Forbidden');
+      } else {
+        next();
+      }
+    });
+  };
+
   app.get('/sessions', function(req, res) {
     var respond = function(user, userStorageAuths, userSourceAuths) {
       var users = [];

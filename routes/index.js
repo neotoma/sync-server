@@ -12,9 +12,22 @@ module.exports = function(app) {
 
   require('./sessions')(app);
   require('./storages')(app);
+  require('./contactVerificationRequests')(app);
+
   require('./sources')(app);
-  require('./user_storage_auths')(app);
-  require('./user_source_auths')(app);
-  require('./statuses')(app);
-  require('./notificationRequests')(app);
+  require('./userStorageAuths')(app);
+  require('./userSourceAuths')(app); 
+  require('./statuses')(app); 
+  require('./notificationRequests')(app);  
+
+  require('./resources')(app, [{
+    name: 'contactVerificationRequest',
+    adminAuthFilter: true
+  }, {
+    name: 'user',
+    adminAuthFilter: true
+  }, {
+    name: 'notificationRequest',
+    adminAuthFilter: true
+  }]);
 }

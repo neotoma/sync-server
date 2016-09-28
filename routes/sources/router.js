@@ -33,38 +33,13 @@ module.exports = function(app, source) {
     logger.fatal('Passport parameters not provided by environment for ' + source.name + ' config');
   }
 
-  var authFilter = function(req, res, next) {
-    if (req.path == '/sources/' + sourceId + '/auth') {
-      req.session.sourceAuthRedirectPath = null;
-    } else {
-      req.session.sourceAuthRedirectPath = req.path;
-    }
-
-    if (typeof req.user == 'undefined') {
-      logger.trace('screened request with ' + sourceId + ' authFilter; no session user');
-      res.redirect('/sources/' + sourceId + '/auth');
-    } else {
-      UserSourceAuth.findOne({
-        userId:    req.user.id,
-        sourceId:  sourceId
-      }, function(error, userSourceAuth) {
-        if (!userSourceAuth) {
-          logger.trace('screened request with ' + sourceId + ' authFilter; no user source auth');
-          res.redirect('/sources/' + sourceId + '/auth');
-        } else {
-          next();
-        }
-      });
-    }
-  };
-
   var verifyCallback = function(req, accessToken, refreshToken, profile, done) {
     logger.trace('authenticating ' + sourceId + ' user', { source_userId: profile.id });
 
     UserSourceAuth.findOrCreate({
       userId:          req.user.id,
       sourceId:        sourceId,
-      source_userId:   profile.id
+      sourceUserId:   profile.id
     }, function(error, userSourceAuth) {
       if (error) {
         logger.error('failed to find or create user source auth', { 

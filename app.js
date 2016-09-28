@@ -51,7 +51,7 @@ var server = https.createServer({
   ca: fs.readFileSync(process.env.SYNC_SSL_INT_CRT, 'utf8')
 }, app).listen(app.port);
 
-logger.trace('started listening for HTTPS requests', { port: app.port });
+logger.info('started listening for HTTPS requests', { port: app.port });
 
 app.io = require('socket.io')(server);
 
@@ -76,4 +76,4 @@ app.io.set('authorization', passportSocketIo.authorize({
   cookieParser: express.cookieParser
 }));
 
-logger.trace('started listening for WebSocket connections');
+logger.info('started listening for WebSocket connections');
