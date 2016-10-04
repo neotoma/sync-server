@@ -13,7 +13,7 @@ module.exports = function(app) {
     var attributes = req.body.data.attributes;
     var genericErrorCopy = 'For some reason, we were unable to send you an email. Please try submitting your address again.';
 
-    ContactVerificationRequest.cleanseAttributes(attributes, function(errors, attributes) {
+    ContactVerificationRequest.validate(attributes, function(errors, attributes) {
       if (errors) {
         return res.status(400).json(errors);
       }
