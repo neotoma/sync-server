@@ -1,50 +1,45 @@
 var ModelFactory = require('../factories/model');
+var mailer = require('../services/mailer');
+var supportedMethods = ['email'];
 
 var staticMethods = {
-  'cleanseAttributes': function(attributes, callback) {
-    var isValidEmail = function(email) {
-      var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-      return re.test(email);
-    }
-
-    var supportedMethods = [
-      'email'
-    ];
-
+  validate: function(attributes, callback) {
     var errors = [];
 
     if (typeof(attributes.method) === 'undefined') {
-      errors.push('Required method value missing');
+      errors.push(new Error('Required method value missing'));
     } else if (supportedMethods.indexOf(attributes.method) === -1) {
-      errors.push('Unsupported method value');
+      errors.push(new Error('Invalid method value'));
     }
 
     if (typeof(attributes.contact) === 'undefined') {
-      errors.push('Required contact value missing');
-    } else if (!isValidEmail(attributes.contact)) {
-      errors.push('Invalid contact value');
+      errors.push(new Error('Required contact value missing'));
+    } else if (!mailer.isValidEmail(attributes.contact)) {
+      errors.push(new Error('Invalid contact value'));
     }
 
-    if (['undefined', 'boolean'].indexOf(typeof(attributes.createUser)) === -1) {
-      errors.push('Invalid createUser value');
+    if (typeof(attributes.createUser) !== 'boolean') {
+      errors.push(new Error('Invalid createUser value'));
     }
 
-    if (['undefined', 'boolean'].indexOf(typeof(attributes.createSession)) === -1) {
-      errors.push('Invalid createSession value');
+    if (typeof(attributes.createSession) !== 'boolean') {
+      errors.push(new Error('Invalid createSession value'));
     }
 
     if (['undefined', 'object'].indexOf(typeof(attributes.createNotificationRequests)) === -1) {
-      errors.push('Invalid createNotificationRequests value provided');
+      errors.push(new Error('Invalid createNotificationRequests value'));
     } else if (typeof(attributes.createNotificationRequests) === 'object') {
       attributes.createNotificationRequests.forEach(function(notificationRequest) {
         if (typeof(notificationRequest.event) === 'undefined') {
-          errors.push('Invalid notificationRequest value');
+          errors.push(new Error('Invalid notificationRequest value'));
         }
       });
     }
 
-    if (['undefined', 'string'].indexOf(typeof(attributes.clientHost)) === -1) {
-      errors.push('Invalid clientHost value');
+    if (typeof(attributes.clientHost) === 'undefined') {
+      errors.push(new Error('Required clientHost value missing'));
+    } else if (typeof attributes.clientHost !== 'string') {
+      errors.push(new Error('Invalid clientHost value'));
     }
 
     if (errors.length > 0) {
@@ -64,12 +59,12 @@ var staticMethods = {
 };
 
 module.exports = ModelFactory.new('contactVerificationRequest', {
-  method: String, // method of contact, e.g. email
-  contact: String, // contact identifier, e.g. example@example.com
+  method: { type: String, required: true }, // method of contact, e.g. email
+  contact: { type: String, required: true }, // contact identifier, e.g. example@example.com
   code: String, // code delivered to contact for verification, e.g. 1234567890
-  createUser: Boolean, // whether to create a user upon verification
-  createSession: Boolean, // whether to create a session upon verification
+  createUser: { type: Boolean, default: false }, // whether to create a user upon verification
+  createSession: { type: Boolean, default: false }, // whether to create a session upon verification
   createNotificationRequests: Array, // array of JSON objects for notification requests to create upon verification
   clientHost: String, // host URL of client used to make request
-  verified: Boolean // whether contact has been verified
+  verified: { type: Boolean, default: false } // whether contact has been verified
 }, staticMethods);
