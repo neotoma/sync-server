@@ -11,7 +11,7 @@ module.exports = function(app, source) {
   var Item = require('../../models/item');
 
   var itemController = require('../../controllers/item');
-  var callbackURL = 'https://' + app.host + '/sources/' + sourceId + '/auth-callback';
+  var callbackURL = app.origin + '/sources/' + sourceId + '/auth-callback';
 
   var strategyParams = {
     callbackURL: callbackURL,

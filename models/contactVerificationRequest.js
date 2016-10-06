@@ -1,5 +1,5 @@
 var ModelFactory = require('../factories/model');
-var mailer = require('../services/mailer');
+var mailer = require('../lib/mailer');
 var supportedMethods = ['email'];
 
 var staticMethods = {

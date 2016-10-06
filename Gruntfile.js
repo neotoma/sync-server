@@ -3,8 +3,13 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
     nodemon: {
-      main: {
-        script: 'app.js'
+      dev: {
+        script: 'app-server.js',
+        options: {
+          env: {
+            NODE_ENV: 'development'
+          }
+        }
       }
     },
     rsync: {
@@ -43,7 +48,7 @@ module.exports = function(grunt) {
 
   // Run local web server for development
   grunt.registerTask('dev', [
-    'nodemon'
+    'nodemon:dev'
   ]);
 
   // Deploy to host

@@ -14,7 +14,7 @@ module.exports = function(app) {
     }
 
     if (typeof req.user === 'undefined') {
-      logger.trace('screened request with Dropbox authFilter; no session user');
+      logger.warn('Dropbox authFilter screened request after failing to find user in session');
       res.redirect('/storages/dropbox/auth');
     } else {
       next();
@@ -26,7 +26,7 @@ module.exports = function(app) {
   passport.use(new dropboxPassport.Strategy({
       clientID: process.env.SYNC_STORAGES_DROPBOX_APP_KEY || logger.fatal('App key not provided by environment for Dropbox config'),
       clientSecret: process.env.SYNC_STORAGES_DROPBOX_APP_SECRET || logger.fatal('App secret not provided by environment for Dropbox config'),
-      callbackURL: 'https://' + app.host + '/storages/dropbox/auth-callback',
+      callbackURL: app.origin + '/storages/dropbox/auth-callback',
       passReqToCallback: true
     },
     function(req, accessToken, refreshToken, profile, done) {
@@ -127,12 +127,13 @@ module.exports = function(app) {
         res.redirect('/storages/dropbox/auth');
       } else {
         req.logIn(user, function(error) {
-          if (error) { 
-            logger.error('Dropbox auth session establishment failed', { error: error });
+          logger.trace('req.logIn user', user.toObject());
+          if (error || !user) { 
+            logger.error('Dropbox auth-callback route failed to create session', { error: error });
             res.redirect('/storages/dropbox/auth');
           } else {
             if (req.session.storagesDropboxAuthRedirectURL) {
-              logger.trace('redirect to remembered URL', { url: req.session.storagesDropboxAuthRedirectURL });
+              logger.info('Dropbox auth-callback route redirecting to remembered URL', { url: req.session.storagesDropboxAuthRedirectURL });
               var storagesDropboxAuthRedirectURL = req.session.storagesDropboxAuthRedirectURL;
               req.session.storagesDropboxAuthRedirectURL = null;
               res.redirect(storagesDropboxAuthRedirectURL);

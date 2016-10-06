@@ -1,7 +1,7 @@
 var ContactVerificationRequest = require('../../models/contactVerificationRequest');
 var NotificationRequest = require('../../models/notificationRequest');
 var User = require('../../models/user');
-var mailer = require('../../services/mailer');
+var mailer = require('../../lib/mailer');
 var logger = require('../../lib/logger');
 var async = require('async');
 
@@ -20,7 +20,7 @@ module.exports = function(app) {
 
       crypto.randomBytes(CRYPTO_SIZE, function(error, buffer) {
         if (error || !buffer) {
-          logger.error('failed to generate code for new contactVerificationRequest');
+          logger.error('App failed to generate code for new contactVerificationRequest');
           return res.status(500).send('500 Internal Server Error');
         }
 
@@ -28,7 +28,7 @@ module.exports = function(app) {
 
         ContactVerificationRequest.findOrCreate(attributes, function(error, contactVerificationRequest) {
           if (error || !contactVerificationRequest) {
-            logger.error('failed to find or create contactVerificationRequest');
+            logger.error('App failed to find or create contactVerificationRequest');
             return res.status(500).send('500 Internal Server Error');
           }
 
@@ -39,16 +39,16 @@ module.exports = function(app) {
               text: 'Thanks for submitting your email address to ' + process.env.SYNC_NAME + ' so we can notify you when it becomes available!\n\nHowever, before we can do so, we need you to confirm your address by visiting:\n\n' + contactVerificationRequest.clientHost + '/contactVerificationRequests/' + contactVerificationRequest._id + '?code=' + contactVerificationRequest.code + ' \n\n\nPlease take a second to do so!\n\nNote: If you weren\'t the one to submit your email address to us, don\'t worry; we won\'t contact you further about this matter. You can simply ignore this message.'
             }, function(error, mailerRes) {
               if (error) {
-                logger.error('failed to send email for new contactVerificationRequest');
+                logger.error('App failed to send email for new contactVerificationRequest', { reason: error.message });
                 return res.status(500).send(genericErrorCopy);
               }
 
-              logger.trace('sent email for new contactVerificationRequest');
+              logger.info('App sent email for new contactVerificationRequest');
 
               return res.json(req.body);
             });
           } else {
-            logger.error('failed to send code for new contactVerificationRequest given method');
+            logger.error('App failed to send code for new contactVerificationRequest given method');
             return res.status(500).send(genericErrorCopy);
           }
         });
@@ -129,7 +129,7 @@ module.exports = function(app) {
                 if (error) {
                   error.message = 'Unable to create session after verifying contact';
                 } else {
-                  logger.trace('session created after verifying contact');
+                  logger.info('session created after verifying contact');
                 }
 
                 callback(error, user);

@@ -2,11 +2,11 @@ var logger = require('../lib/logger');
 
 module.exports = function(app) {
   app.all('/*', function(req, res, next) {
-    logger.info('received request', { 
-      path: req.path,
-      params: req.params,
-      query: req.query
-    });
+    logger.info('App received request', { path: req.path, ip: req.ip });
+    res.header('Access-Control-Allow-Origin', 'https://' + process.env.SYNC_WEB_HOST);
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    res.header('Access-Control-Allow-Credentials', 'true');
     next();
   });
 
