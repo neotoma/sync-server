@@ -39,7 +39,7 @@ module.exports = function(grunt) {
         command: 'cd ' + process.env.SYNC_DEPLOY_HOST_DIR + ' && npm install --production'
       },
       foreverRestartAll: {
-        command: 'cd ' + process.env.SYNC_DEPLOY_HOST_DIR + ' && forever restart app.js'
+        command: 'cd ' + process.env.SYNC_DEPLOY_HOST_DIR + ' && forever restart app-server.js'
       }
     }
   });

@@ -12,11 +12,11 @@ var contactVerificationRequestAttributes = {
   contact: 'example@example.com',
   code: '123456789',
   createUser: true,
-  createSession: true,
+  authenticateSession: true,
   createNotificationRequests: [{
     event: 'Test'
   }],
-  clientHost: 'http://example.com',
+  clientOrigin: 'http://example.com',
   verified: false
 };
 
@@ -41,16 +41,16 @@ describe('new contactVerificationRequest', function() {
     assert.equal(this.contactVerificationRequest.createUser, contactVerificationRequestAttributes.createUser);
   });
 
-  it('has createSession', function() {
-    assert.equal(this.contactVerificationRequest.createSession, contactVerificationRequestAttributes.createSession);
+  it('has authenticateSession', function() {
+    assert.equal(this.contactVerificationRequest.authenticateSession, contactVerificationRequestAttributes.authenticateSession);
   });
 
   it('has createNotificationRequests', function() {
     assert.equal(this.contactVerificationRequest.createNotificationRequests[0].event, contactVerificationRequestAttributes.createNotificationRequests[0].event);
   });
 
-  it('has clientHost', function() {
-    assert.equal(this.contactVerificationRequest.clientHost, contactVerificationRequestAttributes.clientHost);
+  it('has clientOrigin', function() {
+    assert.equal(this.contactVerificationRequest.clientOrigin, contactVerificationRequestAttributes.clientOrigin);
   });
 
   it('has verified', function() {
@@ -155,15 +155,15 @@ describe('new contactVerificationRequest', function() {
     });
   });
 
-  it('catches invalid createSession value with validate static method', function(done) {
+  it('catches invalid authenticateSession value with validate static method', function(done) {
     var attributes = clone(contactVerificationRequestAttributes);
-    attributes.createSession = 'apple';
+    attributes.authenticateSession = 'apple';
 
     ContactVerificationRequest.validate(attributes, function(errors, attributes) {
       if (!errors) {
         done(new Error('No errors returned by validate'));
       } else {
-        assert.equal(errors[0].message, 'Invalid createSession value');
+        assert.equal(errors[0].message, 'Invalid authenticateSession value');
         done();
       }
     });
@@ -197,29 +197,29 @@ describe('new contactVerificationRequest', function() {
     });
   });
 
-  it('catches missing clientHost value with validate static method', function(done) {
+  it('catches missing clientOrigin value with validate static method', function(done) {
     var attributes = clone(contactVerificationRequestAttributes);
-    delete attributes.clientHost;
+    delete attributes.clientOrigin;
 
     ContactVerificationRequest.validate(attributes, function(errors, attributes) {
       if (!errors) {
         done(new Error('No errors returned by validate'));
       } else {
-        assert.equal(errors[0].message, 'Required clientHost value missing');
+        assert.equal(errors[0].message, 'Required clientOrigin value missing');
         done();
       }
     });
   });
 
-  it('catches invalid clientHost value with validate static method', function(done) {
+  it('catches invalid clientOrigin value with validate static method', function(done) {
     var attributes = clone(contactVerificationRequestAttributes);
-    attributes.clientHost = 3;
+    attributes.clientOrigin = 3;
 
     ContactVerificationRequest.validate(attributes, function(errors, attributes) {
       if (!errors) {
         done(new Error('No errors returned by validate'));
       } else {
-        assert.equal(errors[0].message, 'Invalid clientHost value');
+        assert.equal(errors[0].message, 'Invalid clientOrigin value');
         done();
       }
     });
@@ -234,9 +234,9 @@ describe('new contactVerificationRequest', function() {
       assert.equal(newAttributes.contact, attributes.contact);
       assert.equal(newAttributes.code, attributes.code);
       assert.equal(newAttributes.createUser, attributes.createUser);
-      assert.equal(newAttributes.createSession, attributes.createSession);
+      assert.equal(newAttributes.authenticateSession, attributes.authenticateSession);
       assert.equal(newAttributes.createNotificationRequests[0].event, attributes.createNotificationRequests[0].event);
-      assert.equal(newAttributes.clientHost, attributes.clientHost);
+      assert.equal(newAttributes.clientOrigin, attributes.clientOrigin);
       assert.equal(typeof newAttributes.foo, 'undefined');
       done();
     });
