@@ -1,5 +1,6 @@
+*.env
+*.sublime-workspace
 .DS_Store
-sync.sublime-workspace
 logs/
 node_modules/
 npm-debug.log

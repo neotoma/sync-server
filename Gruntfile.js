@@ -16,10 +16,11 @@ module.exports = function(grunt) {
       main: {
         options: {
           exclude: [
-            ".DS_Store",
-            ".git",
-            "node_modules",
-            "*.sublime*"
+            '.DS_Store',
+            '.git',
+            'node_modules',
+            '*.sublime*',
+            '*.env'
           ],
           recursive: true,
           src: './',

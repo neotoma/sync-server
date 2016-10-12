@@ -1,12 +1,24 @@
 var logger = require('../lib/logger');
+var cors = require('cors');
+
+var origins = [
+  'http://' + process.env.SYNC_WEB_HOST, 
+  'https://' + process.env.SYNC_WEB_HOST
+];
+
+var corsOptions = {
+  allowedHeaders: 'Content-Type',
+  credentials: true,
+  methods: 'GET,PUT,POST,DELETE',
+  origin: function(origin, callback) {
+    var whitelisted = (origins.indexOf(origin) !== -1);
+    callback(whitelisted ? null : 'Bad Request', whitelisted);
+  }
+};
 
 module.exports = function(app) {
-  app.all('/*', function(req, res, next) {
+  app.all('/*', cors(corsOptions), function(req, res, next) {
     logger.info('App received request', { path: req.path, ip: req.ip });
-    res.header('Access-Control-Allow-Origin', 'https://' + process.env.SYNC_WEB_HOST);
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
-    res.header('Access-Control-Allow-Credentials', 'true');
     next();
   });
 
