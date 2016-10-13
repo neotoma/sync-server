@@ -165,7 +165,7 @@ describe('PUT /contactVerificationRequests/:id', function() {
     });
   });
 
-  it('throws 500 errror properly for contactVerificationRequest with authenticateSession and no preexisting user with email', function(done) {
+  it('throws 500 error properly for contactVerificationRequest with authenticateSession and no preexisting user with email', function(done) {
     var attributes = {
       'method': 'email',
       'contact': 'example@example.com',

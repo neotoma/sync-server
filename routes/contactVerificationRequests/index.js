@@ -52,7 +52,10 @@ module.exports = function(app) {
                 return res.status(500).send(genericErrorCopy);
               }
 
-              logger.info('App sent email for new contactVerificationRequest');
+              logger.milestone('App sent email for new contactVerificationRequest', {
+                contactVerificationRequestId: contactVerificationRequest.id,
+                to: contactVerificationRequest.contact
+              });
 
               req.body.id = contactVerificationRequest.id;
 
@@ -186,11 +189,22 @@ module.exports = function(app) {
           }
         };
 
-        async.waterfall([createUser, createNotificationRequests, authenticateSession], function(error) {
+        async.waterfall([createUser, createNotificationRequests, authenticateSession], function(error, user) {
           if (error) {
             logger.error(error.message);
             res.status(500).send(error.message);
           } else {
+            var meta = {
+              contactVerificationRequestId: contactVerificationRequest.id
+            };
+
+            if (user) {
+              meta.userId = user.id;
+              meta.userEmail = user.email;
+            }
+
+            logger.milestone('App verified contactVerificationRequest', meta);
+
             res.json({
               'data': {
                 'type': 'contactVerificationRequest',

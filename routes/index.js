@@ -11,8 +11,12 @@ var corsOptions = {
   credentials: true,
   methods: 'GET,PUT,POST,DELETE',
   origin: function(origin, callback) {
-    var whitelisted = (origins.indexOf(origin) !== -1);
-    callback(whitelisted ? null : 'Bad Request', whitelisted);
+    if (origin) {
+      var whitelisted = (origins.indexOf(origin) !== -1);
+      callback(whitelisted ? null : 'Bad Request', whitelisted);
+    } else {
+      callback(null, true);
+    }
   }
 };
 

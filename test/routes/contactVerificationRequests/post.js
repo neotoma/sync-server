@@ -122,7 +122,9 @@ describe('POST /contactVerificationRequests', function() {
       };
 
       var testMailDelivery = function(done) {
-        assert(mailer.sendMail.calledOnce);
+        assert(mailer.sendMail.firstCall.calledWith(sinon.match({
+          to: 'example@example.com'
+        })));
         done();
       }
 
