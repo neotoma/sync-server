@@ -31,12 +31,34 @@ describe('new userStorageAuth', function() {
     assert.equal(this.userStorageAuth.storageUserId, userStorageAuthAttributes.storageUserId);
   });
 
-  it('can save and have id', function(done) {
+  it('can save and have id, timestamps', function(done) {
+    var self = this;
     var userStorageAuth = this.userStorageAuth;
+
     this.userStorageAuth.save(function(error) {
       assert.equal(typeof userStorageAuth.id, 'string');
+      assert(userStorageAuth.createdAt);
+      assert(userStorageAuth.updatedAt);
+
+      self._id = userStorageAuth._id;
+      self.createdAt = userStorageAuth.createdAt;
+      self.updatedAt = userStorageAuth.updatedAt;
+
       done(error);
     });
+  });
+
+  it('has toObject', function() {
+    var object = this.userStorageAuth.toObject();
+    assert.equal(object.id, this._id);
+    assert.equal(object.userId, userStorageAuthAttributes.userId);
+    assert.equal(object.sourceId, userStorageAuthAttributes.sourceId);
+    assert.equal(object.sourceToken, userStorageAuthAttributes.sourceToken);
+    assert.equal(object.sourceUserId, userStorageAuthAttributes.sourceUserId);
+
+    // Hack: asserts failing on equivalency without use of toString()
+    assert.equal(object.createdAt.toString(), this.createdAt.toString());
+    assert.equal(object.updatedAt.toString(), this.updatedAt.toString());
   });
 
   it('can be found with findOrCreate', function(done) {

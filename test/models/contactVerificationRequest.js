@@ -57,12 +57,39 @@ describe('new contactVerificationRequest', function() {
     assert.equal(this.contactVerificationRequest.verified, contactVerificationRequestAttributes.verified);
   });
 
-  it('can save and have id', function(done) {
+  it('can save and have id, timestamps', function(done) {
+    var self = this;
     var contactVerificationRequest = this.contactVerificationRequest;
+
     this.contactVerificationRequest.save(function(error) {
       assert.equal(typeof contactVerificationRequest.id, 'string');
+      assert(contactVerificationRequest.createdAt);
+      assert(contactVerificationRequest.updatedAt);
+
+      self._id = contactVerificationRequest._id;
+      self.createdAt = contactVerificationRequest.createdAt;
+      self.updatedAt = contactVerificationRequest.updatedAt;
+
       done(error);
     });
+  });
+
+  it('has toObject', function() {
+    var object = this.contactVerificationRequest.toObject();
+    assert.equal(object.id, this._id);
+    assert.equal(object.method, contactVerificationRequestAttributes.method);
+    assert.equal(object.contact, contactVerificationRequestAttributes.contact);
+    assert.equal(object.code, contactVerificationRequestAttributes.code);
+    assert.equal(object.createUser, contactVerificationRequestAttributes.createUser);
+    assert.equal(object.authenticateSession, contactVerificationRequestAttributes.authenticateSession);
+    assert.equal(object.createNotificationRequests[0].event, contactVerificationRequestAttributes.createNotificationRequests[0].event);
+    assert.equal(object.clientOrigin, contactVerificationRequestAttributes.clientOrigin);
+    assert.equal(object.verified, contactVerificationRequestAttributes.verified);
+    assert.equal(object.userId, contactVerificationRequestAttributes.userId);
+
+    // Hack: asserts failing on equivalency without use of toString()
+    assert.equal(object.createdAt.toString(), this.createdAt.toString());
+    assert.equal(object.updatedAt.toString(), this.updatedAt.toString());
   });
 
   it('can be found with findOrCreate', function(done) {

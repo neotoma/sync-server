@@ -31,12 +31,34 @@ describe('new userSourceAuth', function() {
     assert.equal(this.userSourceAuth.sourceUserId, userSourceAuthAttributes.sourceUserId);
   });
 
-  it('can save and have id', function(done) {
+  it('can save and have id, timestamps', function(done) {
+    var self = this;
     var userSourceAuth = this.userSourceAuth;
+
     this.userSourceAuth.save(function(error) {
       assert.equal(typeof userSourceAuth.id, 'string');
+      assert(userSourceAuth.createdAt);
+      assert(userSourceAuth.updatedAt);
+
+      self._id = userSourceAuth._id;
+      self.createdAt = userSourceAuth.createdAt;
+      self.updatedAt = userSourceAuth.updatedAt;
+
       done(error);
     });
+  });
+
+  it('has toObject', function() {
+    var object = this.userSourceAuth.toObject();
+    assert.equal(object.id, this._id);
+    assert.equal(object.userId, userSourceAuthAttributes.userId);
+    assert.equal(object.sourceId, userSourceAuthAttributes.sourceId);
+    assert.equal(object.sourceToken, userSourceAuthAttributes.sourceToken);
+    assert.equal(object.sourceUserId, userSourceAuthAttributes.sourceUserId);
+
+    // Hack: asserts failing on equivalency without use of toString()
+    assert.equal(object.createdAt.toString(), this.createdAt.toString());
+    assert.equal(object.updatedAt.toString(), this.updatedAt.toString());
   });
 
   it('can be found with findOrCreate', function(done) {
