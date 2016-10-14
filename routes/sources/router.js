@@ -37,9 +37,9 @@ module.exports = function(app, source) {
     logger.trace('authenticating ' + sourceId + ' user', { source_userId: profile.id });
 
     UserSourceAuth.findOrCreate({
-      userId:          req.user.id,
-      sourceId:        sourceId,
-      sourceUserId:   profile.id
+      userId: req.user.id,
+      sourceId: sourceId,
+      sourceUserId: profile.id
     }, function(error, userSourceAuth) {
       if (error) {
         logger.error('failed to find or create user source auth', { 

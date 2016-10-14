@@ -1,10 +1,10 @@
 var ModelFactory = require('../factories/model');
 
 module.exports = ModelFactory.new('status', {
-  userId: String,
-  storageId: String,
-  sourceId: String,
-  contentTypeId: String,
+  userId: { type: String, required: true },
+  storageId: { type: String, required: true },
+  sourceId: { type: String, required: true },
+  contentTypeId: { type: String, required: true },
   totalItemsAvailable: Number,
   totalItemsSynced: Number,
   totalItemsPending: Number,

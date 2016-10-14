@@ -51,12 +51,39 @@ describe('new status', function() {
     assert.equal(this.status.lastSyncedItemId, statusAttributes.lastSyncedItemId);
   });
 
-  it('can save and have id', function(done) {
+  it('can save and have id, timestamps', function(done) {
+    var self = this;
     var status = this.status;
+
     this.status.save(function(error) {
       assert.equal(typeof status.id, 'string');
+      assert(status.createdAt);
+      assert(status.updatedAt);
+
+      self._id = status._id;
+      self.createdAt = status.createdAt;
+      self.updatedAt = status.updatedAt;
+
       done(error);
     });
+  });
+
+  it('has toObject', function() {
+    var object = this.status.toObject();
+
+    assert.equal(object.id, this._id);
+    assert.equal(object.userId, statusAttributes.userId);
+    assert.equal(object.storageId, statusAttributes.storageId);
+    assert.equal(object.sourceId, statusAttributes.sourceId);
+    assert.equal(object.contentTypeId, statusAttributes.contentTypeId);
+    assert.equal(object.totalItemsAvailable, statusAttributes.totalItemsAvailable);
+    assert.equal(object.totalItemsSynced, statusAttributes.totalItemsSynced);
+    assert.equal(object.totalItemsPending, statusAttributes.totalItemsPending);
+    assert.equal(object.lastSyncedItemId, statusAttributes.lastSyncedItemId);
+
+    // Hack: asserts failing on equivalency without use of toString()
+    assert.equal(object.createdAt.toString(), this.createdAt.toString());
+    assert.equal(object.updatedAt.toString(), this.updatedAt.toString());
   });
 
   it('can be found with findOrCreate', function(done) {

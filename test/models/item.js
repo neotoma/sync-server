@@ -78,10 +78,32 @@ describe('new item', function() {
     assert.equal(this.item.data, itemAttributes.data);
   });
 
-  it('can save and have id', function(done) {
+  it('has toObject', function() {
+    var object = this.item.toObject();
+    assert.equal(object.userId, itemAttributes.userId);
+    assert.equal(object.storageId, itemAttributes.storageId);
+    assert.equal(object.sourceId, itemAttributes.sourceId);
+    assert.equal(object.sourceItemId, itemAttributes.sourceItemId);
+    assert.equal(object.contentTypeId, itemAttributes.contentTypeId);
+
+    // Hack: asserts failing on equivalency without use of toString()
+    assert.equal(object.syncAttemptedAt.toString(), itemAttributes.syncAttemptedAt.toString());
+    assert.equal(object.syncVerifiedAt.toString(), itemAttributes.syncVerifiedAt.toString());
+    assert.equal(object.syncFailedAt.toString(), itemAttributes.syncFailedAt.toString());
+
+    assert.equal(object.bytes, itemAttributes.bytes);
+    assert.equal(object.path, itemAttributes.path);
+    assert.equal(object.description, itemAttributes.description);
+    assert.equal(object.error, itemAttributes.error);
+    assert.equal(object.data.foo, itemAttributes.data.foo);
+  });
+
+  it('can save and have id, timestamps', function(done) {
     var item = this.item;
     this.item.save(function(error) {
       assert.equal(typeof item.id, 'string');
+      assert(item.createdAt);
+      assert(item.updatedAt);
       done(error);
     });
   });

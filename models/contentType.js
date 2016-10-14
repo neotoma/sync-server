@@ -1,6 +1,6 @@
 var pluralize = require('pluralize');
-var prototype = require('../lib/prototypes/array');
-var prototype = require('../lib/prototypes/string');
+require('../lib/prototypes/array');
+require('../lib/prototypes/string');
 
 module.exports = function ContentType(id) {
   this.id = id;

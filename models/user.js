@@ -1,7 +1,7 @@
 var ModelFactory = require('../factories/model');
 
 module.exports = ModelFactory.new('user', {
-  name: String,
-  email: String,
-  admin: Boolean
+  admin: { type: Boolean, default: false },
+  email: { type: String, required: true },
+  name: String
 });
