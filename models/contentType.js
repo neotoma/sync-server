@@ -21,12 +21,17 @@ module.exports = function ContentType(id) {
       }).clean();
     }
 
-    return {
+    var object = {
       id: this.id,
       pluralId: this.pluralId,
       name: this.name,
-      pluralName: this.pluralName,
-      sourceIds: sourceIds
+      pluralName: this.pluralName
     };
+
+    if (sourceIds) {
+      object.sourceIds = sourceIds;
+    }
+
+    return object;
   };
 }

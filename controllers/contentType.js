@@ -1,17 +1,17 @@
 var ContentType = require('../models/contentType');
 
 module.exports = {
-  toObject: function(sources) {
-    var contentTypeIds = [
-      'checkin',
-      'friend',
-      'image',
-      'tip',
-      'video'
-    ];
+  supportedIds: [
+    'checkin',
+    'friend',
+    'image',
+    'tip',
+    'video'
+  ],
 
+  toObject: function(sources) {
     var contentTypeObjects = [];
-    contentTypeIds.forEach(function(contentTypeId) {
+    this.supportedIds.forEach(function(contentTypeId) {
       contentTypeObjects.push(new ContentType(contentTypeId).toObject(sources));
     });
 

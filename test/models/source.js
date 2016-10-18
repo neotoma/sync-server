@@ -1,6 +1,7 @@
 var assert = require('assert');
 var async = require('async');
 var Source = require('../../models/source');
+var sourceFactory = require('../factories/source');
 var ContentType = require('../../models/contentType');
 var UserSourceAuth = require('../../models/userSourceAuth');
 
@@ -33,8 +34,12 @@ describe('source module', function() {
 });
 
 describe('new source', function() {
-  before(function() {
-    this.source = new Source(sourceAttributes);
+  before(function(done) {
+    var self = this;
+    sourceFactory.makeOne(sourceAttributes, null, function(error, source) {
+      self.source = source;
+      done();
+    });
   });
 
   it('has id', function() {
