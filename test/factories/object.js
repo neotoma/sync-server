@@ -10,7 +10,7 @@ module.exports = function(Model, defaultAttributes) {
 
     n = (typeof n !== 'undefined') ? n : '';
 
-    if (!attributes) {
+    if (typeof attributes === 'undefined') {
       attributes = defaultAttributes;
       
       Object.keys(attributes).forEach(function(key) {
@@ -20,7 +20,11 @@ module.exports = function(Model, defaultAttributes) {
       });
     }
 
-    done(null, new Model(attributes));
+    try {
+      done(null, new Model(attributes));
+    } catch (error) {
+      done(error);
+    }
   };
 
   factory.createMany = function(n, done) {
@@ -35,7 +39,7 @@ module.exports = function(Model, defaultAttributes) {
     }
 
     var createOne = function(n, next) {
-      self.createOne(next, null, n);
+      self.createOne(next, undefined, n);
     };
 
     async.times(n, createOne, function(error, object) {
