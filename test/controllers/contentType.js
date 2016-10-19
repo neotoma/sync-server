@@ -20,7 +20,7 @@ describe('contentTypes controller', function() {
   });
 
   it('has toObject with sources', function(done) {
-    var sources = sourceFactory.makeMany(5, function(error, sources) {
+    var sources = sourceFactory.createMany(5, function(error, sources) {
       sources.forEach(function(source) {
         var contentType = new ContentType(controller.supportedIds[0]);
         source.contentTypes = [contentType];

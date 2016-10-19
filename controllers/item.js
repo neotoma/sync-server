@@ -1,3 +1,4 @@
+require('../lib/prototypes/object.js');
 var logger = require('../lib/logger');
 var Status = require('../models/status');
 var Item = require('../models/item');
@@ -5,26 +6,8 @@ var UserSourceAuth = require('../models/userSourceAuth');
 var UserStorageAuth = require('../models/userStorageAuth');
 var https = require('https');
 var async = require('async');
-var itemController = {};
-
 var fs = require('fs');
-
-Object.byString = function(o, s) {
-  // From: http://stackoverflow.com/questions/6491463/accessing-nested-javascript-objects-with-string-key
-
-  s = s.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
-  s = s.replace(/^\./, '');           // strip a leading dot
-  var a = s.split('.');
-  for (var i = 0, n = a.length; i < n; ++i) {
-      var k = a[i];
-      if (k in o) {
-          o = o[k];
-      } else {
-          return;
-      }
-  }
-  return o;
-}
+var itemController = {};
 
 itemController.syncAllForAllContentTypes = function(app, user, storage, source) {
   var self = this;
@@ -185,7 +168,7 @@ itemController.syncPage = function(app, user, storage, source, contentType, pagi
                 total: itemsJSON.length
               });
 
-              if (pagination.offset == 0) {
+              if (pagination.offset === 0) {
                 if (typeof dataJSON.response !== 'undefined') {
                   status.totalItemsAvailable = dataJSON.response[contentType.pluralId].count;
                 }
@@ -452,7 +435,7 @@ itemController.getFile = function(url, callback) {
   var parsedUrl = require('url').parse(url);
   var contentType;
 
-  if (extension == 'jpg') {
+  if (extension === 'jpg') {
     contentType = 'image/jpeg';
   } else {
     contentType = 'application/json';
@@ -475,7 +458,7 @@ itemController.getFile = function(url, callback) {
 
     var data = '';
 
-    if (extension == 'jpg') {
+    if (extension === 'jpg') {
       res.setEncoding('binary');
     }
 
@@ -500,7 +483,7 @@ itemController.storeFile = function(user, storage, path, data, encoding, callbac
   var extension = path.split('.').pop();
   var contentType;
 
-  if (extension == 'jpg') {
+  if (extension === 'jpg') {
     contentType = 'image/jpeg';
   } else {
     contentType = 'application/json';
@@ -515,7 +498,7 @@ itemController.storeFile = function(user, storage, path, data, encoding, callbac
       return callback(error);
     }
 
-    if (encoding == 'binary') {
+    if (encoding === 'binary') {
       fs.writeFile('/Users/markhendrickson/Desktop/binary/1.jpg', data, 'binary', function(error) {
         if (error) { 
           logger.error('failed to write binary file to disk');
@@ -536,7 +519,7 @@ itemController.storeFile = function(user, storage, path, data, encoding, callbac
 
     try {
       var req = https.request(options, function(res) {
-        if (res.statusCode == 401) {
+        if (res.statusCode === 401) {
           return callback(new Error('unauthorized request'));
         }
 
@@ -553,7 +536,7 @@ itemController.storeFile = function(user, storage, path, data, encoding, callbac
         return callback(error);
       });
 
-      if (encoding == 'utf8') {
+      if (encoding === 'utf8') {
         data = JSON.stringify(data);
       }
 

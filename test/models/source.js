@@ -36,10 +36,10 @@ describe('source module', function() {
 describe('new source', function() {
   before(function(done) {
     var self = this;
-    sourceFactory.makeOne(sourceAttributes, null, function(error, source) {
+    sourceFactory.createOne(function(error, source) {
       self.source = source;
       done();
-    });
+    }, sourceAttributes);
   });
 
   it('has id', function() {
