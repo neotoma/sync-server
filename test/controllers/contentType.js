@@ -1,10 +1,10 @@
 var config = require('../config');
 var assert = require('assert');
 var controller = require('../../controllers/contentType');
-var sourceFactory = require('../factories/source');
+var SourceFactory = require('../factories/source');
 var ContentType = require('../../models/contentType');
 
-describe('contentTypes controller', function() {
+describe('contentType controller', function() {
   it('has supportedIds', function() {
     assert(controller.supportedIds.length);
   });
@@ -20,7 +20,7 @@ describe('contentTypes controller', function() {
   });
 
   it('has toObject with sources', function(done) {
-    var sources = sourceFactory.createMany(5, function(error, sources) {
+    var sources = SourceFactory.createMany(5, function(error, sources) {
       sources.forEach(function(source) {
         var contentType = new ContentType(controller.supportedIds[0]);
         source.contentTypes = [contentType];

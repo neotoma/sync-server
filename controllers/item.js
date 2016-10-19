@@ -1,4 +1,5 @@
 require('../lib/prototypes/object.js');
+require('../lib/prototypes/string.js');
 var logger = require('../lib/logger');
 var Status = require('../models/status');
 var Item = require('../models/item');
@@ -393,7 +394,7 @@ itemController.storeItem = function(app, user, storage, source, contentType, ite
   };
 
   var path = '/' + contentType.pluralId + '/raw-synced-meta/' + item.id + '.json';
-  this.storeFile(user, storage, path, item.data, 'utf8', storeCallback);
+  this.storeFile(user, storage, path, item.data, storeCallback);
 
   if (typeof source.itemAssetLinks !== 'undefined') {
     for (var key in source.itemAssetLinks) {
@@ -410,7 +411,7 @@ itemController.storeItem = function(app, user, storage, source, contentType, ite
           callback(error);
         } else {
           var path = '/' + contentType.pluralId + '/' + item.id + '.' + extension;
-          self.storeFile(user, storage, path, data, 'binary', function(error, response) {
+          self.storeFile(user, storage, path, data, function(error, response) {
             if (error) {
               logger.error('failed to store item asset', {
                 item_id: item.id,
@@ -479,33 +480,80 @@ itemController.getFile = function(url, callback) {
   });
 }
 
-itemController.storeFile = function(user, storage, path, data, encoding, callback) {
-  var extension = path.split('.').pop();
-  var contentType;
+itemController.storeFile = function(user, storage, path, data, done) {
+  if (!user) {
+    throw new Error('Parameter user undefined or null');
+  }
 
-  if (extension === 'jpg') {
-    contentType = 'image/jpeg';
-  } else {
-    contentType = 'application/json';
+  if (!user.id) {
+    throw new Error('Parameter user has no id property');
+  }
+
+  if (!storage) {
+    throw new Error('Parameter storage undefined or null');
+  }
+
+  if (!storage.id) {
+    throw new Error('Parameter storage has no id property');
+  }
+
+  if (!storage.host) {
+    throw new Error('Parameter storage has no host property');
+  }
+
+  if (!storage.path) {
+    throw new Error('Parameter storage has no path property');
+  }
+
+  if (typeof storage.path !== 'function') {
+    throw new Error('Property path of storage not a function');
+  }
+
+  if (!path) {
+    throw new Error('Parameter path undefined or null');
+  }
+
+  if (typeof path !== 'string') {
+    throw new Error('Parameter path not a string');
+  }
+
+  if (path.split('.').length > 2) {
+    throw new Error('Parameter path has more than one period');
+  }
+
+  var extension = path.split('.').pop();
+  var mimeTypes = {
+    jpg: 'image/jpeg',
+    json: 'application/json'
+  }
+
+  if (!extension || extension === path) {
+    throw new Error('Parameter path lacks extension');
+  }
+
+  if (!mimeTypes[extension]) {
+    throw new Error('Parameter path extension indicates unsupported MIME type');
+  }
+
+  if (!data) {
+    throw new Error('Parameter data undefined or null');
+  }
+
+  if (typeof data !== 'object' && !(data instanceof Buffer)) {
+    throw new Error('Parameter data not an object or buffer');
+  }
+
+  if (typeof done !== 'function') {
+    throw new Error('Parameter done not a function');
   }
 
   UserStorageAuth.findOne({
     storageId: storage.id,
-    userId:    user.id
+    userId: user.id
   }, function(error, userStorageAuth) {
     if (error) {
-      logger.error('failed to retrieve userStorageAuth for user while storing file');
-      return callback(error);
-    }
-
-    if (encoding === 'binary') {
-      fs.writeFile('/Users/markhendrickson/Desktop/binary/1.jpg', data, 'binary', function(error) {
-        if (error) { 
-          logger.error('failed to write binary file to disk');
-        } else {
-          logger.trace('wrote binary file to disk');
-        }
-      });
+      logger.error('Item controller failed to retrieve userStorageAuth for user while storing file');
+      return done(error);
     }
 
     var options = {
@@ -513,37 +561,54 @@ itemController.storeFile = function(user, storage, path, data, encoding, callbac
       path: storage.path(path, userStorageAuth),
       method: 'PUT',
       headers: {
-        'Content-Type': contentType
+        'Content-Type': mimeTypes[extension]
       }
     };
 
     try {
       var req = https.request(options, function(res) {
-        if (res.statusCode === 401) {
-          return callback(new Error('unauthorized request'));
+        try {
+          if (res.statusCode === 401) {
+            throw new Error('failed to store file because of unauthorized request to storage');
+          } else if ([200, 201, 202].indexOf(res.statusCode) === -1) {
+            throw new Error('failed to confirm storage of file with indicative status code from storage');
+          }
+        } catch (error) {
+          logger.error('Item controller ' + error.message.capitalizeFirstLetter(), {
+            storageId: storage.id,
+            userId: user.id,
+            path: path
+          });
+          
+          return done(error.message);
         }
 
-        var data = '';
+        var resData = '';
 
         res.on('data', function(chunk) {
-          data += chunk;
+          resData += chunk;
         });
 
         res.on('end', function() {
-          callback(null, data);
+          done(null, resData);
         });
       }).on('error', function(error) {
-        return callback(error);
+        return done(error);
       });
 
-      if (encoding === 'utf8') {
+      if (!(data instanceof Buffer)) {
         data = JSON.stringify(data);
       }
 
       req.write(data);
       req.end();
     } catch (error) {
-      return callback(error);
+      logger.error(error.message, {
+        storageId: storage.id,
+        userId: user.id,
+        path: path
+      });
+      return done(error);
     }
   });
 }

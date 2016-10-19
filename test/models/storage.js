@@ -143,18 +143,20 @@ describe('new storage', function() {
   });
 
   it('returns expected path when attributes.path defined on creation', function(done) {
+    var self = this;
+
     StorageFactory.createOne(function(error, storage) {
       try {
-        assert.equal(storage.path('i', 'like'), 'i like hamburger');
+        assert.equal(storage.path('/this/is/a/path', self.userStorageAuth), '/now/this/is/a/path?token=userStorageAuthStorageToken');
         done(error);
       } catch (error) {
         done(error);
       }
     }, {
-      id: 'drivey',
+      id: 'drivey', 
       host: 'drivey.example.com',
-      path: function(turkey, sandwich) {
-        return turkey + ' ' + sandwich + ' hamburger';
+      path: function(path, userStorageAuth) {
+        return '/now' + path + '?token=' + userStorageAuth.storageToken;
       }
     });
   });
