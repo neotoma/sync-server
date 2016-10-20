@@ -5,14 +5,17 @@ var controller = require('../../controllers/item');
 var StorageFactory = require('../factories/storage');
 var UserFactory = require('../factories/user');
 var UserStorageAuth = require('../../models/userStorageAuth');
+var StorageNock = require('../nocks/storage');
 
 describe('item controller', function() {
   describe('storeFile method', function() {
     before(function(done) {
       var self = this;
 
-      this.path = 'foo.json';
+      this.jsonPath = 'foo.json';
       this.jsonData = { foo: 'bar' };
+
+      this.bufferPath = 'foo.jpg';
       this.bufferData = Buffer.from([0x62, 0x75, 0x66, 0x66, 0x65, 0x72]);
       
       var createStorage = function(done) {
@@ -40,6 +43,8 @@ describe('item controller', function() {
           storageToken: 'userStorageAuthStorageToken',
           storageUserId: 'userStorageAuthUserId'
         }, function(error, userStorageAuth) {
+          self.userStorageAuth = userStorageAuth;
+          StorageNock(self.storage, userStorageAuth);
           done(error);
         });
       });
@@ -47,7 +52,7 @@ describe('item controller', function() {
 
     it('throws error if no user parameter provided', function(done) {
       try {
-        controller.storeFile(undefined, this.storage, this.path, this.jsonData, function(error, data) {
+        controller.storeFile(undefined, this.storage, this.jsonPath, this.jsonData, function(error, data) {
           done(new Error('Error not thrown by method'));
         });
       } catch (error) {
@@ -58,7 +63,7 @@ describe('item controller', function() {
 
     it('throws error if user parameter has no id property', function(done) {
       try {
-        controller.storeFile({ foo: 'bar' }, this.storage, this.path, this.jsonData, function(error, data) {
+        controller.storeFile({ foo: 'bar' }, this.storage, this.jsonPath, this.jsonData, function(error, data) {
           done(new Error('Error not thrown by method'));
         });
       } catch (error) {
@@ -69,7 +74,7 @@ describe('item controller', function() {
 
     it('throws error if no storage parameter provided', function(done) {
       try {
-        controller.storeFile(this.user, undefined, this.path, this.jsonData, function(error, data) {
+        controller.storeFile(this.user, undefined, this.jsonPath, this.jsonData, function(error, data) {
           done(new Error('Error not thrown by method'));
         });
       } catch (error) {
@@ -80,7 +85,7 @@ describe('item controller', function() {
 
     it('throws error if storage parameter has no id property', function(done) {
       try {
-        controller.storeFile(this.user, { foo: 'bar' }, this.path, this.jsonData, function(error, data) {
+        controller.storeFile(this.user, { foo: 'bar' }, this.jsonPath, this.jsonData, function(error, data) {
           done(new Error('Error not thrown by method'));
         });
       } catch (error) {
@@ -91,7 +96,7 @@ describe('item controller', function() {
 
     it('throws error if storage parameter has no host property', function(done) {
       try {
-        controller.storeFile(this.user, { id: 'bar' }, this.path, this.jsonData, function(error, data) {
+        controller.storeFile(this.user, { id: 'bar' }, this.jsonPath, this.jsonData, function(error, data) {
           done(new Error('Error not thrown by method'));
         });
       } catch (error) {
@@ -102,7 +107,7 @@ describe('item controller', function() {
 
     it('throws error if storage parameter has no path property', function(done) {
       try {
-        controller.storeFile(this.user, { id: 'bar', host: 'weee' }, this.path, this.jsonData, function(error, data) {
+        controller.storeFile(this.user, { id: 'bar', host: 'weee' }, this.jsonPath, this.jsonData, function(error, data) {
           done(new Error('Error not thrown by method'));
         });
       } catch (error) {
@@ -113,7 +118,7 @@ describe('item controller', function() {
 
     it('throws error if path property of storage parameter not function', function(done) {
       try {
-        controller.storeFile(this.user, { id: 'bar', host: 'weee', path: 3 }, this.path, this.jsonData, function(error, data) {
+        controller.storeFile(this.user, { id: 'bar', host: 'weee', path: 3 }, this.jsonPath, this.jsonData, function(error, data) {
           done(new Error('Error not thrown by method'));
         });
       } catch (error) {
@@ -190,7 +195,7 @@ describe('item controller', function() {
 
     it('throws error if no data parameter provided', function(done) {
       try {
-        controller.storeFile(this.user, this.storage, this.path, undefined, function(error, data) {
+        controller.storeFile(this.user, this.storage, this.jsonPath, undefined, function(error, data) {
           done(new Error('Error not thrown by method'));
         });
       } catch (error) {
@@ -201,7 +206,7 @@ describe('item controller', function() {
 
     it('throws error if data parameter not object or buffer', function(done) {
       try {
-        controller.storeFile(this.user, this.storage, this.path, 3, function(error, data) {
+        controller.storeFile(this.user, this.storage, this.jsonPath, 3, function(error, data) {
           done(new Error('Error not thrown by method'));
         });
       } catch (error) {
@@ -210,9 +215,31 @@ describe('item controller', function() {
       }
     });
 
+    it('throws error if jpg path matched with json data', function(done) {
+      try {
+        controller.storeFile(this.user, this.storage, this.bufferPath, this.jsonData, function(error, data) {
+          done(new Error('Error not thrown by method'));
+        });
+      } catch (error) {
+        assert.equal(error.message, 'Parameter extension jpg not provided with binary data');
+        done();
+      }
+    });
+
+    it('throws error if json path matched with buffer data', function(done) {
+      try {
+        controller.storeFile(this.user, this.storage, this.jsonPath, this.bufferData, function(error, data) {
+          done(new Error('Error not thrown by method'));
+        });
+      } catch (error) {
+        assert.equal(error.message, 'Parameter extension json not provided with parseable data');
+        done();
+      }
+    });
+
     it('throws error if done parameter not function', function(done) {
       try {
-        controller.storeFile(this.user, this.storage, this.path, this.jsonData, 3);
+        controller.storeFile(this.user, this.storage, this.jsonPath, this.jsonData, 3);
         done(new Error('Error not thrown by method'));
       } catch (error) {
         assert.equal(error.message, 'Parameter done not a function');
@@ -222,7 +249,7 @@ describe('item controller', function() {
 
     describe('with json data', function() {
       it('returns no error', function(done) {
-        controller.storeFile(this.user, this.storage, this.path, this.jsonData, function(error, data) {
+        controller.storeFile(this.user, this.storage, this.jsonPath, this.jsonData, function(error, data) {
           done(error);
         });
       });
@@ -230,8 +257,22 @@ describe('item controller', function() {
 
     describe('with buffer data', function() {
       it('returns no error', function(done) {
-        controller.storeFile(this.user, this.storage, this.path, this.bufferData, function(error, data) {
+        controller.storeFile(this.user, this.storage, this.bufferPath, this.bufferData, function(error, data) {
           done(error);
+        });
+      });
+    });
+
+    describe('with invalid userStorageAuth.storageToken', function() { 
+      it('throws unauthorized request error', function(done) {
+        var self = this;
+        this.userStorageAuth.storageToken = 'xxxxxxxxx';
+
+        this.userStorageAuth.save(function(error) {
+          controller.storeFile(self.user, self.storage, self.jsonPath, self.jsonData, function(error) {
+            assert.equal(error.message, 'Failed to store file because of unauthorized request to storage');
+            done();
+          });
         });
       });
     });

@@ -5,8 +5,8 @@ var Status = require('../models/status');
 var Item = require('../models/item');
 var UserSourceAuth = require('../models/userSourceAuth');
 var UserStorageAuth = require('../models/userStorageAuth');
-var https = require('https');
 var async = require('async');
+var request = require('request');
 var fs = require('fs');
 var itemController = {};
 
@@ -442,13 +442,22 @@ itemController.getFile = function(url, callback) {
     contentType = 'application/json';
   }
 
-  https.get({
+  request.get({
     hostname: parsedUrl.hostname,
     path: parsedUrl.path,
     headers: {
       'Content-Type': contentType
     }
-  }, function(res) {
+  }, function(error, res, body) {
+    if (error) {
+      logger.error('failed to get file', {
+        error: error,
+        url: url
+      });
+
+      return callback(error);
+    }
+
     if (res.statusCode != 200) {
       logger.error('failed to get file with status code 200', {
         url: url
@@ -457,26 +466,7 @@ itemController.getFile = function(url, callback) {
       return callback(new Error('failed to get file'));
     }
 
-    var data = '';
-
-    if (extension === 'jpg') {
-      res.setEncoding('binary');
-    }
-
-    res.on('data', function(chunk) {
-      data += chunk;
-    });
-
-    res.on('end', function() {
-      callback(null, data);
-    });
-  }).on('error', function(error) {
-    logger.error('failed to get file', {
-      error: error,
-      url: url
-    });
-
-    callback(error);
+    callback(null, body);
   });
 }
 
@@ -547,6 +537,12 @@ itemController.storeFile = function(user, storage, path, data, done) {
     throw new Error('Parameter done not a function');
   }
 
+  if (extension === 'jpg' && !(data instanceof Buffer)) {
+    throw new Error('Parameter extension jpg not provided with binary data');
+  } else if (extension == 'json' && (data instanceof Buffer)) {
+    throw new Error('Parameter extension json not provided with parseable data');
+  }
+
   UserStorageAuth.findOne({
     storageId: storage.id,
     userId: user.id
@@ -556,60 +552,48 @@ itemController.storeFile = function(user, storage, path, data, done) {
       return done(error);
     }
 
+    if (!(data instanceof Buffer)) {
+      data = JSON.stringify(data);
+    }
+
     var options = {
-      host: storage.host,
-      path: storage.path(path, userStorageAuth),
-      method: 'PUT',
+      url: 'https://' + storage.host + storage.path(path, userStorageAuth),
       headers: {
         'Content-Type': mimeTypes[extension]
-      }
+      },
+      body: data
     };
 
-    try {
-      var req = https.request(options, function(res) {
-        try {
-          if (res.statusCode === 401) {
-            throw new Error('failed to store file because of unauthorized request to storage');
-          } else if ([200, 201, 202].indexOf(res.statusCode) === -1) {
-            throw new Error('failed to confirm storage of file with indicative status code from storage');
-          }
-        } catch (error) {
-          logger.error('Item controller ' + error.message.capitalizeFirstLetter(), {
-            storageId: storage.id,
-            userId: user.id,
-            path: path
-          });
-          
-          return done(error.message);
-        }
-
-        var resData = '';
-
-        res.on('data', function(chunk) {
-          resData += chunk;
+    request.put(options, function(error, res, body) {
+      if (error) {
+        logger.error('Item controller failed to make https request while storing file', {
+          error: error,
+          storageId: storage.id,
+          userId: user.id,
+          path: path
         });
 
-        res.on('end', function() {
-          done(null, resData);
-        });
-      }).on('error', function(error) {
         return done(error);
-      });
-
-      if (!(data instanceof Buffer)) {
-        data = JSON.stringify(data);
       }
 
-      req.write(data);
-      req.end();
-    } catch (error) {
-      logger.error(error.message, {
-        storageId: storage.id,
-        userId: user.id,
-        path: path
-      });
-      return done(error);
-    }
+      try {
+        if (res.statusCode === 401) {
+          throw new Error('failed to store file because of unauthorized request to storage');
+        } else if ([200, 201, 202].indexOf(res.statusCode) === -1) {
+          throw new Error('failed to confirm storage of file with indicative status code from storage');
+        }
+      } catch (error) {
+        logger.error('Item controller ' + error.message, {
+          storageId: storage.id,
+          userId: user.id,
+          path: path
+        });
+
+        return done(new Error(error.message.capitalizeFirstLetter()));
+      }
+
+      done(null, body);
+    });
   });
 }
 
