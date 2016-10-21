@@ -10,6 +10,11 @@ var request = require('request');
 var fs = require('fs');
 var itemController = {};
 
+var supportedMimeTypes = {
+  jpg: 'image/jpeg',
+  json: 'application/json'
+}
+
 itemController.syncAllForAllContentTypes = function(app, user, storage, source) {
   var self = this;
 
@@ -431,42 +436,63 @@ itemController.storeItem = function(app, user, storage, source, contentType, ite
   }
 }
 
-itemController.getFile = function(url, callback) {
-  var extension = url.split('.').pop();
-  var parsedUrl = require('url').parse(url);
-  var contentType;
-
-  if (extension === 'jpg') {
-    contentType = 'image/jpeg';
-  } else {
-    contentType = 'application/json';
+itemController.getFile = function(url, done) {
+  if (!url) {
+    throw new Error('Parameter url undefined or null');
   }
 
-  request.get({
-    hostname: parsedUrl.hostname,
-    path: parsedUrl.path,
+  if (typeof url !== 'string') {
+    throw new Error('Parameter url not a string');
+  }
+
+  if (!done) {
+    throw new Error('Parameter done undefined or null');
+  }
+
+  if (typeof done !== 'function') {
+    throw new Error('Parameter done not a function');
+  }
+
+  var extension = url.split('.').pop();
+
+  if (!extension || extension === url) {
+    throw new Error('Parameter url has no extension');
+  }
+
+  if (!supportedMimeTypes[extension]) {
+    throw new Error('Parameter url extension indicates unsupported MIME type');
+  }
+
+  request({
+    url: url,
     headers: {
-      'Content-Type': contentType
+      'Content-Type': supportedMimeTypes[extension]
     }
   }, function(error, res, body) {
     if (error) {
-      logger.error('failed to get file', {
+      logger.error('Item controller failed to make request while getting file', {
         error: error,
         url: url
       });
 
-      return callback(error);
+      return done(error);
     }
 
-    if (res.statusCode != 200) {
-      logger.error('failed to get file with status code 200', {
+    try {
+      if (res.statusCode === 401) {
+        throw new Error('failed to get file because of unauthorized request');
+      } else if ([200, 201, 202].indexOf(res.statusCode) === -1) {
+        throw new Error('failed to get file');
+      }
+
+      done(null, body);
+    } catch (error) {
+      logger.error('Item controller ' + error.message, {
         url: url
       });
 
-      return callback(new Error('failed to get file'));
+      done(new Error(error.message.capitalizeFirstLetter()));
     }
-
-    callback(null, body);
   });
 }
 
@@ -512,16 +538,12 @@ itemController.storeFile = function(user, storage, path, data, done) {
   }
 
   var extension = path.split('.').pop();
-  var mimeTypes = {
-    jpg: 'image/jpeg',
-    json: 'application/json'
-  }
 
   if (!extension || extension === path) {
     throw new Error('Parameter path lacks extension');
   }
 
-  if (!mimeTypes[extension]) {
+  if (!supportedMimeTypes[extension]) {
     throw new Error('Parameter path extension indicates unsupported MIME type');
   }
 
@@ -559,14 +581,14 @@ itemController.storeFile = function(user, storage, path, data, done) {
     var options = {
       url: 'https://' + storage.host + storage.path(path, userStorageAuth),
       headers: {
-        'Content-Type': mimeTypes[extension]
+        'Content-Type': supportedMimeTypes[extension]
       },
       body: data
     };
 
     request.put(options, function(error, res, body) {
       if (error) {
-        logger.error('Item controller failed to make https request while storing file', {
+        logger.error('Item controller failed to make request while storing file', {
           error: error,
           storageId: storage.id,
           userId: user.id,
@@ -582,6 +604,8 @@ itemController.storeFile = function(user, storage, path, data, done) {
         } else if ([200, 201, 202].indexOf(res.statusCode) === -1) {
           throw new Error('failed to confirm storage of file with indicative status code from storage');
         }
+
+        done(null, body);
       } catch (error) {
         logger.error('Item controller ' + error.message, {
           storageId: storage.id,
@@ -591,8 +615,6 @@ itemController.storeFile = function(user, storage, path, data, done) {
 
         return done(new Error(error.message.capitalizeFirstLetter()));
       }
-
-      done(null, body);
     });
   });
 }

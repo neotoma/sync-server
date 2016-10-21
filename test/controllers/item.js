@@ -6,8 +6,131 @@ var StorageFactory = require('../factories/storage');
 var UserFactory = require('../factories/user');
 var UserStorageAuth = require('../../models/userStorageAuth');
 var StorageNock = require('../nocks/storage');
+var nock = require('nock');
+var url = require('url');
+
+var nockGet = function(requestUrl, responseBody, responseStatus) {
+  var urlObject = url.parse(requestUrl);
+  var hostname = urlObject.protocol + '//' + urlObject.host;
+  var status = responseStatus ? responseStatus : 200;
+  nock(hostname).get(urlObject.path).reply(responseStatus, responseBody);
+};
+
+var expectError = function(methodCall, errorMessage, done) {
+  try {
+    methodCall();
+    done(new Error('Error not thrown by method'));
+  } catch (error) {
+    assert.equal(error.message, errorMessage);
+    done();
+  }
+};
 
 describe('item controller', function() {
+  describe('getFile method', function() {
+    var method = function(params) {
+      controller.getFile(params[0], params[1]);
+    }
+
+    var jsonUrl = 'http://myhost/foo.json';
+    var jpegUrl = 'http://myhost/foo.jpg';
+    var jsonData = { foo: 'bar' };
+    var jpegData = Buffer.from([0x62, 0x75, 0x66, 0x66, 0x65, 0x72]);
+    var done = function(error, data) {};
+
+    var errorThrowTests = [{
+      desc: 'no url parameter provided',
+      params: [undefined, done],
+      msg: 'Parameter url undefined or null',
+    }, {
+      desc: 'url parameter not string',
+      params: [3, done],
+      msg: 'Parameter url not a string',
+    }, {
+      desc: 'url parameter has no extension',
+      params: ['foo', done],
+      msg: 'Parameter url has no extension',
+    }, {
+      desc: 'url parameter has unsupported extension',
+      params: ['foo.xyz', done],
+      msg: 'Parameter url extension indicates unsupported MIME type',
+    }, {
+      desc: 'no done parameter provided',
+      params: [jsonUrl, undefined],
+      msg: 'Parameter done undefined or null',
+    }, {
+      desc: 'done parameter not function',
+      params: [jsonUrl, 3],
+      msg: 'Parameter done not a function',
+    }];
+
+    errorThrowTests.forEach(function(test) {
+      it('throws error if ' + test.desc, function(done) {
+        try {
+          method(test.params);
+          done(new Error('Error not thrown by method'));
+        } catch (error) {
+          assert.equal(error.message, test.msg);
+          done();
+        }
+      });
+    });
+
+    it('returns json file content if provided valid url and callback', function(done) {
+      nockGet(jsonUrl, jsonData);
+
+      controller.getFile(jsonUrl, function(error, body) {
+        try {
+          assert.equal(JSON.parse(body).foo, jsonData.foo);
+          done(error);
+        } catch (error) {
+          done(error);
+        }
+      });
+    });
+
+    it('returns jpeg file content if provided valid url and callback', function(done) {
+      nockGet(jpegUrl, jpegData);
+
+      controller.getFile(jpegUrl, function(error, body) {
+        try {
+          assert.equal(body, 'buffer');
+          done(error);
+        } catch (error) {
+          done(error);
+        }
+      });
+    });
+
+    it('returns error if provided invalid url', function(done) {
+      var url = 'http://myhost/filedoesntexist.json';
+
+      nockGet(url, jsonData, 404);
+
+      controller.getFile(url, function(error, body) {
+        try {
+          assert.equal(error.message, 'Failed to get file');
+          done();
+        } catch (error) {
+          done(error);
+        }
+      });
+    });
+
+    it('returns error if provided url without authorization', function(done) {
+      nockGet(jsonUrl, jsonData, 401);
+
+      controller.getFile(jsonUrl, function(error, body) {
+        try {
+          assert.equal(error.message, 'Failed to get file because of unauthorized request');
+          done();
+        } catch (error) {
+          done(error);
+        }
+      });
+    });
+  });
+
   describe('storeFile method', function() {
     before(function(done) {
       var self = this;

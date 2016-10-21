@@ -4,7 +4,7 @@ module.exports = function(storage, userStorageAuth) {
   var storageNock = nock('https://' + storage.host);
 
   storageNock.persist().put(/.+/).query({
-    'access_token': userStorageAuth.storageToken
+    access_token: userStorageAuth.storageToken
   }).reply(function(url, body) {
     return [200, 'Success'];
   });
