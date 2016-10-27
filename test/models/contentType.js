@@ -1,10 +1,13 @@
+var db = require('../db');
 var assert = require('assert');
 var ContentType = require('../../models/contentType.js');
 var Source = require('../../models/source.js');
 
 describe('new contentType', function() {
+  before(db.clear);
+  
   before(function() {
-    this.contentType = new ContentType('widget');
+    this.contentType = new ContentType({ id: 'widget' });
   });
 
   it('has id', function() {
@@ -34,7 +37,7 @@ describe('new contentType', function() {
 
   describe('with sources', function() {
     before(function() {
-      var contentType2 = new ContentType('gizmo');
+      var contentType2 = new ContentType({ id: 'gizmo' });
       this.sources = [
         new Source({id: 'alpha'}),
         new Source({id: 'beta', contentTypes: [this.contentType, contentType2]}),

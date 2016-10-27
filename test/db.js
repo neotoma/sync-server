@@ -1,18 +1,23 @@
 process.env.NODE_ENV = 'test';
 var mongoose = require('../lib/mongoose');
+var warehouse = require('./warehouse');
 
-before(function (done) {
+var clear = function() {
   for (var i in mongoose.connection.collections) {
     mongoose.connection.collections[i].remove(function() {});
   }
-  return done();
+};
+
+before(function() {
+  clear();
 });
 
-after(function (done) {
+after(function(done) {
+  clear();
   mongoose.disconnect();
-  return done();
+  done();
 });
 
 module.exports = {
-  database: 'sync_test'
-}
+  clear: clear
+};

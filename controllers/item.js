@@ -19,7 +19,7 @@ itemController.syncAllForAllContentTypes = function(app, user, storage, source) 
   var self = this;
 
   try {
-    logger.info('started to sync all items for all content types', {
+    logger.trace('started to sync all items for all content types', {
       userId: user.id,
       storageId: storage.id,
       sourceId: source.id
@@ -41,7 +41,7 @@ itemController.syncAllForAllContentTypes = function(app, user, storage, source) 
 itemController.syncAll = function(app, user, storage, source, contentType) {
   var self = this;
 
-  logger.info('started to sync all items', {
+  logger.trace('started to sync all items', {
     userId: user.id,
     storageId: storage.id,
     sourceId: source.id,
@@ -485,6 +485,15 @@ itemController.getFile = function(url, done) {
         throw new Error('failed to get file');
       }
 
+      switch(supportedMimeTypes[extension]) {
+        case 'application/json':
+          body = JSON.parse(body);
+          break;
+        case 'image/jpeg':
+          body = new Buffer(body);
+          break;
+      }
+
       done(null, body);
     } catch (error) {
       logger.error('Item controller ' + error.message, {
@@ -569,53 +578,62 @@ itemController.storeFile = function(user, storage, path, data, done) {
     storageId: storage.id,
     userId: user.id
   }, function(error, userStorageAuth) {
-    if (error) {
-      logger.error('Item controller failed to retrieve userStorageAuth for user while storing file');
-      return done(error);
-    }
-
-    if (!(data instanceof Buffer)) {
-      data = JSON.stringify(data);
-    }
-
-    var options = {
-      url: 'https://' + storage.host + storage.path(path, userStorageAuth),
-      headers: {
-        'Content-Type': supportedMimeTypes[extension]
-      },
-      body: data
-    };
-
-    request.put(options, function(error, res, body) {
+    try {
       if (error) {
-        logger.error('Item controller failed to make request while storing file', {
-          error: error,
-          storageId: storage.id,
-          userId: user.id,
-          path: path
-        });
-
-        return done(error);
+        throw error;
+      } else if(!userStorageAuth) {
+        throw new Error('Item controller failed to retrieve userStorageAuth for user while storing file');
       }
 
-      try {
-        if (res.statusCode === 401) {
-          throw new Error('failed to store file because of unauthorized request to storage');
-        } else if ([200, 201, 202].indexOf(res.statusCode) === -1) {
-          throw new Error('failed to confirm storage of file with indicative status code from storage');
+      if (!(data instanceof Buffer)) {
+        data = JSON.stringify(data);
+      }
+
+      var options = {
+        url: 'https://' + storage.host + storage.path(path, userStorageAuth),
+        body: data,
+        headers: {
+          'Content-Type': supportedMimeTypes[extension]
+        }
+      };
+
+      request.put(options, function(error, res, body) {
+        if (error) {
+          logger.error('Item controller failed to make request while storing file', {
+            error: error,
+            storageId: storage.id,
+            userId: user.id,
+            path: path
+          });
+
+          return done(error);
         }
 
-        done(null, body);
-      } catch (error) {
-        logger.error('Item controller ' + error.message, {
-          storageId: storage.id,
-          userId: user.id,
-          path: path
-        });
+        try {
+          if (res.statusCode === 401) {
+            throw new Error('failed to store file because of unauthorized request to storage');
+          } else if ([200, 201, 202].indexOf(res.statusCode) === -1) {
+            throw new Error('failed to confirm storage of file with indicative status code from storage');
+          }
 
-        return done(new Error(error.message.capitalizeFirstLetter()));
-      }
-    });
+          done(null, body);
+        } catch (error) {
+          logger.error('Item controller ' + error.message, {
+            storageId: storage.id,
+            userId: user.id,
+            path: path
+          });
+
+          return done(new Error(error.message.capitalizeFirstLetter()));
+        }
+      });
+    } catch (error) {
+      logger.error(error.message, {
+        userId: user.id,
+        storageId: storage.id
+      });
+      return done(error);
+    }
   });
 }
 

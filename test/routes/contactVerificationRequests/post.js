@@ -1,5 +1,5 @@
+require('../../db');
 var async = require('async');
-var config = require('../../config');
 var assert = require('assert');
 var request = require('supertest');
 var sinon = require('sinon');

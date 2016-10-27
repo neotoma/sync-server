@@ -12,7 +12,7 @@ module.exports = {
   toObject: function(sources) {
     var contentTypeObjects = [];
     this.supportedIds.forEach(function(contentTypeId) {
-      contentTypeObjects.push(new ContentType(contentTypeId).toObject(sources));
+      contentTypeObjects.push(new ContentType({ id: contentTypeId }).toObject(sources));
     });
 
     return contentTypeObjects;

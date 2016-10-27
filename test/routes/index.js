@@ -1,5 +1,4 @@
-var config = require('../config');
-var assert = require('assert');
+require('../db');
 var request = require('supertest');
 var app = require('../../app');
 

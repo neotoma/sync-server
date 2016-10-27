@@ -1,15 +1,13 @@
-var ObjectFactory = require('./object');
-var Source = require('../../models/source');
 var ContentType = require('../../models/contentType');
 
-module.exports = new ObjectFactory(Source, {
+module.exports = require('./warehouse')('source', {
   id: 'megaplex',
   name: 'Megaplex',
   enabled: true,
   logoGlyphPath: '/images/logos/megaplex.svg',
   contentTypes: [
-    new ContentType('widget'),
-    new ContentType('gadget')
+    new ContentType({ id: 'widget' }),
+    new ContentType({ id: 'gadget' })
   ],
   host: 'megaplex.example.com',
   apiVersion: 5,
