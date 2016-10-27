@@ -1,6 +1,5 @@
 process.env.NODE_ENV = 'test';
 var mongoose = require('../lib/mongoose');
-var warehouse = require('./warehouse');
 
 var clear = function() {
   for (var i in mongoose.connection.collections) {
@@ -8,14 +7,11 @@ var clear = function() {
   }
 };
 
-before(function() {
-  clear();
-});
+before(clear);
 
-after(function(done) {
+after(function() {
   clear();
   mongoose.disconnect();
-  done();
 });
 
 module.exports = {

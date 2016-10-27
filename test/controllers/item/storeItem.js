@@ -1,4 +1,4 @@
-require('../../db');
+var db = require('../../db');
 var wh = require('../../warehouse');
 var controller = require('../../../controllers/item');
 var StorageNock = require('../../nocks/storage');
@@ -9,6 +9,8 @@ var itThrowsError = require('../../method/itThrowsError');
 StorageNock(wh.storage, wh.userStorageAuth);
 
 describe('item controller', function() {
+  beforeEach(db.clear);
+
   describe('storeItem method', function() {
     /*itThrowsError(controller.storeItem, [{
       when: 'no app parameter provided',

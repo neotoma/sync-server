@@ -1,4 +1,4 @@
-require('../../db');
+var db = require('../../db');
 var wh = require('../../warehouse');
 var controller = require('../../../controllers/item');
 var nock = require('../../../lib/nock');
@@ -8,6 +8,8 @@ var itCallbacksResult = require('../../method/itCallbacksResult');
 var method = controller.getFile;
 
 describe('item controller getFile method', function() {
+  beforeEach(db.clear);
+
   itThrowsError(method, [{
     when: 'no url parameter provided',
     params: [undefined, wh.emptyDone],

@@ -1,10 +1,12 @@
-require('../db');
+var db = require('../db');
 var assert = require('assert');
 var controller = require('../../controllers/contentType');
 var SourceFactory = require('../factory')('source');
 var ContentType = require('../../models/contentType');
 
 describe('contentType controller', function() {
+  beforeEach(db.clear);
+
   it('has supportedIds', function() {
     assert(controller.supportedIds.length);
   });

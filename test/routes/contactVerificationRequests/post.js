@@ -1,4 +1,4 @@
-require('../../db');
+var db = require('../../db');
 var async = require('async');
 var assert = require('assert');
 var request = require('supertest');
@@ -8,6 +8,8 @@ var app = require('../../../app');
 var ContactVerificationRequest = require('../../../models/contactVerificationRequest');
 
 describe('POST /contactVerificationRequests', function() {
+  beforeEach(db.clear);
+
   it('responds with 400 if data missing', function(done) {
     request(app).post('/contactVerificationRequests').expect(400).end(function(error, res) {
       done(error);

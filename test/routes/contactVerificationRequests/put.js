@@ -99,12 +99,7 @@ var testPut = function(attributes, done) {
 };
 
 describe('PUT /contactVerificationRequests/:id', function() {
-  beforeEach(function (done) {
-    for (var i in mongoose.connection.collections) {
-      mongoose.connection.collections[i].remove(function() {});
-    }
-    return done();
-  });
+  beforeEach(db.clear);
   
   it('processes verification properly for contactVerificationRequest with createUser, authenticateSession and createNotificationRequests', function(done) {
     var attributes = {
