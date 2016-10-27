@@ -1,11 +1,10 @@
 var db = require('../../db');
 var wh = require('../../warehouse');
-var controller = require('../../../controllers/item');
 var nock = require('../../../lib/nock');
 var itThrowsError = require('../../method/itThrowsError');
 var itCallbacksError = require('../../method/itCallbacksError');
 var itCallbacksResult = require('../../method/itCallbacksResult');
-var method = controller.getFile;
+var method = require('../../../controllers/item').getFile;
 
 describe('item controller getFile method', function() {
   beforeEach(db.clear);

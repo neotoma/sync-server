@@ -1,17 +1,15 @@
 var db = require('../../db');
 var wh = require('../../warehouse');
-var controller = require('../../../controllers/item');
-var StorageNock = require('../../nocks/storage');
+var nock = require('../../../lib/nock');
 var UserStorageAuthFactory = require('../../factory')('userStorageAuth');
 var itThrowsError = require('../../method/itThrowsError');
 var itCallbacksError = require('../../method/itCallbacksError');
 var itCallbacksNoError = require('../../method/itCallbacksNoError');
-var method = controller.storeFile;
-
-StorageNock(wh.storage, wh.userStorageAuth);
+var method = require('../../../controllers/item').storeFile;
 
 describe('item controller storeFile method', function() {
   beforeEach(db.clear);
+  beforeEach(nock.cleanAll);
   
   itThrowsError(method, [{
     when: 'no user parameter provided',
@@ -91,6 +89,8 @@ describe('item controller storeFile method', function() {
     when: 'provided JSON data',
     params: [wh.user, wh.storage, wh.jsonPath, wh.jsonData],
     before: function(done) {
+      nock.putStorage(wh.storage, wh.userStorageAuth);
+
       UserStorageAuthFactory.create(done, {
         userId: wh.user.id,
         storageId: wh.storage.id
@@ -100,6 +100,8 @@ describe('item controller storeFile method', function() {
     when: 'provided buffer data',
     params: [wh.user, wh.storage, wh.jpegPath, wh.jpegData],
     before: function(done) {
+      nock.putStorage(wh.storage, wh.userStorageAuth);
+
       UserStorageAuthFactory.create(done, {
         userId: wh.user.id,
         storageId: wh.storage.id
@@ -112,6 +114,8 @@ describe('item controller storeFile method', function() {
     params: [wh.user, wh.storage, wh.jsonPath, wh.jsonData],
     error: 'Failed to store file because of unauthorized request to storage',
     before: function(done) {
+      nock.putStorage(wh.storage, wh.userStorageAuth);
+
       wh.userStorageAuth.userId = wh.user.id;
       wh.userStorageAuth.storageId = wh.storage.id;
       wh.userStorageAuth.storageToken = 'xxxxxxxxx';

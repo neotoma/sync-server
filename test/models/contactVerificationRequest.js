@@ -1,9 +1,8 @@
+require('../../lib/prototypes/object.js');
 var db = require('../db');
 var wh = require('../warehouse/contactVerificationRequest');
 var assert = require('assert');
 var ContactVerificationRequest = require('../../models/contactVerificationRequest');
-var mongoose = require('../../lib/mongoose');
-require('../../lib/prototypes/object.js');
 
 describe('new contactVerificationRequest', function() {
   before(db.clear);

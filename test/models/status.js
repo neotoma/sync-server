@@ -2,7 +2,6 @@ var db = require('../db');
 var wh = require('../warehouse/status');
 var assert = require('assert');
 var Status = require('../../models/status');
-var mongoose = require('../../lib/mongoose');
 
 describe('new status', function() {
   before(db.clear);
