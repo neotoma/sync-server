@@ -1,3 +1,4 @@
+require('../../lib/prototypes/object.js');
 var db = require('../db');
 var wh = require('../warehouse/userStorageAuth');
 var assert = require('assert');
@@ -63,11 +64,11 @@ describe('new userStorageAuth', function() {
   });
 
   it('can be created with findOrCreate', function(done) {
-    var newUserStorageAuthAttributes = wh.attributes;
-    newUserStorageAuthAttributes.userId = 'newUserStorageAuthUserId';
+    var attributes = Object.clone(wh.attributes);
+    attributes.userId = wh.attributes.userId + 'x';
 
     var self = this;
-    UserStorageAuth.findOrCreate(newUserStorageAuthAttributes, function(error, userStorageAuth) {
+    UserStorageAuth.findOrCreate(attributes, function(error, userStorageAuth) {
       assert.equal(typeof userStorageAuth.id, 'string');
       assert.notEqual(userStorageAuth.id, self.userStorageAuth.id);
       done(error);

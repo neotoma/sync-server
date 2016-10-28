@@ -1,6 +1,7 @@
+require('../lib/prototypes/object.js');
 var async = require('async');
 
-module.exports = function(modelName, attributes) {
+module.exports = function(modelName) {
   var Model = require('../models/' + modelName);
   var wh = require('./warehouse/' + modelName);
   var factory = {};
@@ -13,7 +14,7 @@ module.exports = function(modelName, attributes) {
     n = (typeof n !== 'undefined') ? n : '';
 
     if (attributes) {
-      attributes = Object.assign(wh.attributes, attributes);
+      attributes = Object.assign(Object.clone(wh.attributes), attributes);
     } else if (attributes !== null) {
       attributes = wh.attributes;
     }

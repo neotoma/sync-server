@@ -1,3 +1,4 @@
+require('../../lib/prototypes/object.js');
 var db = require('../db');
 var wh = require('../warehouse/userSourceAuth');
 var assert = require('assert');
@@ -63,11 +64,11 @@ describe('new userSourceAuth', function() {
   });
 
   it('can be created with findOrCreate', function(done) {
-    var newUserSourceAuthAttributes = wh.attributes;
-    newUserSourceAuthAttributes.userId = 'newUserSourceAuthUserId';
+    var attributes = Object.clone(wh.attributes);
+    attributes.userId = wh.attributes.userId + 'x';
 
     var self = this;
-    UserSourceAuth.findOrCreate(newUserSourceAuthAttributes, function(error, userSourceAuth) {
+    UserSourceAuth.findOrCreate(attributes, function(error, userSourceAuth) {
       assert.equal(typeof userSourceAuth.id, 'string');
       assert.notEqual(userSourceAuth.id, self.userSourceAuth.id);
       done(error);

@@ -1,3 +1,4 @@
+require('../../lib/prototypes/object.js');
 var db = require('../db');
 var wh = require('../warehouse/status');
 var assert = require('assert');
@@ -61,7 +62,6 @@ describe('new status', function() {
 
   it('has toObject', function() {
     var object = this.status.toObject();
-
     assert.equal(object.id, this._id);
     assert.equal(object.userId, wh.attributes.userId);
     assert.equal(object.storageId, wh.attributes.storageId);
@@ -84,11 +84,11 @@ describe('new status', function() {
   });
 
   it('can be created with findOrCreate', function(done) {
-    var newStatusAttributes = wh.attributes;
-    newStatusAttributes.userId = 'newStatusUserId';
+    var attributes = Object.clone(wh.attributes);
+    attributes.userId = wh.attributes.userId + 'x';
 
     var self = this;
-    Status.findOrCreate(newStatusAttributes, function(error, status) {
+    Status.findOrCreate(attributes, function(error, status) {
       assert.equal(typeof status.id, 'string');
       assert.notEqual(status.id, self.status.id);
       done(error);

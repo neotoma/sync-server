@@ -10,26 +10,10 @@ describe('new storage', function() {
   before(db.clear);
   
   before(function(done) {
-    var self = this;
-    
-    var createStorage = function(done) {
-      StorageFactory.create(function(error, storage) {
-        done(error, storage);
-      }, wh.swh.storage.attributes);
-    };
+    this.storage = wh.storage;
+    this.userStorageAuth = wh.userStorageAuth;
 
-    var createUserStorageAuth = function(done) {
-      UserStorageAuthFactory.create(function(error, userStorageAuth) {
-        done(error, userStorageAuth);
-      });
-    };
-
-    async.parallel({
-      storage: createStorage,
-      userStorageAuth: createUserStorageAuth
-    }, function(error, results) {
-      self.storage = results.storage;
-      self.userStorageAuth = results.userStorageAuth;
+    wh.userStorageAuth.save(function(error) {
       done();
     });
   });
@@ -97,7 +81,7 @@ describe('new storage', function() {
 
   it('throws error if attributes.id undefined upon creation', function(done) {
     try {
-      new Storage({ host: 'drivey.example.com' });
+      new Storage({ host: wh.swh.storage.attributes.host });
     } catch (error) {
       assert.equal(error.message, 'Parameter attributes has no id property');
       done();
@@ -106,7 +90,7 @@ describe('new storage', function() {
 
   it('throws error if attributes.id not string upon creation', function(done) {
     try {
-      new Storage({ id: 3, host: 'drivey.example.com' });
+      new Storage({ id: 3, host: wh.swh.storage.attributes.host });
     } catch (error) {
       assert.equal(error.message, 'Property id of attributes not a string');
       done();
@@ -115,7 +99,7 @@ describe('new storage', function() {
 
   it('throws error if attributes.host undefined upon creation', function(done) {
     try {
-      new Storage({ id: 'drivey' });
+      new Storage({ id: wh.swh.storage.attributes.id });
     } catch (error) {
       assert.equal(error.message, 'Parameter attributes has no host property');
       done();
@@ -123,42 +107,43 @@ describe('new storage', function() {
   });
 
   it('throws error if attributes.host not string upon creation', function(done) {
-    StorageFactory.create(function(error, storage) {
+    try {
+      new Storage({ id: wh.swh.storage.attributes.id, host: 3 });
+    } catch (error) {
       assert.equal(error.message, 'Property host of attributes not a string');
       done();
-    }, {
-      id: 'drivey',
-      host: 3
-    });
+    }
   });
 
   it('throws error if attributes.path defined and not function upon creation', function(done) {
-    StorageFactory.create(function(error, storage) {
+    try {
+      new Storage({
+        id: wh.swh.storage.attributes.id,
+        host: wh.swh.storage.attributes.host,
+        path: 315
+      });
+    } catch (error) {
       assert.equal(error.message, 'Property path of attributes not a function');
       done();
-    }, {
-      id: 'drivey',
-      host: 'drivey.example.com',
-      path: 315
-    });
+    }
   });
 
   it('returns expected path when attributes.path defined on creation', function(done) {
     var self = this;
 
-    StorageFactory.create(function(error, storage) {
-      try {
-        assert.equal(storage.path('/this/is/a/path', self.userStorageAuth), '/now/this/is/a/path?token=' + wh.swh.userStorageAuth.attributes.storageToken);
-        done(error);
-      } catch (error) {
-        done(error);
-      }
-    }, {
-      id: 'drivey', 
-      host: 'drivey.example.com',
+    var storage = new Storage({
+      id: wh.swh.storage.attributes.id, 
+      host: wh.swh.storage.attributes.host,
       path: function(path, userStorageAuth) {
         return '/now' + path + '?token=' + userStorageAuth.storageToken;
       }
     });
+
+    try {
+      assert.equal(storage.path('/this/is/a/path', self.userStorageAuth), '/now/this/is/a/path?token=' + wh.swh.userStorageAuth.attributes.storageToken);
+      done();
+    } catch (error) {
+      done(error);
+    }
   });
 });

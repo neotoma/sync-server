@@ -1,6 +1,6 @@
 var assert = require('assert');
 
-module.exports = require('./it')('callbacks error when', function(test, done) {
+module.exports = require('./it')('callbacks no error when', function(test, done) {
   test.params.push(function(error, result) {
     try {
       assert.equal(error, undefined);

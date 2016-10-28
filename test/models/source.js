@@ -1,3 +1,4 @@
+require('../../lib/prototypes/object.js');
 var db = require('../db');
 var wh = require('../warehouse/source');
 var assert = require('assert');
@@ -7,8 +8,6 @@ var SourceFactory = require('../factory')('source');
 var UserSourceAuth = require('../../models/userSourceAuth');
 
 describe('source module', function() {
-  before(db.clear);
-
   it('has defaultItemsLimit', function() {
     assert(Source.defaultItemsLimit > 0);
   });
@@ -17,12 +16,8 @@ describe('source module', function() {
 describe('new source', function() {
   before(db.clear);
   
-  before(function(done) {
-    var self = this;
-    SourceFactory.create(function(error, source) {
-      self.source = source;
-      done();
-    }, wh.attributes);
+  before(function() {
+    this.source = new Source(wh.attributes);
   });
 
   it('has id', function() {
@@ -139,8 +134,9 @@ describe('new source', function() {
 
   describe('created with no itemsLimit', function() {
     before(function() {
-      delete wh.attributes.itemsLimit;
-      this.source = new Source(wh.attributes);
+      var attributes = Object.clone(wh.attributes);
+      delete attributes.itemsLimit;
+      this.source = new Source(attributes);
     });
 
     it('has default itemsLimit', function() {

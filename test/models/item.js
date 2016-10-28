@@ -1,3 +1,4 @@
+require('../../lib/prototypes/object.js');
 var db = require('../db');
 var wh = require('../warehouse/item');
 var assert = require('assert');
@@ -99,11 +100,11 @@ describe('new item', function() {
   });
 
   it('can be created with findOrCreate', function(done) {
-    var newItemAttributes = wh.attributes;
-    newItemAttributes.userId = 'newItemUserId';
+    var attributes = Object.clone(wh.attributes);
+    attributes.userId = attributes.userId + 'x';
 
     var self = this;
-    Item.findOrCreate(newItemAttributes, function(error, item) {
+    Item.findOrCreate(attributes, function(error, item) {
       assert.equal(typeof item.id, 'string');
       assert.notEqual(item.id, self.item.id);
       done(error);

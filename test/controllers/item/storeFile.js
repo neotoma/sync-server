@@ -116,11 +116,10 @@ describe('item controller storeFile method', function() {
     before: function(done) {
       nock.putStorage(wh.storage, wh.userStorageAuth);
 
-      wh.userStorageAuth.userId = wh.user.id;
-      wh.userStorageAuth.storageId = wh.storage.id;
-      wh.userStorageAuth.storageToken = 'xxxxxxxxx';
-      wh.userStorageAuth.save(function(error) {
-        done(error);
+      UserStorageAuthFactory.create(done, {
+        userId: wh.user.id,
+        storageId: wh.storage.id,
+        storageToken: wh.userStorageAuth.storageToken + 'x'
       });
     }
   }]);

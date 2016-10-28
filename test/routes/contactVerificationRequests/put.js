@@ -90,7 +90,12 @@ var testPut = function(attributes, done) {
           }
         };
 
-        async.waterfall([testVerifiedAttribute, testNewUser, testSessionAuthentication, testNewNotificationRequests], function(error) {
+        async.waterfall([
+          testVerifiedAttribute,
+          testNewUser,
+          testSessionAuthentication,
+          testNewNotificationRequests
+        ], function(error) {
           done(error);
         });
       });

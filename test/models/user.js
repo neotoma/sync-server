@@ -1,3 +1,4 @@
+require('../../lib/prototypes/object.js');
 var db = require('../db');
 var wh = require('../warehouse/user');
 var assert = require('assert');
@@ -54,11 +55,11 @@ describe('new user', function() {
   });
 
   it('can be created with findOrCreate', function(done) {
-    var newUserAttributes = wh.attributes;
-    newUserAttributes.name = 'Chris Mills';
+    var attributes = Object.clone(wh.attributes);
+    attributes.name = wh.attributes.name + 'x';
 
     var self = this;
-    User.findOrCreate(newUserAttributes, function(error, user) {
+    User.findOrCreate(attributes, function(error, user) {
       assert.equal(typeof user.id, 'string');
       assert.notEqual(user.id, self.user.id);
       done(error);
@@ -68,9 +69,10 @@ describe('new user', function() {
   describe('without admin value', function() {
     before(function(done) {
       var self = this;
-      delete wh.attributes.admin;
+      var attributes = Object.clone(wh.attributes);
+      delete attributes.admin;
 
-      User.create(wh.attributes, function(error, user) {
+      User.create(attributes, function(error, user) {
         self.user = user;
         done(error);
       });
