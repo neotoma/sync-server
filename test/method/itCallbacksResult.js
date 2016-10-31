@@ -3,6 +3,8 @@ var assert = require('assert');
 module.exports = require('./it')('callbacks result when', function(test, done) {
   test.params.push(function(error, result) {
     try {
+      assert.equal(error, undefined);
+
       if (test.result) {
         assert.deepEqual(result, test.result);
       }
@@ -13,5 +15,5 @@ module.exports = require('./it')('callbacks result when', function(test, done) {
     }
   });
 
-  test.method.apply(undefined, test.params);
+  test.method.apply(test.context, test.params);
 });

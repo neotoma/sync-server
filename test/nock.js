@@ -1,5 +1,6 @@
 var nock = require('nock');
 var url = require('url');
+var wh = require('./warehouse');
 
 nock.get = function(requestUrl, responseBody, responseStatus) {
   var urlObject = url.parse(requestUrl);
@@ -13,8 +14,8 @@ nock.putStorage = function(storage, userStorageAuth) {
 
   scope.put(/.+/).query({
     access_token: userStorageAuth.storageToken
-  }).reply(function(url, body) {
-    return [200, 'Success'];
+  }).reply(200, {
+    bytes: wh.bytes
   });
 
   scope.put(/.+/).reply(401);

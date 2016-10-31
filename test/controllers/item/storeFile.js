@@ -1,10 +1,10 @@
 var db = require('../../db');
 var wh = require('../../warehouse');
-var nock = require('../../../lib/nock');
+var nock = require('../../nock');
 var UserStorageAuthFactory = require('../../factory')('userStorageAuth');
 var itThrowsError = require('../../method/itThrowsError');
 var itCallbacksError = require('../../method/itCallbacksError');
-var itCallbacksNoError = require('../../method/itCallbacksNoError');
+var itCallbacksResult = require('../../method/itCallbacksResult');
 var method = require('../../../controllers/item').storeFile;
 
 describe('item controller storeFile method', function() {
@@ -85,10 +85,11 @@ describe('item controller storeFile method', function() {
     error: 'Parameter done not a function'
   }]);
 
-  itCallbacksNoError(method, [{
+  itCallbacksResult(method, [{
     when: 'provided JSON data',
     params: [wh.user, wh.storage, wh.jsonPath, wh.jsonData],
-    before: function(done) {
+    result: { bytes: wh.bytes },
+    before: function(test, done) {
       nock.putStorage(wh.storage, wh.userStorageAuth);
 
       UserStorageAuthFactory.create(done, {
@@ -99,7 +100,8 @@ describe('item controller storeFile method', function() {
   }, {
     when: 'provided buffer data',
     params: [wh.user, wh.storage, wh.jpegPath, wh.jpegData],
-    before: function(done) {
+    result: { bytes: wh.bytes },
+    before: function(test, done) {
       nock.putStorage(wh.storage, wh.userStorageAuth);
 
       UserStorageAuthFactory.create(done, {
@@ -113,7 +115,7 @@ describe('item controller storeFile method', function() {
     when: 'userStorageAuth.storageToken invalid',
     params: [wh.user, wh.storage, wh.jsonPath, wh.jsonData],
     error: 'Failed to store file because of unauthorized request to storage',
-    before: function(done) {
+    before: function(test, done) {
       nock.putStorage(wh.storage, wh.userStorageAuth);
 
       UserStorageAuthFactory.create(done, {

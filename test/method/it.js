@@ -6,16 +6,24 @@ module.exports = function(description, runTest) {
       test.method = method;
 
       it(description + ' ' + test.when, function(done) {
+        if (test.after) {
+          var after = function() {
+            test.after(test, done);
+          }
+        } else {
+          var after = done;
+        }
+
         if (test.before) {
-          test.before(function(error) {
+          test.before(test, function(error) {
             if (error) {
               return done(error);
             }
 
-            runTest(test, done);
+            runTest(test, after);
           });
         } else {
-          runTest(test, done);
+          runTest(test, after);
         }
       });
     });

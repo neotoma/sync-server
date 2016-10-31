@@ -16,10 +16,7 @@ var instagram = new Source({
   contentTypes: contentTypes,
   host: 'api.instagram.com',
   clientId: process.env.SYNC_SOURCES_INSTAGRAM_CLIENT_ID || logger.fatal('Client ID not provided by environment for Instagram config'),
-  clientSecret: process.env.SYNC_SOURCES_INSTAGRAM_CLIENT_SECRET || logger.fatal('Client secret not provided by environment for Instagram config'),
-  itemAssetLinks: {
-    standardResolutionImage: 'images.standard_resolution.url'
-  }
+  clientSecret: process.env.SYNC_SOURCES_INSTAGRAM_CLIENT_SECRET || logger.fatal('Client secret not provided by environment for Instagram config')
 });
 
 instagram.itemsPagePath = function(contentType, userSourceAuth, pagination) {

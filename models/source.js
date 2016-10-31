@@ -13,7 +13,6 @@ module.exports = function(properties) {
   this.clientSecret = properties.clientSecret;
   this.consumerKey = properties.consumerKey;
   this.consumerSecret = properties.consumerSecret;
-  this.itemAssetLinks = properties.itemAssetLinks;
 
   this.toObject = function(userSourceAuths) {
     var contentTypeIds;
@@ -49,7 +48,6 @@ module.exports = function(properties) {
       clientSecret: this.clientSecret,
       consumerKey: this.consumerKey,
       consumerSecret: this.consumerSecret,
-      itemAssetLinks: this.itemAssetLinks,
       contentTypes: contentTypeIds,
       userSourceAuths: userSourceAuthIds
     };

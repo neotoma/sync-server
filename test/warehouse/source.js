@@ -15,9 +15,5 @@ module.exports = require('./warehouse')('source', {
   clientId: 'megaplexClientId',
   clientSecret: 'megaplexClientSecret',
   consumerKey: 'megaplexConsumerKey',
-  consumerSecret: 'megaplexConsumerSecret',
-  itemAssetLinks: {
-    foo1: 'bar1',
-    foo2: 'bar2'
-  }
+  consumerSecret: 'megaplexConsumerSecret'
 });

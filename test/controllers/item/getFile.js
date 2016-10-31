@@ -1,6 +1,6 @@
 var db = require('../../db');
 var wh = require('../../warehouse');
-var nock = require('../../../lib/nock');
+var nock = require('../../nock');
 var itThrowsError = require('../../method/itThrowsError');
 var itCallbacksError = require('../../method/itCallbacksError');
 var itCallbacksResult = require('../../method/itCallbacksResult');
@@ -39,7 +39,7 @@ describe('item controller getFile method', function() {
     when: 'provided invalid url',
     params: [wh.jsonUrl],
     error: 'Failed to get file',
-    before: function(done) {
+    before: function(test, done) {
       nock.get(wh.jsonUrl, wh.jsonData, 404);
       done();
     }
@@ -47,7 +47,7 @@ describe('item controller getFile method', function() {
     when: 'provided url without authorization',
     params: [wh.jsonUrl],
     error: 'Failed to get file because of unauthorized request',
-    before: function(done) {
+    before: function(test, done) {
       nock.get(wh.jsonUrl, wh.jsonData, 401);
       done();
     }
@@ -57,7 +57,7 @@ describe('item controller getFile method', function() {
     when: 'provided valid url for json file and callback',
     params: [wh.jsonUrl],
     result: wh.jsonData,
-    before: function(done) {
+    before: function(test, done) {
       nock.get(wh.jsonUrl,  wh.jsonData);
       done();
     }
@@ -65,7 +65,7 @@ describe('item controller getFile method', function() {
     when: 'provided valid url for jpeg file and callback',
     params: [wh.jpegUrl],
     result: wh.jpegData,
-    before: function(done) {
+    before: function(test, done) {
       nock.get(wh.jpegUrl, wh.jpegData);
       done();
     }

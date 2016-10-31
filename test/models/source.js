@@ -69,10 +69,6 @@ describe('new source', function() {
     assert.equal(this.source.clientSecret, wh.attributes.clientSecret);
   });
 
-  it('has itemAssetLinks', function() {
-    assert.equal(this.source.itemAssetLinks, wh.attributes.itemAssetLinks);
-  });
-
   it('has toObject', function() {
     var object = this.source.toObject();
     assert.equal(object.id, wh.attributes.id);
@@ -86,7 +82,6 @@ describe('new source', function() {
     assert.equal(object.clientSecret, wh.attributes.clientSecret);
     assert.equal(object.consumerKey, wh.attributes.consumerKey);
     assert.equal(object.consumerSecret, wh.attributes.consumerSecret);
-    assert.equal(object.itemAssetLinks, wh.attributes.itemAssetLinks);
     assert.equal(object.contentTypes.length, wh.attributes.contentTypes.length);
     assert.equal(object.contentTypes[0], wh.attributes.contentTypes[0].id);
   });

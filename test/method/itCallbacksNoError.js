@@ -10,5 +10,5 @@ module.exports = require('./it')('callbacks no error when', function(test, done)
     }
   });
 
-  test.method.apply(undefined, test.params);
+  test.method.apply(test.context, test.params);
 });

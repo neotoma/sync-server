@@ -14,7 +14,7 @@ var testPut = function(attributes, done) {
   ContactVerificationRequest.create(attributes, function(error, contactVerificationRequest) {
     var body = {
       data: {
-        id: contactVerificationRequest._id,
+        id: contactVerificationRequest.id,
         attributes: {
           code: contactVerificationRequest.code,
           verified: true

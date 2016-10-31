@@ -8,12 +8,15 @@ var UserStorageAuth = require('../models/userStorageAuth');
 var async = require('async');
 var request = require('request');
 var fs = require('fs');
+var validateParams = require('../lib/validateParams');
 var itemController = {};
 
 var supportedMimeTypes = {
   jpg: 'image/jpeg',
   json: 'application/json'
 }
+
+var successStatusCodes = [200, 201, 202];
 
 itemController.syncAllForAllContentTypes = function(app, user, storage, source) {
   var self = this;
@@ -281,7 +284,7 @@ itemController.syncItem = function(app, user, storage, source, contentType, item
           sourceId: source.id,
           contentTypeId: contentType.id,
           sourceItemId: item.sourceItemId,
-          item_id: item.id
+          itemId: item.id
         });
 
         callback();
@@ -297,7 +300,7 @@ itemController.syncItem = function(app, user, storage, source, contentType, item
               sourceId: source.id,
               contentTypeId: contentType.id,
               sourceItemId: item.sourceItemId,
-              item_id: item.id,
+              itemId: item.id,
               error: error
             });
 
@@ -311,129 +314,70 @@ itemController.syncItem = function(app, user, storage, source, contentType, item
   });
 }
 
-itemController.storeItem = function(app, user, storage, source, contentType, item, callback) {
-  var self = this;
+itemController.storeItem = function(app, user, storage, source, contentType, item, done) {
+  validateParams([{
+    name: 'app', variable: app, required: true, requiredProperties: ['emit']
+  }, {
+    name: 'user', variable: user, required: true, requiredProperties: ['id']
+  }, {
+    name: 'storage', variable: storage, required: true, requiredProperties: ['id']
+  }, {
+    name: 'source', variable: source, required: true, requiredProperties: ['id']
+  }, {
+    name: 'contentType', variable: contentType, required: true, requiredProperties: ['id', 'pluralId']
+  }, {
+    name: 'item', variable: item, required: true, requiredProperties: ['id', 'data', 'save']
+  }, {
+    name: 'done', variable: done, required: true, requiredType: 'function'
+  }]);
 
-  logger.trace('started to store item', {
-    userId: user.id,
-    storageId: storage.id,
-    sourceId: source.id,
-    contentTypeId: contentType.id,
-    item_id: item.id
-  });
+  var log = function(level, event, meta) {
+    var meta = meta ? meta : {};
 
-  var storeCallback = function(error, response) {
+    logger.log(level, event, Object.assign(meta, {
+      userId: user.id,
+      storageId: storage.id,
+      sourceId: source.id,
+      contentTypeId: contentType.id,
+      itemId: item.id
+    }));
+  };
+
+  log('error', 'Item controller started to store item');
+
+  var path = '/' + contentType.pluralId + '/' + item.id + '.json';
+
+  this.storeFile(user, storage, path, item.data, function(error, result) {
     if (error) {
-      logger.error('failed to store item', { 
-        userId: user.id,
-        storageId: storage.id,
-        sourceId: source.id,
-        contentTypeId: contentType.id,
-        item_id: item.id,
-        message: error.message
-      });
+      log('error', 'Item controller failed to store item', { error: error });
 
       item.syncFailedAt = Date.now();
       item.error = error.message;
       item.save(function(saveError) {
         if (saveError) {
-          logger.error('failed to update item after failure to store it', {
-            userId: user.id,
-            storageId: storage.id,
-            sourceId: source.id,
-            contentTypeId: contentType.id,
-            item_id: item.id,
-            error: saveError 
-          });
+          log('error', 'Item controller failed to update item after failure to store it', { error: saveError });
         }
 
-        return callback(error);
+        return done(error);
       });
-    }
+    } else {
+      log('trace', 'Item controller stored file for item', { result: result });
 
-    try {
-      response = JSON.parse(JSON.stringify(response));
-    } catch(error) {
-      logger.error('failed to parse store item response', { response: response });
-      return callback(error);
-    }
-
-    logger.trace('stored item', { 
-      userId: user.id,
-      storageId: storage.id,
-      sourceId: source.id,
-      contentTypeId: contentType.id,
-      item_id: item.id,
-      response: response
-    });
-
-    item.syncVerifiedAt = Date.now();
-    item.bytes = response.bytes;
-    item.path = response.path;
-    item.save(function(error) {
-      if (error) {
-        logger.error('failed to update item after storing it', {
-          userId: user.id,
-          storageId: storage.id,
-          sourceId: source.id,
-          contentTypeId: contentType.id,
-          item_id: item.id,
-          error: error
-        });
-
-        callback(error);
-      } else {
-        app.emit('itemSyncVerified', item);
-
-        logger.trace('updated item after storing it', {
-          userId: user.id,
-          storageId: storage.id,
-          sourceId: source.id,
-          contentTypeId: contentType.id,
-          item_id: item.id
-        });
-
-        callback();
-      }
-    });
-  };
-
-  var path = '/' + contentType.pluralId + '/raw-synced-meta/' + item.id + '.json';
-  this.storeFile(user, storage, path, item.data, storeCallback);
-
-  if (typeof source.itemAssetLinks !== 'undefined') {
-    for (var key in source.itemAssetLinks) {
-      var url = Object.byString(item.data, source.itemAssetLinks[key]);
-      var extension = url.split('.').pop();
-
-      this.getFile(url, function(error, data) {
+      item.syncVerifiedAt = Date.now();
+      item.bytes = result.bytes;
+      item.path = path;
+      item.save(function(error) {
         if (error) {
-          logger.error('failed to get item asset', {
-            item_id: item.id,
-            asset_url: url
-          });
-
-          callback(error);
+          log('error', 'Item controller failed to update item after storing it', { error: error });
+          done(error);
         } else {
-          var path = '/' + contentType.pluralId + '/' + item.id + '.' + extension;
-          self.storeFile(user, storage, path, data, function(error, response) {
-            if (error) {
-              logger.error('failed to store item asset', {
-                item_id: item.id,
-                asset_url: url
-              });
-            } else {
-              logger.trace('stored item asset', {
-                item_id: item.id,
-                asset_key: key,
-                asset_url: url
-              });
-            }
-          });
+          app.emit('itemSyncVerified', item);
+          log('trace', 'Item controller updated item after storing it');
+          done();
         }
       });
     }
-  }
+  });
 }
 
 itemController.getFile = function(url, done) {
@@ -481,7 +425,7 @@ itemController.getFile = function(url, done) {
     try {
       if (res.statusCode === 401) {
         throw new Error('failed to get file because of unauthorized request');
-      } else if ([200, 201, 202].indexOf(res.statusCode) === -1) {
+      } else if (successStatusCodes.indexOf(res.statusCode) === -1) {
         throw new Error('failed to get file');
       }
 
@@ -597,7 +541,7 @@ itemController.storeFile = function(user, storage, path, data, done) {
         }
       };
 
-      request.put(options, function(error, res, body) {
+      request.put(options, function(error, res) {
         if (error) {
           logger.error('Item controller failed to make request while storing file', {
             error: error,
@@ -612,11 +556,11 @@ itemController.storeFile = function(user, storage, path, data, done) {
         try {
           if (res.statusCode === 401) {
             throw new Error('failed to store file because of unauthorized request to storage');
-          } else if ([200, 201, 202].indexOf(res.statusCode) === -1) {
+          } else if (successStatusCodes.indexOf(res.statusCode) === -1) {
             throw new Error('failed to confirm storage of file with indicative status code from storage');
           }
 
-          done(null, body);
+          done(null, JSON.parse(res.body));
         } catch (error) {
           logger.error('Item controller ' + error.message, {
             storageId: storage.id,
