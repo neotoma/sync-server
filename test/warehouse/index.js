@@ -18,12 +18,12 @@ var subwarehouses = {
 module.exports = {
   // JSON
   jsonUrl: 'http://myhost/foo.json',
-  jsonPath: 'foo.json',
+  jsonPath: '/foo.json',
   jsonData: { foo: 'bar' },
 
   // JPEG
   jpegUrl: 'http://myhost/foo.jpg',
-  jpegPath: 'foo.jpg',
+  jpegPath: '/foo.jpg',
   jpegData: Buffer.from([0x62, 0x75, 0x66, 0x66, 0x65, 0x72]),
 
   // Misc

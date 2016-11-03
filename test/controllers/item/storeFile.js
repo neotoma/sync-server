@@ -38,7 +38,7 @@ describe('item controller storeFile method', function() {
   }, {
     when: 'path property of storage parameter not function',
     params: [wh.user, { id: 'bar', host: 'weee', path: 3 }, wh.jsonPath, wh.jsonData, wh.emptyDone],
-    error: 'Property path of storage not a function'
+    error: 'Property path of parameter storage is not function'
   }, {
     when: 'no path parameter provided',
     params: [wh.user, wh.storage, undefined, wh.jsonData, wh.emptyDone],
@@ -46,23 +46,27 @@ describe('item controller storeFile method', function() {
   }, {
     when: 'path parameter not string',
     params: [wh.user, wh.storage, 3, wh.jsonData, wh.emptyDone],
-    error: 'Parameter path not a string'
+    error: 'Parameter path is not a string'
+  }, {
+    when: 'path parameter lacks leading slash',
+    params: [wh.user, wh.storage, 'foo.bar', wh.jsonData, wh.emptyDone],
+    error: 'Parameter path is not a properly formatted string'
   }, {
     when: 'path parameter contains several periods',
-    params: [wh.user, wh.storage, 'h.el.lo', wh.jsonData, wh.emptyDone],
-    error: 'Parameter path has more than one period'
+    params: [wh.user, wh.storage, '/h.el.lo', wh.jsonData, wh.emptyDone],
+    error: 'Parameter path is not a properly formatted string'
   }, {
     when: 'path parameter contains period at end but lacks extension',
-    params: [wh.user, wh.storage, 'hello.', wh.jsonData, wh.emptyDone],
-    error: 'Parameter path lacks extension'
+    params: [wh.user, wh.storage, '/hello.', wh.jsonData, wh.emptyDone],
+    error: 'Parameter path is not a properly formatted string'
   }, {
     when: 'path parameter lacks extension',
-    params: [wh.user, wh.storage, 'hello', wh.jsonData, wh.emptyDone],
-    error: 'Parameter path lacks extension'
+    params: [wh.user, wh.storage, '/hello', wh.jsonData, wh.emptyDone],
+    error: 'Parameter path is not a properly formatted string'
   }, {
     when: 'path parameter lacks supported extension',
-    params: [wh.user, wh.storage, 'hello', wh.jsonData, wh.emptyDone],
-    error: 'Parameter path lacks extension'
+    params: [wh.user, wh.storage, '/hello', wh.jsonData, wh.emptyDone],
+    error: 'Parameter path is not a properly formatted string'
   }, {
     when: 'no data parameter provided',
     params: [wh.user, wh.storage, wh.jsonPath, undefined, wh.emptyDone],
@@ -70,19 +74,19 @@ describe('item controller storeFile method', function() {
   }, {
     when: 'data parameter not object or buffer',
     params: [wh.user, wh.storage, wh.jsonPath, 3, wh.emptyDone],
-    error: 'Parameter data not an object or buffer'
+    error: 'Parameter data is not one of the supported types: buffer, object'
   }, {
     when: 'jpg path matched with json data',
     params: [wh.user, wh.storage, wh.jpegPath, wh.jsonData, wh.emptyDone],
-    error: 'Parameter extension jpg not provided with binary data'
+    error: 'Path parameter with jpg extension not provided with binary data'
   }, {
     when: 'json path matched with buffer data',
     params: [wh.user, wh.storage, wh.jsonPath, wh.jpegData, wh.emptyDone],
-    error: 'Parameter extension json not provided with parseable data'
+    error: 'Path parameter with json extension not provided with parseable data'
   }, {
     when: 'done parameter not function',
     params: [wh.user, wh.storage, wh.jsonPath, wh.jsonData, 3],
-    error: 'Parameter done not a function'
+    error: 'Parameter done is not a function'
   }]);
 
   itCallbacksResult(method, [{

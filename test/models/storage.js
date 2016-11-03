@@ -27,7 +27,7 @@ describe('new storage', function() {
   });
 
   it('returns expected path with subPath and userStorageAuth', function() {
-    assert.equal(this.storage.path('foo', this.userStorageAuth), '/foo?access_token=' + wh.swh.userStorageAuth.attributes.storageToken);
+    assert.equal(this.storage.path('/foo', this.userStorageAuth), '/foo?access_token=' + wh.swh.userStorageAuth.attributes.storageToken);
   });
 
   it('throws error instead of returning path when subPath undefined', function(done) {

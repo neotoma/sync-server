@@ -7,8 +7,12 @@ module.exports = function(description, runTest) {
 
       it(description + ' ' + test.when, function(done) {
         if (test.after) {
-          var after = function() {
-            test.after(test, done);
+          var after = function(error) {
+            if (error) {
+              done(error);
+            } else {
+              test.after(test, done);
+            }
           }
         } else {
           var after = done;

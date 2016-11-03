@@ -2,6 +2,7 @@ require('../../lib/prototypes/object.js');
 var db = require('../db');
 var wh = require('../warehouse/item');
 var assert = require('assert');
+var pluralize = require('pluralize');
 var Item = require('../../models/item');
 
 describe('new item', function() {
@@ -31,16 +32,16 @@ describe('new item', function() {
     assert.equal(this.item.contentTypeId, wh.attributes.contentTypeId);
   });
 
-  it('has syncAttemptedAt', function() {
-    assert.equal(this.item.syncAttemptedAt, wh.attributes.syncAttemptedAt);
+  it('has storageAttemptedAt', function() {
+    assert.equal(this.item.storageAttemptedAt, wh.attributes.storageAttemptedAt);
   });
 
-  it('has syncVerifiedAt', function() {
-    assert.equal(this.item.syncVerifiedAt, wh.attributes.syncVerifiedAt);
+  it('has storageVerifiedAt', function() {
+    assert.equal(this.item.storageVerifiedAt, wh.attributes.storageVerifiedAt);
   });
 
-  it('has syncFailedAt', function() {
-    assert.equal(this.item.syncFailedAt, wh.attributes.syncFailedAt);
+  it('has storageFailedAt', function() {
+    assert.equal(this.item.storageFailedAt, wh.attributes.storageFailedAt);
   });
 
   it('has bytes', function() {
@@ -70,15 +71,19 @@ describe('new item', function() {
     assert.equal(object.sourceId, wh.attributes.sourceId);
     assert.equal(object.sourceItemId, wh.attributes.sourceItemId);
     assert.equal(object.contentTypeId, wh.attributes.contentTypeId);
-    assert.deepEqual(object.syncAttemptedAt.toString(), wh.attributes.syncAttemptedAt.toString());
-    assert.deepEqual(object.syncVerifiedAt.toString(), wh.attributes.syncVerifiedAt.toString());
-    assert.deepEqual(object.syncFailedAt.toString(), wh.attributes.syncFailedAt.toString());
+    assert.deepEqual(object.storageAttemptedAt.toString(), wh.attributes.storageAttemptedAt.toString());
+    assert.deepEqual(object.storageVerifiedAt.toString(), wh.attributes.storageVerifiedAt.toString());
+    assert.deepEqual(object.storageFailedAt.toString(), wh.attributes.storageFailedAt.toString());
 
     assert.equal(object.bytes, wh.attributes.bytes);
     assert.equal(object.path, wh.attributes.path);
     assert.equal(object.description, wh.attributes.description);
     assert.equal(object.error, wh.attributes.error);
     assert.equal(object.data.foo, wh.attributes.data.foo);
+  });
+
+  it('has storagePath', function() {
+    assert.equal(this.item.storagePath(), '/' + pluralize(wh.attributes.contentTypeId) + '/' + this.item.id + '.json');
   });
 
   it('can save and have id, timestamps', function(done) {

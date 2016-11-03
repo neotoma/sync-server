@@ -18,7 +18,7 @@ describe('item controller', function() {
   beforeEach(db.clear);
 
   describe('storeItem method', function() {
-    itThrowsError(controller.storeItem, [{
+    itThrowsError(controller.storeItemData, [{
       when: 'no app parameter provided',
       params: [undefined, wh.user, wh.storage, wh.source, wh.contentType, wh.item, wh.emptyDone],
       error: 'Parameter app undefined or null'
@@ -27,42 +27,6 @@ describe('item controller', function() {
       params: [3, wh.user, wh.storage, wh.source, wh.contentType, wh.item, wh.emptyDone],
       error: 'Parameter app has no emit property'
     }, {
-      when: 'no user parameter provided',
-      params: [app, undefined, wh.storage, wh.source, wh.contentType, wh.item, wh.emptyDone],
-      error: 'Parameter user undefined or null'
-    }, {
-      when: 'user parameter has no id property',
-      params: [app, 3, wh.storage, wh.source, wh.contentType, wh.item, wh.emptyDone],
-      error: 'Parameter user has no id property'
-    }, {
-      when: 'no storage parameter provided',
-      params: [app, wh.user, undefined, wh.source, wh.contentType, wh.item, wh.emptyDone],
-      error: 'Parameter storage undefined or null'
-    }, {
-      when: 'storage parameter has no id property',
-      params: [app, wh.user, 3, wh.source, wh.contentType, wh.item, wh.emptyDone],
-      error: 'Parameter storage has no id property'
-    }, {
-      when: 'no source parameter provided',
-      params: [app, wh.user, wh.storage, undefined, wh.contentType, wh.item, wh.emptyDone],
-      error: 'Parameter source undefined or null'
-    }, {
-      when: 'source parameter has no id property',
-      params: [app, wh.user, wh.storage, 3, wh.contentType, wh.item, wh.emptyDone],
-      error: 'Parameter source has no id property'
-    }, {
-      when: 'no contentType parameter provided',
-      params: [app, wh.user, wh.storage, wh.source, undefined, wh.item, wh.emptyDone],
-      error: 'Parameter contentType undefined or null'
-    }, {
-      when: 'contentType parameter has no id property',
-      params: [app, wh.user, wh.storage, wh.source, 3, wh.item, wh.emptyDone],
-      error: 'Parameter contentType has no id property'
-    }, {
-      when: 'contentType parameter has no pluralId property',
-      params: [app, wh.user, wh.storage, wh.source, { id: wh.swh.contentType.attributes.id }, wh.item, wh.emptyDone],
-      error: 'Parameter contentType has no pluralId property'
-    }, {
       when: 'no item parameter provided',
       params: [app, wh.user, wh.storage, wh.source, wh.contentType, undefined, wh.emptyDone],
       error: 'Parameter item undefined or null'
@@ -70,6 +34,15 @@ describe('item controller', function() {
       when: 'item parameter has no id property',
       params: [app, wh.user, wh.storage, wh.source, wh.contentType, 3, wh.emptyDone],
       error: 'Parameter item has no id property'
+    }, {
+      when: 'item parameter has no userId property',
+      params: [app, wh.user, wh.storage, wh.source, wh.contentType, 3, wh.emptyDone],
+      error: 'Parameter item has no userId property',
+      before: function(test, done) {
+        ItemFactory.create(done, {
+          userId: undefined
+        });
+      }
     }, {
       when: 'item parameter has no data property',
       params: [app, wh.user, wh.storage, wh.source, wh.contentType, { id: wh.swh.contentType.attributes.id }, wh.emptyDone],
@@ -88,7 +61,7 @@ describe('item controller', function() {
       error: 'Parameter done is not a function'
     }]);
 
-    itCallbacksNoError(controller.storeItem, [{
+    itCallbacksNoError(controller.storeItemData, [{
       context: controller,
       when: 'provided adequate parameters',
       params: [app, wh.user, wh.storage, wh.source, wh.contentType],
@@ -104,7 +77,7 @@ describe('item controller', function() {
           }, {
             bytes: undefined,
             path: undefined,
-            syncVerifiedAt: undefined,
+            storageVerifiedAt: undefined,
             contentTypeId: test.params[4].id
           });
         };
@@ -124,7 +97,7 @@ describe('item controller', function() {
         var contentType = new ContentType({ id: test.item.contentTypeId });
 
         try {
-          assert(test.item.syncVerifiedAt);
+          assert(test.item.storageVerifiedAt);
           assert.equal(test.item.bytes, wh.bytes);
           assert.equal(test.item.path, '/' + contentType.pluralId + '/' + test.item.id + '.json');
           assert(app.emit.firstCall.calledWith('itemSyncVerified', test.item));

@@ -16,7 +16,7 @@ describe('item controller getFile method', function() {
   }, {
     when: 'url parameter not string',
     params: [3, wh.emptyDone],
-    error: 'Parameter url not a string',
+    error: 'Parameter url is not a string',
   }, {
     when: 'url parameter has no extension',
     params: ['foo', wh.emptyDone],
@@ -32,7 +32,7 @@ describe('item controller getFile method', function() {
   }, {
     when: 'done parameter not function',
     params: [wh.jsonUrl, 3],
-    error: 'Parameter done not a function',
+    error: 'Parameter done is not a function',
   }]);
 
   itCallbacksError(method, [{

@@ -6,7 +6,7 @@ function capitalizeFirstLetter(string) {
 }
 
 module.exports = {
-  new: function(name, attributes, staticMethods) {
+  new: function(name, attributes, staticMethods, methods) {
     var schema = mongoose.Schema(attributes, {
       timestamps: true
     });
@@ -39,6 +39,12 @@ module.exports = {
     if (staticMethods) {
       for (var key in staticMethods) {
         schema.statics[key] = staticMethods[key];
+      }
+    }
+
+    if (methods) {
+      for (var key in methods) {
+        schema.methods[key] = methods[key];
       }
     }
 

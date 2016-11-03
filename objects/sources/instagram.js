@@ -41,12 +41,12 @@ instagram.itemDescription = function(item) {
   return description;
 };
 
-instagram.isValidItemJSON = function(itemJSON, contentType) {
+instagram.validItemType = function(type, contentType) {
   switch (contentType.id) {
     case 'image':
-      return (itemJSON.type == 'image');
+      return (type === 'image');
     case 'video':
-      return (itemJSON.type == 'video');
+      return (type === 'video');
     default:
       return false;
   }

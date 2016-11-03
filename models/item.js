@@ -1,4 +1,5 @@
 var ModelFactory = require('../factories/model');
+var pluralize = require('pluralize');
 
 module.exports = ModelFactory.new('item', {
   userId: { type: String, required: true },
@@ -6,12 +7,11 @@ module.exports = ModelFactory.new('item', {
   sourceId: { type: String, required: true },
   sourceItemId: { type: String, required: true },
   contentTypeId: { type: String, required: true },
-  syncAttemptedAt: Date,
-  syncVerifiedAt: Date,
-  syncFailedAt: Date,
-  bytes: Number,
-  path: String,
-  description: String,
-  error: String,
+  storageAttemptedAt: Date,
+  storageVerifiedAt: Date,
+  storageFailedAt: Date,
+  storageBytes: Number,
+  storagePath: String,
+  storageError: String,
   data: Object
 });

@@ -46,7 +46,7 @@ module.exports = function(attributes) {
         throw new Error('Parameter userStorageAuth has no storageToken property');
       }
 
-      return '/' + subPath + '?access_token=' + userStorageAuth.storageToken;
+      return subPath + '?access_token=' + userStorageAuth.storageToken;
     };
   }
 };
