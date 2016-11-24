@@ -2,10 +2,18 @@ var pluralize = require('pluralize');
 require('../lib/prototypes/array');
 require('../lib/prototypes/string');
 
-module.exports = function ContentType(id) {
-  this.id = id;
-  this.pluralId = pluralize(id);
-  this.name = id.capitalizeFirstLetter();
+module.exports = function ContentType(attributes) {
+  if (!attributes) {
+    throw new Error('Parameter attributes undefined or null');
+  }
+
+  if (!attributes.id) {
+    throw new Error('Parameter attributes has no id property');
+  }
+  
+  this.id = attributes.id;
+  this.pluralId = pluralize(attributes.id);
+  this.name = attributes.id.capitalizeFirstLetter();
   this.pluralName = this.pluralId.capitalizeFirstLetter();
 
   this.toObject = function(sources) {
@@ -21,12 +29,17 @@ module.exports = function ContentType(id) {
       }).clean();
     }
 
-    return {
+    var object = {
       id: this.id,
       pluralId: this.pluralId,
       name: this.name,
-      pluralName: this.pluralName,
-      sourceIds: sourceIds
+      pluralName: this.pluralName
     };
+
+    if (sourceIds) {
+      object.sourceIds = sourceIds;
+    }
+
+    return object;
   };
 }

@@ -4,8 +4,8 @@ var ContentType = require('../../models/contentType');
 var logger = require('../../lib/logger');
 
 var contentTypes = [
-  new ContentType('image'),
-  new ContentType('video'),
+  new ContentType({ id: 'image' }),
+  new ContentType({ id: 'video' }),
 ];
 
 var instagram = new Source({
@@ -16,13 +16,10 @@ var instagram = new Source({
   contentTypes: contentTypes,
   host: 'api.instagram.com',
   clientId: process.env.SYNC_SOURCES_INSTAGRAM_CLIENT_ID || logger.fatal('Client ID not provided by environment for Instagram config'),
-  clientSecret: process.env.SYNC_SOURCES_INSTAGRAM_CLIENT_SECRET || logger.fatal('Client secret not provided by environment for Instagram config'),
-  itemAssetLinks: {
-    standardResolutionImage: 'images.standard_resolution.url'
-  }
+  clientSecret: process.env.SYNC_SOURCES_INSTAGRAM_CLIENT_SECRET || logger.fatal('Client secret not provided by environment for Instagram config')
 });
 
-instagram.itemsPagePath = function(contentType, userSourceAuth, pagination) {
+instagram.itemsPageUrl = function(contentType, userSourceAuth, pagination) {
   var path = '/v1/users/self/media/recent?access_token=' + userSourceAuth.sourceToken;
 
   if (typeof pagination.next_max_id !== 'undefined') {
@@ -31,8 +28,28 @@ instagram.itemsPagePath = function(contentType, userSourceAuth, pagination) {
     return null;
   }
 
-  return path;
+  return 'https://' + this.host + path;
 }
+
+instagram.itemsPageDataObjets = function(page) {
+  return page.data;
+};
+
+instagram.itemsPageTotalAvailable = function(page) {
+  return null;
+};
+
+instagram.itemsPageNextPagination = function(page) {
+  var nextPagination;
+
+  if (typeof page.data.pagination !== 'undefined' && typeof page.data.pagination.next_max_id !== 'undefined') {
+    nextPagination = {
+      next_max_id: page.data.pagination.next_max_id
+    };
+  }
+
+  return nextPagination;
+};
 
 instagram.itemDescription = function(item) {
   var description;
@@ -42,17 +59,6 @@ instagram.itemDescription = function(item) {
   }
 
   return description;
-};
-
-instagram.isValidItemJSON = function(itemJSON, contentType) {
-  switch (contentType.id) {
-    case 'image':
-      return (itemJSON.type == 'image');
-    case 'video':
-      return (itemJSON.type == 'video');
-    default:
-      return false;
-  }
 };
 
 module.exports = instagram;

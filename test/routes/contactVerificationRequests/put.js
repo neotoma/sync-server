@@ -1,5 +1,5 @@
+var db = require('../../db');
 var async = require('async');
-var config = require('../../config');
 var assert = require('assert');
 var request = require('supertest');
 var sinon = require('sinon');
@@ -14,7 +14,7 @@ var testPut = function(attributes, done) {
   ContactVerificationRequest.create(attributes, function(error, contactVerificationRequest) {
     var body = {
       data: {
-        id: contactVerificationRequest._id,
+        id: contactVerificationRequest.id,
         attributes: {
           code: contactVerificationRequest.code,
           verified: true
@@ -90,7 +90,12 @@ var testPut = function(attributes, done) {
           }
         };
 
-        async.waterfall([testVerifiedAttribute, testNewUser, testSessionAuthentication, testNewNotificationRequests], function(error) {
+        async.waterfall([
+          testVerifiedAttribute,
+          testNewUser,
+          testSessionAuthentication,
+          testNewNotificationRequests
+        ], function(error) {
           done(error);
         });
       });
@@ -99,12 +104,7 @@ var testPut = function(attributes, done) {
 };
 
 describe('PUT /contactVerificationRequests/:id', function() {
-  beforeEach(function (done) {
-    for (var i in mongoose.connection.collections) {
-      mongoose.connection.collections[i].remove(function() {});
-    }
-    return done();
-  });
+  beforeEach(db.clear);
   
   it('processes verification properly for contactVerificationRequest with createUser, authenticateSession and createNotificationRequests', function(done) {
     var attributes = {

@@ -1,101 +1,77 @@
-var config = require('../config');
+require('../../lib/prototypes/object.js');
+var db = require('../db');
+var wh = require('../warehouse/item');
 var assert = require('assert');
+var pluralize = require('pluralize');
 var Item = require('../../models/item');
-var mongoose = require('../../lib/mongoose');
-
-var itemAttributes = {
-  userId: 'itemUserId',
-  storageId: 'itemStorageId',
-  sourceId: 'itemSourceId',
-  sourceItemId: 'itemSourceItemId',
-  contentTypeId: 'itemContentTypeId',
-  syncAttemptedAt: new Date(2015, 1, 1, 1, 1, 1, 1),
-  syncVerifiedAt: new Date(2015, 1, 1, 1, 2, 1, 1),
-  syncFailedAt: new Date(2015, 1, 1, 1, 3, 1, 1),
-  bytes: 12345,
-  path: '/path/to/item',
-  description: 'Item description',
-  error: 'Item error',
-  data: {
-    foo: 'bar'
-  }
-};
 
 describe('new item', function() {
+  before(db.clear);
+  
   before(function() {
-    this.item = new Item(itemAttributes);
+    this.item = new Item(wh.attributes);
   });
 
   it('has userId', function() {
-    assert.equal(this.item.userId, itemAttributes.userId);
+    assert.equal(this.item.userId, wh.attributes.userId);
   });
 
   it('has storageId', function() {
-    assert.equal(this.item.storageId, itemAttributes.storageId);
+    assert.equal(this.item.storageId, wh.attributes.storageId);
   });
 
   it('has sourceId', function() {
-    assert.equal(this.item.sourceId, itemAttributes.sourceId);
+    assert.equal(this.item.sourceId, wh.attributes.sourceId);
   });
 
   it('has sourceItemId', function() {
-    assert.equal(this.item.sourceItemId, itemAttributes.sourceItemId);
+    assert.equal(this.item.sourceItemId, wh.attributes.sourceItemId);
   });
 
   it('has contentTypeId', function() {
-    assert.equal(this.item.contentTypeId, itemAttributes.contentTypeId);
+    assert.equal(this.item.contentTypeId, wh.attributes.contentTypeId);
   });
 
-  it('has syncAttemptedAt', function() {
-    assert.equal(this.item.syncAttemptedAt, itemAttributes.syncAttemptedAt);
+  it('has storageAttemptedAt', function() {
+    assert.equal(this.item.storageAttemptedAt, wh.attributes.storageAttemptedAt);
   });
 
-  it('has syncVerifiedAt', function() {
-    assert.equal(this.item.syncVerifiedAt, itemAttributes.syncVerifiedAt);
+  it('has storageVerifiedAt', function() {
+    assert.equal(this.item.storageVerifiedAt, wh.attributes.storageVerifiedAt);
   });
 
-  it('has syncFailedAt', function() {
-    assert.equal(this.item.syncFailedAt, itemAttributes.syncFailedAt);
+  it('has storageFailedAt', function() {
+    assert.equal(this.item.storageFailedAt, wh.attributes.storageFailedAt);
   });
 
-  it('has bytes', function() {
-    assert.equal(this.item.bytes, itemAttributes.bytes);
+  it('has storageBytes', function() {
+    assert.equal(this.item.storageBytes, wh.attributes.storageBytes);
   });
 
-  it('has path', function() {
-    assert.equal(this.item.path, itemAttributes.path);
-  });
-
-  it('has description', function() {
-    assert.equal(this.item.description, itemAttributes.description);
-  });
-
-  it('has error', function() {
-    assert.equal(this.item.error, itemAttributes.error);
+  it('has storageError', function() {
+    assert.equal(this.item.storageError, wh.attributes.storageError);
   });
 
   it('has data', function() {
-    assert.equal(this.item.data, itemAttributes.data);
+    assert.equal(this.item.data, wh.attributes.data);
   });
 
   it('has toObject', function() {
     var object = this.item.toObject();
-    assert.equal(object.userId, itemAttributes.userId);
-    assert.equal(object.storageId, itemAttributes.storageId);
-    assert.equal(object.sourceId, itemAttributes.sourceId);
-    assert.equal(object.sourceItemId, itemAttributes.sourceItemId);
-    assert.equal(object.contentTypeId, itemAttributes.contentTypeId);
+    assert.equal(object.userId, wh.attributes.userId);
+    assert.equal(object.storageId, wh.attributes.storageId);
+    assert.equal(object.sourceId, wh.attributes.sourceId);
+    assert.equal(object.sourceItemId, wh.attributes.sourceItemId);
+    assert.equal(object.contentTypeId, wh.attributes.contentTypeId);
+    assert.deepEqual(object.storageAttemptedAt.toString(), wh.attributes.storageAttemptedAt.toString());
+    assert.deepEqual(object.storageVerifiedAt.toString(), wh.attributes.storageVerifiedAt.toString());
+    assert.deepEqual(object.storageFailedAt.toString(), wh.attributes.storageFailedAt.toString());
 
-    // Hack: asserts failing on equivalency without use of toString()
-    assert.equal(object.syncAttemptedAt.toString(), itemAttributes.syncAttemptedAt.toString());
-    assert.equal(object.syncVerifiedAt.toString(), itemAttributes.syncVerifiedAt.toString());
-    assert.equal(object.syncFailedAt.toString(), itemAttributes.syncFailedAt.toString());
-
-    assert.equal(object.bytes, itemAttributes.bytes);
-    assert.equal(object.path, itemAttributes.path);
-    assert.equal(object.description, itemAttributes.description);
-    assert.equal(object.error, itemAttributes.error);
-    assert.equal(object.data.foo, itemAttributes.data.foo);
+    assert.equal(object.bytes, wh.attributes.bytes);
+    assert.equal(object.path, wh.attributes.path);
+    assert.equal(object.description, wh.attributes.description);
+    assert.equal(object.error, wh.attributes.error);
+    assert.equal(object.data.foo, wh.attributes.data.foo);
   });
 
   it('can save and have id, timestamps', function(done) {
@@ -110,18 +86,18 @@ describe('new item', function() {
 
   it('can be found with findOrCreate', function(done) {
     var self = this;
-    Item.findOrCreate(itemAttributes, function(error, item) {
+    Item.findOrCreate(wh.attributes, function(error, item) {
       assert.equal(item.id, self.item.id);
       done(error);
     });
   });
 
   it('can be created with findOrCreate', function(done) {
-    var newItemAttributes = itemAttributes;
-    newItemAttributes.userId = 'newItemUserId';
+    var attributes = Object.clone(wh.attributes);
+    attributes.userId = attributes.userId + 'x';
 
     var self = this;
-    Item.findOrCreate(newItemAttributes, function(error, item) {
+    Item.findOrCreate(attributes, function(error, item) {
       assert.equal(typeof item.id, 'string');
       assert.notEqual(item.id, self.item.id);
       done(error);

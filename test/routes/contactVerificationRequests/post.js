@@ -1,5 +1,5 @@
+var db = require('../../db');
 var async = require('async');
-var config = require('../../config');
 var assert = require('assert');
 var request = require('supertest');
 var sinon = require('sinon');
@@ -8,10 +8,10 @@ var app = require('../../../app');
 var ContactVerificationRequest = require('../../../models/contactVerificationRequest');
 
 describe('POST /contactVerificationRequests', function() {
+  beforeEach(db.clear);
+
   it('responds with 400 if data missing', function(done) {
-    request(app).post('/contactVerificationRequests').expect(400).end(function(error, res) {
-      done(error);
-    });
+    request(app).post('/contactVerificationRequests').expect(400).end(done);
   });
 
   it('responds with 400 if data.attributes missing', function(done) {
@@ -19,9 +19,7 @@ describe('POST /contactVerificationRequests', function() {
       'data': {}
     };
 
-    request(app).post('/contactVerificationRequests').send(body).expect(400).end(function(error, res) {
-      done(error);
-    });
+    request(app).post('/contactVerificationRequests').send(body).expect(400).end(done);
   });
 
   it('responds with 400 if method attribute missing', function(done) {

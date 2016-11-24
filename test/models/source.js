@@ -1,30 +1,11 @@
+require('../../lib/prototypes/object.js');
+var db = require('../db');
+var wh = require('../warehouse/source');
 var assert = require('assert');
 var async = require('async');
 var Source = require('../../models/source');
-var ContentType = require('../../models/contentType');
+var SourceFactory = require('../factory')('source');
 var UserSourceAuth = require('../../models/userSourceAuth');
-
-var sourceAttributes = {
-  id: 'megaplex',
-  name: 'Megaplex',
-  enabled: true,
-  logoGlyphPath: '/images/logos/megaplex.svg',
-  contentTypes: [
-    new ContentType('widget'),
-    new ContentType('gadget')
-  ],
-  host: 'megaplex.example.com',
-  apiVersion: 5,
-  itemsLimit: 98,
-  clientId: 'megaplexClientId',
-  clientSecret: 'megaplexClientSecret',
-  consumerKey: 'megaplexConsumerKey',
-  consumerSecret: 'megaplexConsumerSecret',
-  itemAssetLinks: {
-    foo1: 'bar1',
-    foo2: 'bar2'
-  }
-};
 
 describe('source module', function() {
   it('has defaultItemsLimit', function() {
@@ -33,79 +14,76 @@ describe('source module', function() {
 });
 
 describe('new source', function() {
+  before(db.clear);
+  
   before(function() {
-    this.source = new Source(sourceAttributes);
+    this.source = new Source(wh.attributes);
   });
 
   it('has id', function() {
-    assert.equal(this.source.id, sourceAttributes.id);
+    assert.equal(this.source.id, wh.attributes.id);
   });
 
   it('has name', function() {
-    assert.equal(this.source.name, sourceAttributes.name);
+    assert.equal(this.source.name, wh.attributes.name);
   });
 
   it('has enabled', function() {
-    assert.equal(this.source.enabled, sourceAttributes.enabled);
+    assert.equal(this.source.enabled, wh.attributes.enabled);
   });
 
   it('has logoGlyphPath', function() {
-    assert.equal(this.source.logoGlyphPath, sourceAttributes.logoGlyphPath);
+    assert.equal(this.source.logoGlyphPath, wh.attributes.logoGlyphPath);
   });
 
   it('has contentTypes', function() {
-    assert.equal(this.source.contentTypes.length, sourceAttributes.contentTypes.length);
-    assert.equal(this.source.contentTypes[0].id, sourceAttributes.contentTypes[0].id);
+    assert.equal(this.source.contentTypes.length, wh.attributes.contentTypes.length);
+    assert.equal(this.source.contentTypes[0].id, wh.attributes.contentTypes[0].id);
   });
 
   it('has host', function() {
-    assert.equal(this.source.host, sourceAttributes.host);
+    assert.equal(this.source.host, wh.attributes.host);
   });
 
   it('has apiVersion', function() {
-    assert.equal(this.source.apiVersion, sourceAttributes.apiVersion);
+    assert.equal(this.source.apiVersion, wh.attributes.apiVersion);
   });
 
   it('has itemsLimit', function() {
-    assert.equal(this.source.itemsLimit, sourceAttributes.itemsLimit);
+    assert.equal(this.source.itemsLimit, wh.attributes.itemsLimit);
   });
 
   it('has clientId', function() {
-    assert.equal(this.source.clientId, sourceAttributes.clientId);
+    assert.equal(this.source.clientId, wh.attributes.clientId);
   });
 
   it('has clientSecret', function() {
-    assert.equal(this.source.clientSecret, sourceAttributes.clientSecret);
+    assert.equal(this.source.clientSecret, wh.attributes.clientSecret);
   });
 
   it('has consumerKey', function() {
-    assert.equal(this.source.consumerKey, sourceAttributes.consumerKey);
+    assert.equal(this.source.consumerKey, wh.attributes.consumerKey);
   });
 
   it('has clientSecret', function() {
-    assert.equal(this.source.clientSecret, sourceAttributes.clientSecret);
-  });
-
-  it('has itemAssetLinks', function() {
-    assert.equal(this.source.itemAssetLinks, sourceAttributes.itemAssetLinks);
+    assert.equal(this.source.clientSecret, wh.attributes.clientSecret);
   });
 
   it('has toObject', function() {
     var object = this.source.toObject();
-    assert.equal(object.id, sourceAttributes.id);
-    assert.equal(object.name, sourceAttributes.name);
-    assert.equal(object.enabled, sourceAttributes.enabled);
-    assert.equal(object.logoGlyphPath, sourceAttributes.logoGlyphPath);
-    assert.equal(object.host, sourceAttributes.host);
-    assert.equal(object.apiVersion, sourceAttributes.apiVersion);
-    assert.equal(object.itemsLimit, sourceAttributes.itemsLimit);
-    assert.equal(object.clientId, sourceAttributes.clientId);
-    assert.equal(object.clientSecret, sourceAttributes.clientSecret);
-    assert.equal(object.consumerKey, sourceAttributes.consumerKey);
-    assert.equal(object.consumerSecret, sourceAttributes.consumerSecret);
-    assert.equal(object.itemAssetLinks, sourceAttributes.itemAssetLinks);
-    assert.equal(object.contentTypes.length, sourceAttributes.contentTypes.length);
-    assert.equal(object.contentTypes[0], sourceAttributes.contentTypes[0].id);
+    assert.equal(object.id, wh.attributes.id);
+    assert.equal(object.name, wh.attributes.name);
+    assert.equal(object.enabled, wh.attributes.enabled);
+    assert.equal(object.logoGlyphPath, wh.attributes.logoGlyphPath);
+    assert.equal(object.host, wh.attributes.host);
+    assert.equal(object.apiVersion, wh.attributes.apiVersion);
+    assert.equal(object.itemsLimit, wh.attributes.itemsLimit);
+    assert.equal(object.clientId, wh.attributes.clientId);
+    assert.equal(object.clientSecret, wh.attributes.clientSecret);
+    assert.equal(object.consumerKey, wh.attributes.consumerKey);
+    assert.equal(object.consumerSecret, wh.attributes.consumerSecret);
+    assert.equal(object.contentTypes.length, wh.attributes.contentTypes.length);
+    assert.equal(object.contentTypes[0], wh.attributes.contentTypes[0].id);
   });
 
   it('has toObject with userSourceAuths', function(done) {
@@ -114,7 +92,7 @@ describe('new source', function() {
     var createUserSourceAuth = function(n, next) {
       UserSourceAuth.create({
         userId: 'userId' + n,
-        sourceId: sourceAttributes.id,
+        sourceId: wh.attributes.id,
         sourceUserId: 'sourceUserId' + n
       }, function(error, userSourceAuth) {
         next(error, userSourceAuth);
@@ -151,8 +129,9 @@ describe('new source', function() {
 
   describe('created with no itemsLimit', function() {
     before(function() {
-      delete sourceAttributes.itemsLimit;
-      this.source = new Source(sourceAttributes);
+      var attributes = Object.clone(wh.attributes);
+      delete attributes.itemsLimit;
+      this.source = new Source(attributes);
     });
 
     it('has default itemsLimit', function() {

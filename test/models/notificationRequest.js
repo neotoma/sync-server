@@ -1,32 +1,29 @@
+var db = require('../db');
+var wh = require('../warehouse/notificationRequest');
 var assert = require('assert');
 var NotificationRequest = require('../../models/notificationRequest');
 
-var notificationRequestAttributes = {
-  userId: 'notificationRequestUserId',
-  sourceId: 'notificationRequestSourceId',
-  storageId: 'notificationRequestStorageId',
-  event: 'notificationRequestEvent'
-};
-
 describe('new notificationRequest', function() {
+  before(db.clear);
+  
   before(function() {
-    this.notificationRequest = new NotificationRequest(notificationRequestAttributes);
+    this.notificationRequest = new NotificationRequest(wh.attributes);
   });
 
   it('has userId', function() {
-    assert.equal(this.notificationRequest.userId, notificationRequestAttributes.userId);
+    assert.equal(this.notificationRequest.userId, wh.attributes.userId);
   });
 
   it('has sourceId', function() {
-    assert.equal(this.notificationRequest.sourceId, notificationRequestAttributes.sourceId);
+    assert.equal(this.notificationRequest.sourceId, wh.attributes.sourceId);
   });
 
   it('has storageId', function() {
-    assert.equal(this.notificationRequest.storageId, notificationRequestAttributes.storageId);
+    assert.equal(this.notificationRequest.storageId, wh.attributes.storageId);
   });
 
   it('has event', function() {
-    assert.equal(this.notificationRequest.event, notificationRequestAttributes.event);
+    assert.equal(this.notificationRequest.event, wh.attributes.event);
   });
 
   it('can save and have id, timestamps', function(done) {
@@ -49,13 +46,11 @@ describe('new notificationRequest', function() {
   it('has toObject', function() {
     var object = this.notificationRequest.toObject();
     assert.equal(object.id, this._id);
-    assert.equal(object.userId, notificationRequestAttributes.userId);
-    assert.equal(object.storageId, notificationRequestAttributes.storageId);
-    assert.equal(object.sourceId, notificationRequestAttributes.sourceId);
-    assert.equal(object.event, notificationRequestAttributes.event);
-
-    // Hack: asserts failing on equivalency without use of toString()
-    assert.equal(object.createdAt.toString(), this.createdAt.toString());
-    assert.equal(object.updatedAt.toString(), this.updatedAt.toString());
+    assert.equal(object.userId, wh.attributes.userId);
+    assert.equal(object.storageId, wh.attributes.storageId);
+    assert.equal(object.sourceId, wh.attributes.sourceId);
+    assert.equal(object.event, wh.attributes.event);
+    assert.deepEqual(object.createdAt.toString(), this.createdAt.toString());
+    assert.deepEqual(object.updatedAt.toString(), this.updatedAt.toString());
   });
 });

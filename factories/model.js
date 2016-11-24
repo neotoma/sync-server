@@ -1,12 +1,9 @@
 var mongoose = require('../lib/mongoose');
 var logger = require('../lib/logger');
-
-function capitalizeFirstLetter(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
+require('../lib/prototypes/string');
 
 module.exports = {
-  new: function(name, attributes, staticMethods) {
+  new: function(name, attributes, staticMethods, methods) {
     var schema = mongoose.Schema(attributes, {
       timestamps: true
     });
@@ -42,6 +39,12 @@ module.exports = {
       }
     }
 
-    return mongoose.model(capitalizeFirstLetter(name), schema);
+    if (methods) {
+      for (var key in methods) {
+        schema.methods[key] = methods[key];
+      }
+    }
+
+    return mongoose.model(name.capitalizeFirstLetter(), schema);
   }
 }

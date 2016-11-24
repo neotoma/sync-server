@@ -1,25 +1,22 @@
-var config = require('../config');
+require('../../lib/prototypes/object.js');
+var db = require('../db');
+var wh = require('../warehouse/user');
 var assert = require('assert');
 var User = require('../../models/user');
-var mongoose = require('../../lib/mongoose');
-
-var userAttributes = {
-  admin: false,
-  name: 'Jordan Mills',
-  email: 'jordan.mills@example.com'
-};
 
 describe('new user', function() {
+  before(db.clear);
+  
   before(function() {
-    this.user = new User(userAttributes);
+    this.user = new User(wh.attributes);
   });
 
   it('has name', function() {
-    assert.equal(this.user.name, userAttributes.name);
+    assert.equal(this.user.name, wh.attributes.name);
   });
 
   it('has email', function() {
-    assert.equal(this.user.email, userAttributes.email);
+    assert.equal(this.user.email, wh.attributes.email);
   });
 
   it('can save and have id, timestamps', function(done) {
@@ -42,29 +39,27 @@ describe('new user', function() {
   it('has toObject', function() {
     var object = this.user.toObject();
     assert.equal(object.id, this._id);
-    assert.equal(object.admin, userAttributes.admin);
-    assert.equal(object.name, userAttributes.name);
-    assert.equal(object.email, userAttributes.email);
-
-    // Hack: asserts failing on equivalency without use of toString()
-    assert.equal(object.createdAt.toString(), this.createdAt.toString());
-    assert.equal(object.updatedAt.toString(), this.updatedAt.toString());
+    assert.equal(object.admin, wh.attributes.admin);
+    assert.equal(object.name, wh.attributes.name);
+    assert.equal(object.email, wh.attributes.email);
+    assert.deepEqual(object.createdAt.toString(), this.createdAt.toString());
+    assert.deepEqual(object.updatedAt.toString(), this.updatedAt.toString());
   });
 
   it('can be found with findOrCreate', function(done) {
     var self = this;
-    User.findOrCreate(userAttributes, function(error, user) {
+    User.findOrCreate(wh.attributes, function(error, user) {
       assert.equal(user.id, self.user.id);
       done(error);
     });
   });
 
   it('can be created with findOrCreate', function(done) {
-    var newUserAttributes = userAttributes;
-    newUserAttributes.name = 'Chris Mills';
+    var attributes = Object.clone(wh.attributes);
+    attributes.name = wh.attributes.name + 'x';
 
     var self = this;
-    User.findOrCreate(newUserAttributes, function(error, user) {
+    User.findOrCreate(attributes, function(error, user) {
       assert.equal(typeof user.id, 'string');
       assert.notEqual(user.id, self.user.id);
       done(error);
@@ -74,9 +69,10 @@ describe('new user', function() {
   describe('without admin value', function() {
     before(function(done) {
       var self = this;
-      delete userAttributes.admin;
+      var attributes = Object.clone(wh.attributes);
+      delete attributes.admin;
 
-      User.create(userAttributes, function(error, user) {
+      User.create(attributes, function(error, user) {
         self.user = user;
         done(error);
       });

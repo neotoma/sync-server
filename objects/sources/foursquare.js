@@ -4,9 +4,9 @@ var ContentType = require('../../models/contentType');
 var logger = require('../../lib/logger');
 
 var contentTypes = [
-  new ContentType('checkin'),
-  new ContentType('tip'),
-  new ContentType('friend')
+  new ContentType({ id: 'checkin' }),
+  new ContentType({ id: 'tip' }),
+  new ContentType({ id: 'friend' })
 ];
 
 var foursquare = new Source({
@@ -22,9 +22,9 @@ var foursquare = new Source({
   clientSecret: process.env.SYNC_SOURCES_FOURSQUARE_CLIENT_SECRET || logger.fatal('Client secret not provided by environment for foursquare config')
 });
 
-foursquare.itemsPagePath = function(contentType, userSourceAuth, pagination) {
+foursquare.itemsPageUrl = function(contentType, userSourceAuth, pagination) {
   var offset = (typeof pagination === 'undefined') ? 0 : pagination.offset;
-  return '/v2/users/self/' + contentType.pluralId + '?v=' + this.apiVersion + '&oauth_token=' + userSourceAuth.sourceToken + '&limit=' + this.itemsLimit + '&offset=' + offset;
+  return 'https://' + this.host + '/v2/users/self/' + contentType.pluralId + '?v=' + this.apiVersion + '&oauth_token=' + userSourceAuth.sourceToken + '&limit=' + this.itemsLimit + '&offset=' + offset;
 }
 
 foursquare.itemDescription = function(item) {
