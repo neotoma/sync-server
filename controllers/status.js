@@ -19,11 +19,11 @@ module.exports = {
           userId: status.userId,
           sourceId: status.sourceId,
           contentTypeId: status.contentTypeId,
-          syncAttemptedAt: { '$ne': null },
+          storageAttemptedAt: { '$ne': null },
           '$and': [{
-            syncVerifiedAt: null
+            storageVerifiedAt: null
           }, {
-            syncFailedAt: null
+            storageFailedAt: null
           }]
         }, function(error, count) {
           if (error) {
@@ -35,7 +35,7 @@ module.exports = {
               userId: status.userId,
               sourceId: status.sourceId,
               contentTypeId: status.contentTypeId,
-              syncVerifiedAt: { '$ne': null }
+              storageVerifiedAt: { '$ne': null }
             }, function(error, count) {
               if (error) {
                 return callback(error);
@@ -43,7 +43,7 @@ module.exports = {
                 status.totalItemsSynced = count;
 
                 if (count) {
-                  Item.findOne({ sourceId: status.sourceId, contentTypeId: status.contentTypeId }).sort({ syncVerifiedAt: -1 }).exec(function(error, item) {
+                  Item.findOne({ sourceId: status.sourceId, contentTypeId: status.contentTypeId }).sort({ storageVerifiedAt: -1 }).exec(function(error, item) {
                     if (item) {
                       status.lastSyncedItemId = item.get('id');
                       items.push(item);

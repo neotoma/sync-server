@@ -26,33 +26,33 @@ describe('new storage', function() {
     assert.equal(this.storage.host, wh.swh.storage.attributes.host);
   });
 
-  it('returns expected path with subPath and userStorageAuth', function() {
-    assert.equal(this.storage.path('foo', this.userStorageAuth), '/foo?access_token=' + wh.swh.userStorageAuth.attributes.storageToken);
+  it('returns expected itemUrl with path and userStorageAuth', function() {
+    assert.equal(this.storage.itemUrl('/foo', this.userStorageAuth), 'https://storageplex.com/foo?access_token=' + wh.swh.userStorageAuth.attributes.storageToken);
   });
 
-  it('throws error instead of returning path when subPath undefined', function(done) {
+  it('throws error instead of returning itemUrl when path undefined', function(done) {
     try {
-      this.storage.path(undefined, this.userStorageAuth);
+      this.storage.itemUrl(undefined, this.userStorageAuth);
       done(new Error('Error not thrown by method'));
     } catch (error) {
-      assert.equal(error.message, 'Parameter subPath undefined or null');
+      assert.equal(error.message, 'Parameter path undefined or null');
       done();
     }
   });
 
-  it('throws error instead of returning path when subPath not string', function(done) {
+  it('throws error instead of returning itemUrl when path not string', function(done) {
     try {
-      this.storage.path(3, this.userStorageAuth);
+      this.storage.itemUrl(3, this.userStorageAuth);
       done(new Error('Error not thrown by method'));
     } catch (error) {
-      assert.equal(error.message, 'Parameter subPath not string');
+      assert.equal(error.message, 'Parameter path not string');
       done();
     }
   });
 
-  it('throws error instead of returning path when userStorageAuth undefined', function(done) {
+  it('throws error instead of returning itemUrl when userStorageAuth undefined', function(done) {
     try {
-      this.storage.path('foo');
+      this.storage.itemUrl('foo');
       done(new Error('Error not thrown by method'));
     } catch (error) {
       assert.equal(error.message, 'Parameter userStorageAuth undefined or null');
@@ -60,9 +60,9 @@ describe('new storage', function() {
     }
   });
 
-  it('throws error instead of returning path when userStorageAuth.storageToken undefined', function(done) {
+  it('throws error instead of returning itemUrl when userStorageAuth.storageToken undefined', function(done) {
     try {
-      this.storage.path('foo', { foo: 'bar' });
+      this.storage.itemUrl('foo', { foo: 'bar' });
       done(new Error('Error not thrown by method'));
     } catch (error) {
       assert.equal(error.message, 'Parameter userStorageAuth has no storageToken property');
@@ -115,32 +115,33 @@ describe('new storage', function() {
     }
   });
 
-  it('throws error if attributes.path defined and not function upon creation', function(done) {
+  it('throws error if attributes.itemUrl defined and not function upon creation', function(done) {
     try {
       new Storage({
         id: wh.swh.storage.attributes.id,
         host: wh.swh.storage.attributes.host,
-        path: 315
+        itemUrl: 315
       });
+      done(new Error('Error not thrown by method'));
     } catch (error) {
-      assert.equal(error.message, 'Property path of attributes not a function');
+      assert.equal(error.message, 'Property itemUrl of attributes not a function');
       done();
     }
   });
 
-  it('returns expected path when attributes.path defined on creation', function(done) {
+  it('returns expected path when attributes.itemUrl defined on creation', function(done) {
     var self = this;
 
     var storage = new Storage({
       id: wh.swh.storage.attributes.id, 
       host: wh.swh.storage.attributes.host,
-      path: function(path, userStorageAuth) {
-        return '/now' + path + '?token=' + userStorageAuth.storageToken;
+      itemUrl: function(path, userStorageAuth) {
+        return 'https://storageplex.com/now' + path + '?token=' + userStorageAuth.storageToken;
       }
     });
 
     try {
-      assert.equal(storage.path('/this/is/a/path', self.userStorageAuth), '/now/this/is/a/path?token=' + wh.swh.userStorageAuth.attributes.storageToken);
+      assert.equal(storage.itemUrl('/this/is/a/path', self.userStorageAuth), 'https://storageplex.com/now/this/is/a/path?token=' + wh.swh.userStorageAuth.attributes.storageToken);
       done();
     } catch (error) {
       done(error);

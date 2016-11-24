@@ -6,10 +6,17 @@ module.exports = require('./it')('callbacks result when', function(test, done) {
       assert.equal(error, undefined);
 
       if (test.result) {
-        assert.deepEqual(result, test.result);
+        if (typeof test.result === 'function') {
+          test.result(result, function(error) {
+            done(error);
+          })
+        } else {
+          assert.deepEqual(result, test.result);
+          done();
+        }
+      } else {
+        done();
       }
-      
-      done();
     } catch (error) {
       done(error);
     }

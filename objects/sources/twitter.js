@@ -17,9 +17,13 @@ var twitter = new Source({
   host: 'api.twitter.com'
 });
 
-twitter.itemsPagePath = function(contentType, userSourceAuth) {
-  return '/v1/users/self/media/recent?access_token=' + userSourceAuth.sourceToken;
+twitter.itemsPageUrl = function(contentType, userSourceAuth) {
+  return 'https://' + this.host + '/v1/users/self/media/recent?access_token=' + userSourceAuth.sourceToken;
 }
+
+twitter.itemsPageDataObjects = function(page, contentType) {
+  return page.response[contentType.pluralId].items;
+};
 
 twitter.itemDescription = function(item) {
   switch(item.contentTypeId) {

@@ -1,16 +1,14 @@
 module.exports = require('./warehouse')('item', {
   userId: 'itemUserId',
-  storageId: 'itemStorageId',
+  storageId: 'storageplex',
   sourceId: 'itemSourceId',
   sourceItemId: 'itemSourceItemId',
-  contentTypeId: 'itemContentTypeId',
-  syncAttemptedAt: new Date(2015, 1, 1, 1, 1, 1, 1),
-  syncVerifiedAt: new Date(2015, 1, 1, 1, 2, 1, 1),
-  syncFailedAt: new Date(2015, 1, 1, 1, 3, 1, 1),
-  bytes: 12345,
-  path: '/path/to/item',
-  description: 'Item description',
-  error: 'Item error',
+  contentTypeId: 'widget',
+  storageAttemptedAt: new Date(2015, 1, 1, 1, 1, 1, 1),
+  storageVerifiedAt: new Date(2015, 1, 1, 1, 2, 1, 1),
+  storageFailedAt: new Date(2015, 1, 1, 1, 3, 1, 1),
+  storageBytes: 12345,
+  storageError: 'Item storage error',
   data: {
     foo: 'bar'
   }

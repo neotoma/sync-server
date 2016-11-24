@@ -3,6 +3,8 @@ module.exports = function(modelName, attributes) {
 
   return {
     attributes: attributes,
-    one: new Model(attributes)
+    one: function() {
+      return new Model(attributes);
+    }
   };
 };

@@ -1,0 +1,20 @@
+{
+  "response": {
+    "widgets": {
+      "count": 3,
+      "items": [{
+        "id": 1,
+        "type": "widget",
+        "foo": "bar1"
+      }, {
+        "id": 2,
+        "type": "widget",
+        "foo": "bar2"
+      }, {
+        "id": 3,
+        "type": "widget",
+        "foo": "bar3"
+      }]
+    }
+  }
+}

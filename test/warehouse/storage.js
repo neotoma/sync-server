@@ -1,4 +1,4 @@
 module.exports = require('./warehouse')('storage', {
-  id: 'storageId',
-  host: 'storageHost'
+  id: 'storageplex',
+  host: 'storageplex.com'
 });

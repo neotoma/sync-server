@@ -1,19 +1,19 @@
 var ContentType = require('../../models/contentType');
 
 module.exports = require('./warehouse')('source', {
-  id: 'megaplex',
-  name: 'Megaplex',
+  id: 'sourceplex',
+  name: 'Sourceplex',
   enabled: true,
-  logoGlyphPath: '/images/logos/megaplex.svg',
+  logoGlyphPath: '/images/logos/sourceplex.svg',
   contentTypes: [
     new ContentType({ id: 'widget' }),
     new ContentType({ id: 'gadget' })
   ],
-  host: 'megaplex.example.com',
+  host: 'sourceplex.com',
   apiVersion: 5,
   itemsLimit: 98,
-  clientId: 'megaplexClientId',
-  clientSecret: 'megaplexClientSecret',
-  consumerKey: 'megaplexConsumerKey',
-  consumerSecret: 'megaplexConsumerSecret'
+  clientId: 'sourceplexClientId',
+  clientSecret: 'sourceplexClientSecret',
+  consumerKey: 'sourceplexConsumerKey',
+  consumerSecret: 'sourceplexConsumerSecret'
 });

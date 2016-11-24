@@ -2,583 +2,672 @@ require('../lib/prototypes/object.js');
 require('../lib/prototypes/string.js');
 var logger = require('../lib/logger');
 var Status = require('../models/status');
+var User = require('../models/user');
 var Item = require('../models/item');
 var UserSourceAuth = require('../models/userSourceAuth');
 var UserStorageAuth = require('../models/userStorageAuth');
 var async = require('async');
-var request = require('request');
+var pluralize = require('pluralize');
+var request = require('../lib/request');
+var mime = require('mime-types');
+var urlParser = require('url');
 var fs = require('fs');
 var validateParams = require('../lib/validateParams');
+var urlRegex = require('../lib/urlRegex');
 var itemController = {};
 
-var supportedMimeTypes = {
-  jpg: 'image/jpeg',
-  json: 'application/json'
-}
+/**
+ * Returns whether URL with extension indicates media type supported by controller operations
+ * If able to determine media type with extension, returns boolean.
+ * If unable to determine media type with extension, returns no value.
+ * @param {string} url - URL
+ */
+itemController.hasSupportedMediaType = function(url) {
+  validateParams([{
+    name: 'url', variable: url, required: true, requiredType: 'string'
+  }]);
 
-var successStatusCodes = [200, 201, 202];
-
-itemController.syncAllForAllContentTypes = function(app, user, storage, source) {
-  var self = this;
-
-  try {
-    logger.trace('started to sync all items for all content types', {
-      userId: user.id,
-      storageId: storage.id,
-      sourceId: source.id
-    });
-
-    source.contentTypes.forEach(function(contentType) {
-      self.syncAll(app, user, storage, source, contentType);
-    });
-  } catch (error) {
-    logger.error('failed to sync all items for all content types', {
-      userId: user.id,
-      storageId: storage.id,
-      sourceId: source.id,
-      error: error
-    });
+  if (urlParser.parse(url).pathname.indexOf('.') === -1) {
+    return;
   }
+
+  return (['image/jpeg', 'application/json'].indexOf(mime.lookup(url)) !== -1);
 };
 
-itemController.syncAll = function(app, user, storage, source, contentType) {
-  var self = this;
+/**
+ * Returns file system path used to store item on storage
+ * @param {Item} item - Item
+ */ 
+itemController.storagePath = function(item) {
+  validateParams([{
+    name: 'item', variable: item, required: true, requiredProperties: ['id', 'contentTypeId']
+  }]);
 
-  logger.trace('started to sync all items', {
-    userId: user.id,
-    storageId: storage.id,
-    sourceId: source.id,
-    contentTypeId: contentType.id
-  });
+  return '/' + pluralize(item.contentTypeId) + '/' + item.id + '.json';
+};
 
-  var syncPage = function myself(error, pagination) {
-    if (error) {
-      logger.error('failed to sync page of items', {
-        userId: user.id,
-        storageId: storage.id,
-        sourceId: source.id,
-        contentTypeId: contentType.id,
-        error: error
-      });
-    } else {
-      self.syncPage(app, user, storage, source, contentType, pagination, myself);
-    }
-  }
+/**
+ * Store all items of all supported contentTypes found from source for user.
+ * Persist new Items in database for any not previously stored.
+ * Emit event on app for each Item once stored.
+ * @param {User} user - User for which to retrieve items from source and store them in storage
+ * @param {Source} source - Source from which to retrieve items
+ * @param {Storage} storage - Storage within which to store items
+ * @param {Object} app – App object on which to emit item storage events (optional)
+ * @param {function} done - Error-first callback function expecting no additional parameters (optional)
+ */
+itemController.storeAllForUserStorageSource = function(user, source, storage, app, done) {
+  var controller = this;
+  var log = logger.scopedLog();
 
-  syncPage(null, { offset: 0 });
-}
+  var validate = function(done) {
+    validateParams([{
+      name: 'user', variable: user, required: true, requiredProperties: ['id']
+    }, {
+      name: 'source', variable: source, required: true, requiredProperties: ['id']
+    }, {
+      name: 'storage', variable: storage, required: true, requiredProperties: ['id']
+    }, {
+      name: 'app', variable: app, requiredProperties: [{ name: 'emit', type: 'function' }]
+    }], done);
+  };
 
-itemController.syncPage = function(app, user, storage, source, contentType, pagination, callback) {
-  var self = this;
-
-  try {
-    logger.trace('started to sync page of items', { 
+  var setupLog = function(done) {
+    log = logger.scopedLog({
       userId: user.id,
-      storageId: storage.id,
       sourceId: source.id,
-      contentTypeId: contentType.id,
-      pagination: pagination
+      storageId: storage.id
     });
 
-    Status.findOrCreate({
+    done();
+  };
+
+  var storeAllItems = function(done) {
+    log('trace', 'Item controller started to store all items');
+    
+    async.eachSeries(source.contentTypes, function(contentType, done) {
+      controller.storeAllForUserStorageSourceContentType(user, source, storage, contentType, app, done);
+    }, done);
+  };
+
+  async.series([validate, setupLog, storeAllItems], function(error) {
+    if (error) {
+      log('error', 'Item controller failed to store all items', { error: error });
+    } else {
+      log('trace', 'Item controller stored all items');
+    }
+
+    done(error);
+  });
+};
+
+/**
+ * Store all items of contentType found from source for user.
+ * Persist new Items in database for any not previously stored.
+ * Emit event on app for each Item once stored.
+ * @param {User} user - User for which to retrieve items from source and store them in storage
+ * @param {Source} source - Source from which to retrieve items
+ * @param {Storage} storage - Storage within which to store items
+ * @param {ContentType} contentType - ContentType of which to retrieve items
+ * @param {Object} app – App object on which to emit item storage events (optional)
+ * @param {function} done - Error-first callback function expecting no additional parameters (optional)
+ */
+itemController.storeAllForUserStorageSourceContentType = function(user, source, storage, contentType, app, done) {
+  var controller = this;
+  var log = logger.scopedLog();
+
+  var validate = function(done) {
+    validateParams([{
+      name: 'user', variable: user, required: true, requiredProperties: ['id']
+    }, {
+      name: 'source', variable: source, required: true, requiredProperties: ['id']
+    }, {
+      name: 'storage', variable: storage, required: true, requiredProperties: ['id']
+    }, {
+      name: 'contentType', variable: contentType, required: true, requiredProperties: ['id']
+    }, {
+      name: 'app', variable: app, requiredProperties: [{ name: 'emit', type: 'function' }]
+    }], done);
+  };
+
+  var setupLog = function(done) {
+    log = logger.scopedLog({
+      userId: user.id,
+      sourceId: source.id,
+      storageId: storage.id,
+      contentTypeId: contentType.id
+    });
+
+    done();
+  };
+
+  var storeAllItems = function(done) {
+    log('trace', 'Item controller started to store all items');
+
+    var storeAllItemsPages = function myself(error, pagination) {
+      if (error) {
+        log('error', 'Item controller failed to store page of items', { error: error });
+
+        if (done) {
+          done(error);
+        }
+      } else {
+        if (pagination) {
+          controller.storeItemsPage(user, source, storage, contentType, pagination, app, myself);
+        } else if (done) {
+          done();
+        }
+      }
+    }
+
+    storeAllItemsPages(null, { offset: 0 });
+  };
+
+  async.series([validate, setupLog, storeAllItems], function(error) {
+    if (error) {
+      log('error', 'Item controller failed to store all items', { error: error });
+    } else {
+      log('trace', 'Item controller stored all items');
+    }
+
+    done(error);
+  });
+};
+
+/**
+ * Store all items of contentType found from source for user.
+ * Persist new Items in database for any not previously stored.
+ * Emit event on app for each Item once stored.
+ * @param {User} user - User for which to retrieve items from source and store them in storage
+ * @param {Source} source - Source from which to retrieve items
+ * @param {Storage} storage - Storage within which to store items
+ * @param {ContentType} contentType - ContentType of which to retrieve items
+ * @param {Object} pagination – Object containing pagination information
+ * @param {Object} app – App object on which to emit item storage events (optional)
+ * @param {function} done - Error-first callback function expecting nextPagination object as second parameter (optional)
+ */
+itemController.storeItemsPage = function(user, source, storage, contentType, pagination, app, done) {
+  var controller = this;
+  var log = logger.scopedLog();
+  var ids, page, userSourceAuth, status;
+
+  var validate = function(done) {
+    validateParams([{
+      name: 'user', variable: user, required: true, requiredProperties: ['id']
+    }, {
+      name: 'source', variable: source, required: true, requiredProperties: ['id', 'itemsPageUrl']
+    }, {
+      name: 'storage', variable: storage, required: true, requiredProperties: ['id']
+    }, {
+      name: 'contentType', variable: contentType, required: true, requiredProperties: ['id']
+    }, {
+      name: 'pagination', variable: pagination, required: true
+    }, {
+      name: 'app', variable: app, requiredProperties: [{ name: 'emit', type: 'function' }]
+    }], done);
+  };
+
+  var setupLog = function(done) {
+    ids = {
       userId: user.id,
       storageId: storage.id,
       sourceId: source.id,
       contentTypeId: contentType.id
-    }, function(error, status) {
-      if (error) {
-        logger.error('failed to find or create status while syncing page of items', {
-          userId: user.id,
-          storageId: storage.id,
-          sourceId: source.id,
-          contentTypeId: contentType.id,
-          pagination: pagination
-        });
+    };
 
-        return callback(error);
-      }
-         
-      UserSourceAuth.findOne({
-        userId: user.id,
-        sourceId: source.id
-      }, function(error, userSourceAuth) {
-        if (error || !userSourceAuth) {
-          logger.error('failed to find userSourceAuth while syncing page of items', {
-            userId: user.id,
-            storageId: storage.id,
-            sourceId: source.id,
-            contentTypeId: contentType.id,
-            pagination: pagination,
-            error: error
-          });
+    log = logger.scopedLog(Object.assign({ pagination: pagination }, ids));
+    log('trace', 'Item controller started to store page of items');
+    done();
+  };
 
-          if (!error) {
-            error = new Error('failed to find userSourceAuth while syncing page of items');
-          }
-
-          return callback(error);
-        }
-
-        var path = source.itemsPagePath(contentType, userSourceAuth, pagination);
-
-        if (!path) {
-          return;
-        }
-
-        var url = 'https://' + source.host + path;
-
-        self.getFile(url, function(error, data) {
-          if (error) {
-            var error = new Error('failed to retrieve page of items to sync');
-
-            logger.error(error.message, {
-              userId: user.id,
-              storageId: storage.id,
-              sourceId: source.id,
-              contentTypeId: contentType.id,
-              pagination: pagination,
-              error: error
-            });
-
-            return callback(error);
-          } else {
-            try {
-              var dataJSON = JSON.parse(data);
-              
-              if (typeof dataJSON.meta.errorType != 'undefined') {
-                var error = new Error('failed to retrieve valid page of items to sync');
-                
-                logger.error(error.message, {
-                  userId: user.id,
-                  storageId: storage.id,
-                  sourceId: source.id,
-                  contentTypeId: contentType.id,
-                  pagination: pagination,
-                  errorType: dataJSON.meta.errorType,
-                  errorDetail: dataJSON.meta.errorDetail,
-                  errorType: dataJSON.meta.errorType
-                });
-
-                return callback(error);
-              }
-
-              if (typeof dataJSON.response !== 'undefined') {
-                var itemsJSON = dataJSON.response[contentType.pluralId].items;
-              } else if (typeof dataJSON.data !== 'undefined') {
-                var itemsJSON = dataJSON.data;
-              }
-              
-              logger.trace('parsed page of items to sync', {
-                userId: user.id,
-                storageId: storage.id,
-                sourceId: source.id,
-                contentTypeId: contentType.id,
-                pagination: pagination,
-                total: itemsJSON.length
-              });
-
-              if (pagination.offset === 0) {
-                if (typeof dataJSON.response !== 'undefined') {
-                  status.totalItemsAvailable = dataJSON.response[contentType.pluralId].count;
-                }
-
-                status.save();
-              }
-
-              if (itemsJSON.length != 0) {
-                var syncItem = function(itemJSON, callback) {
-                  try {
-                    self.syncItem(app, user, storage, source, contentType, itemJSON, callback);
-                  } catch (error) {
-                    callback(error);
-                  }
-                }
-
-                var offset = pagination.offset;
-
-                async.each(itemsJSON, syncItem, function(error) {
-                  var pagination = {
-                    offset: offset + itemsJSON.length
-                  };
-
-                  if (typeof dataJSON.pagination !== 'undefined') {
-                    if (typeof dataJSON.pagination.next_url !== 'undefined') {
-                      pagination.next_url = dataJSON.pagination.next_url;
-                    }
-
-                    if (typeof dataJSON.pagination.next_max_id !== 'undefined') {
-                      pagination.next_max_id = dataJSON.pagination.next_max_id;
-                    }
-                  }
-
-                  callback(null, pagination);
-                });
-              } else {
-                logger.trace('found no items to sync in page', { 
-                  userId: user.id,
-                  storageId: storage.id,
-                  sourceId: source.id,
-                  contentTypeId: contentType.id,
-                  pagination: pagination
-                });
-              }
-            } catch(error) {
-              logger.error('failed to sync page of items', {
-                error: error,
-                userId: user.id,
-                storageId: storage.id,
-                sourceId: source.id,
-                contentTypeId: contentType.id,
-                pagination: pagination
-              });
-            }
-          }
-        })
-      });
+  var findOrCreateStatus = function(done) {
+    Status.findOrCreate(ids, function(error, foundOrCreatedStatus) {
+      status = foundOrCreatedStatus;
+      done(error);
     });
-  } catch (error) {
-    logger.error('failed to sync page of items', {
+  };
+
+  var findUserSourceAuth = function(done) {
+    UserSourceAuth.findOne({
       userId: user.id,
-      storageId: storage.id,
-      sourceId: source.id,
-      contentTypeId: contentType.id,
-      pagination: pagination,
-      error: error
+      sourceId: source.id
+    }, function(error, foundUserSourceAuth) {
+      if (!foundUserSourceAuth && !error) {
+        error = new Error('Failed to find userSourceAuth');
+      }
+
+      userSourceAuth = foundUserSourceAuth;
+      done(error);
     });
   }
-}
 
-itemController.syncItem = function(app, user, storage, source, contentType, itemJSON, callback) {
-  var self = this;
+  var getItemsPageResource = function(done) {
+    var url = source.itemsPageUrl(contentType, userSourceAuth, pagination);
 
-  if (typeof source.isValidItemJSON !== 'undefined' && !source.isValidItemJSON(itemJSON, contentType)) {
-    return callback();
-  }
-
-  logger.trace('started to sync item', {
-    userId: user.id,
-    storageId: storage.id,
-    sourceId: source.id,
-    contentTypeId: contentType.id,
-    sourceItemId: itemJSON.id
-  });
-
-  Item.findOrCreate({
-    userId: user.id,
-    storageId: storage.id,
-    sourceId: source.id,
-    contentTypeId: contentType.id,
-    sourceItemId: itemJSON.id
-  }, function(error, item) {
-    if (error) {
-      logger.error('failed to find or create item while syncing', { 
-        error: error
-      });
-
-      callback(error);
-    } else {
-      if (item.syncVerifiedAt) {
-        logger.trace('skipped syncing item because it is already verified', {
-          userId: user.id,
-          storageId: storage.id,
-          sourceId: source.id,
-          contentTypeId: contentType.id,
-          sourceItemId: item.sourceItemId,
-          itemId: item.id
-        });
-
-        callback();
-      } else {
-        item.data = itemJSON;
-        item.description = source.itemDescription(item);
-        item.syncAttemptedAt = Date.now();
-        item.save(function(error) {
-          if (error) {
-            logger.error('failed to save item while syncing', {
-              userId: user.id,
-              storageId: storage.id,
-              sourceId: source.id,
-              contentTypeId: contentType.id,
-              sourceItemId: item.sourceItemId,
-              itemId: item.id,
-              error: error
-            });
-
-            callback(error);
-          } else {
-            self.storeItem(app, user, storage, source, contentType, item, callback);
-          }
-        });
-      }
+    if (!url) {
+      return done('Failed to determine source.itemsPageUrl');
     }
-  });
-}
 
-itemController.storeItem = function(app, user, storage, source, contentType, item, done) {
-  validateParams([{
-    name: 'app', variable: app, required: true, requiredProperties: ['emit']
-  }, {
-    name: 'user', variable: user, required: true, requiredProperties: ['id']
-  }, {
-    name: 'storage', variable: storage, required: true, requiredProperties: ['id']
-  }, {
-    name: 'source', variable: source, required: true, requiredProperties: ['id']
-  }, {
-    name: 'contentType', variable: contentType, required: true, requiredProperties: ['id', 'pluralId']
-  }, {
-    name: 'item', variable: item, required: true, requiredProperties: ['id', 'data', 'save']
-  }, {
-    name: 'done', variable: done, required: true, requiredType: 'function'
-  }]);
+    controller.getResource(url, done);
+  }
 
-  var log = function(level, event, meta) {
-    var meta = meta ? meta : {};
+  var getItemObjects = function(resource, done) {
+    page = resource;
+    var error = source.itemsPageError(page);
 
-    logger.log(level, event, Object.assign(meta, {
-      userId: user.id,
-      storageId: storage.id,
-      sourceId: source.id,
-      contentTypeId: contentType.id,
-      itemId: item.id
+    if (error) {
+      return done(new Error('Failed to retrieve valid page: ' + error.message));
+    }
+
+    var itemDataObjects = source.itemsPageDataObjects(page, contentType);
+
+    if (!itemDataObjects) {
+      itemDataObjects = [];
+    }
+
+    if (pagination.offset === 0) {
+      status.totalItemsAvailable = source.itemsPageTotalAvailable(page, contentType);
+      status.save();
+    }
+
+    itemDataObjects = itemDataObjects.filter(function(itemDataObject) {
+      return (itemDataObject.type === contentType.id);
+    });
+
+    if (!itemDataObjects || !itemDataObjects.length) {
+      log('trace', 'Item controller retrieved page with no data to persist while storing page of items');
+    }
+
+    done(undefined, itemDataObjects.map(function(data) {
+      return {
+        data: data,
+        userId: user.id,
+        storageId: storage.id,
+        sourceId: source.id,
+        contentTypeId: contentType.id,
+        sourceItemId: data.id
+      };
     }));
   };
 
-  log('error', 'Item controller started to store item');
+  var persistItemObjects = function(itemObjects, done) {
+    async.mapSeries(itemObjects, controller.persistItemObject, done);
+  };
 
-  var path = '/' + contentType.pluralId + '/' + item.id + '.json';
+  var storeItemsData = function(items, done) {
+    async.eachSeries(items, function(item, done) {
+      controller.storeItemData(item, app, done);
+    }, done);
+  };
 
-  this.storeFile(user, storage, path, item.data, function(error, result) {
+  var determineNextPagination = function(done) {
+    done(null, source.itemsPageNextPagination(page, contentType, pagination));
+  };
+
+  async.waterfall([
+    validate,
+    setupLog,
+    findOrCreateStatus,
+    findUserSourceAuth,
+    getItemsPageResource,
+    getItemObjects,
+    persistItemObjects,
+    storeItemsData,
+    determineNextPagination
+  ], function(error, nextPagination) {
     if (error) {
-      log('error', 'Item controller failed to store item', { error: error });
-
-      item.syncFailedAt = Date.now();
-      item.error = error.message;
-      item.save(function(saveError) {
-        if (saveError) {
-          log('error', 'Item controller failed to update item after failure to store it', { error: saveError });
-        }
-
-        return done(error);
-      });
-    } else {
-      log('trace', 'Item controller stored file for item', { result: result });
-
-      item.syncVerifiedAt = Date.now();
-      item.bytes = result.bytes;
-      item.path = path;
-      item.save(function(error) {
-        if (error) {
-          log('error', 'Item controller failed to update item after storing it', { error: error });
-          done(error);
-        } else {
-          app.emit('itemSyncVerified', item);
-          log('trace', 'Item controller updated item after storing it');
-          done();
-        }
-      });
+      log('error', 'Item controller failed to store page of items', { error: error });
     }
+
+    done(error, nextPagination);
   });
-}
+};
 
-itemController.getFile = function(url, done) {
-  if (!url) {
-    throw new Error('Parameter url undefined or null');
-  }
+/**
+ * Persist an object representing Item data to the database and return corresponding Item.
+ * Create new Item in database if none with corresponding IDs exists. Otherwise retrieve existing Item.
+ * Update Item with data provided by object param before returning.
+ * @param {Object} object - Basic object containing Item properties
+ * @param {function} done - Error-first callback function expecting Item as second parameter
+ */
+itemController.persistItemObject = function(object, done) {
+  var ids;
+  var log = logger.scopedLog();
 
-  if (typeof url !== 'string') {
-    throw new Error('Parameter url not a string');
-  }
+  var test = function(done) {
+    done();
+  };
 
-  if (!done) {
-    throw new Error('Parameter done undefined or null');
-  }
+  var validate = function(done) {
+    validateParams([{
+      name: 'object', variable: object, required: true, requiredProperties: ['userId', 'storageId', 'sourceId', 'contentTypeId', 'sourceItemId', 'data']
+    }], done);
+  };
 
-  if (typeof done !== 'function') {
-    throw new Error('Parameter done not a function');
-  }
+  var collectIds = function(done) {
+    ids = {
+      userId: object.userId,
+      storageId: object.storageId,
+      sourceId: object.sourceId,
+      contentTypeId: object.contentTypeId,
+      sourceItemId: object.sourceItemId,
+    };
+    done();
+  };
 
-  var extension = url.split('.').pop();
+  var setupLog = function(done) {
+    log = logger.scopedLog(ids);
+    done();
+  };
 
-  if (!extension || extension === url) {
-    throw new Error('Parameter url has no extension');
-  }
-
-  if (!supportedMimeTypes[extension]) {
-    throw new Error('Parameter url extension indicates unsupported MIME type');
-  }
-
-  request({
-    url: url,
-    headers: {
-      'Content-Type': supportedMimeTypes[extension]
-    }
-  }, function(error, res, body) {
-    if (error) {
-      logger.error('Item controller failed to make request while getting file', {
-        error: error,
-        url: url
-      });
-
-      return done(error);
-    }
-
-    try {
-      if (res.statusCode === 401) {
-        throw new Error('failed to get file because of unauthorized request');
-      } else if (successStatusCodes.indexOf(res.statusCode) === -1) {
-        throw new Error('failed to get file');
-      }
-
-      switch(supportedMimeTypes[extension]) {
-        case 'application/json':
-          body = JSON.parse(body);
-          break;
-        case 'image/jpeg':
-          body = new Buffer(body);
-          break;
-      }
-
-      done(null, body);
-    } catch (error) {
-      logger.error('Item controller ' + error.message, {
-        url: url
-      });
-
-      done(new Error(error.message.capitalizeFirstLetter()));
-    }
-  });
-}
-
-itemController.storeFile = function(user, storage, path, data, done) {
-  if (!user) {
-    throw new Error('Parameter user undefined or null');
-  }
-
-  if (!user.id) {
-    throw new Error('Parameter user has no id property');
-  }
-
-  if (!storage) {
-    throw new Error('Parameter storage undefined or null');
-  }
-
-  if (!storage.id) {
-    throw new Error('Parameter storage has no id property');
-  }
-
-  if (!storage.host) {
-    throw new Error('Parameter storage has no host property');
-  }
-
-  if (!storage.path) {
-    throw new Error('Parameter storage has no path property');
-  }
-
-  if (typeof storage.path !== 'function') {
-    throw new Error('Property path of storage not a function');
-  }
-
-  if (!path) {
-    throw new Error('Parameter path undefined or null');
-  }
-
-  if (typeof path !== 'string') {
-    throw new Error('Parameter path not a string');
-  }
-
-  if (path.split('.').length > 2) {
-    throw new Error('Parameter path has more than one period');
-  }
-
-  var extension = path.split('.').pop();
-
-  if (!extension || extension === path) {
-    throw new Error('Parameter path lacks extension');
-  }
-
-  if (!supportedMimeTypes[extension]) {
-    throw new Error('Parameter path extension indicates unsupported MIME type');
-  }
-
-  if (!data) {
-    throw new Error('Parameter data undefined or null');
-  }
-
-  if (typeof data !== 'object' && !(data instanceof Buffer)) {
-    throw new Error('Parameter data not an object or buffer');
-  }
-
-  if (typeof done !== 'function') {
-    throw new Error('Parameter done not a function');
-  }
-
-  if (extension === 'jpg' && !(data instanceof Buffer)) {
-    throw new Error('Parameter extension jpg not provided with binary data');
-  } else if (extension == 'json' && (data instanceof Buffer)) {
-    throw new Error('Parameter extension json not provided with parseable data');
-  }
-
-  UserStorageAuth.findOne({
-    storageId: storage.id,
-    userId: user.id
-  }, function(error, userStorageAuth) {
-    try {
+  var persistItemObject = function(done) {
+    Item.findOrCreate(ids, function(error, item) {
       if (error) {
-        throw error;
-      } else if(!userStorageAuth) {
-        throw new Error('Item controller failed to retrieve userStorageAuth for user while storing file');
+        done(error);
+      } else {
+        item.data = object.data;
+        item.save(function(error) {
+          done(error, item);
+        });
       }
+    });
+  };
 
-      if (!(data instanceof Buffer)) {
-        data = JSON.stringify(data);
+  async.waterfall([
+    test,
+    validate,
+    collectIds,
+    setupLog,
+    persistItemObject
+  ], function(error, item) {
+    if (error) {
+      log('error', 'Item controller failed to persist item object', { error: error });
+    }
+
+    done(error, item);
+  });
+}
+
+/**
+ * Store data contained in property of Item in storage.
+ * Update attemptedAt, failedAt and verifiedAt timestamps as appropriate during process.
+ * Update storageError if storage fails.
+ * Update storageBytes and storagePath if storage succeeds.
+ * @param {Item} item - Item object
+ * @param {Object} app – App object on which to emit item storage events (optional)
+ * @param {function} done - Error-first callback function expecting no additional parameters
+ */
+itemController.storeItemData = function(item, app, done) {
+  var controller = this;
+  var log = logger.scopedLog();
+
+  var validate = function(done) {
+    validateParams([{
+      name: 'item', variable: item, required: true, requiredProperties: ['userId', 'storageId', 'data', 'save']
+    }], done);
+  };
+
+  var setupLog = function(done) {
+    log = logger.scopedLog({ itemId: item.id });
+    done();
+  };
+
+  var getUser = function(done) {
+    User.findById(item.userId, function(error, user) {
+      if (!error && !user) {
+        error = new Error('No user found for item');
       }
+      
+      done(error, user);
+    });
+  };
 
-      var options = {
-        url: 'https://' + storage.host + storage.path(path, userStorageAuth),
-        body: data,
-        headers: {
-          'Content-Type': supportedMimeTypes[extension]
-        }
-      };
+  var getStorage = function(user, done) {
+    try {
+      done(undefined, user, require('../objects/storages/' + item.storageId));
+    } catch (error) {
+      done(new Error('Item controller failed to load storage for item before storing data'));
+    }
+  };
 
-      request.put(options, function(error, res) {
-        if (error) {
-          logger.error('Item controller failed to make request while storing file', {
-            error: error,
-            storageId: storage.id,
-            userId: user.id,
-            path: path
-          });
+  var updateStorageAttemptedAt = function(user, storage, done) {
+    item.storageAttemptedAt = Date.now();
+    item.save(function(error) {
+      done(error, user, storage);
+    });
+  };
 
-          return done(error);
-        }
+  var storeFile = function(user, storage, done) {
+    controller.storeFile(user, storage, itemController.storagePath(item), item.data, done);
+  };
 
-        try {
-          if (res.statusCode === 401) {
-            throw new Error('failed to store file because of unauthorized request to storage');
-          } else if (successStatusCodes.indexOf(res.statusCode) === -1) {
-            throw new Error('failed to confirm storage of file with indicative status code from storage');
+  var updateStorageProperties = function(storeFileResult, done) {
+    item.storageVerifiedAt = Date.now();
+    item.storageFailedAt = undefined;
+    item.storageBytes = storeFileResult.bytes;
+    item.save(function(error) {
+      done(error);
+    });
+  };
+
+  var notifyApp = function(done) {
+    if (app && typeof app.emit === 'function') {
+      app.emit('storedItemData', item);
+    }
+
+    done();
+  };
+
+  log('trace', 'Item controller started to store item data');
+
+  async.waterfall([
+    validate,
+    setupLog,
+    getUser, 
+    getStorage,
+    updateStorageAttemptedAt,
+    storeFile,
+    updateStorageProperties,
+    notifyApp
+  ], function(error) {
+    if (error) {
+      log('error', 'Item controller failed to storeItemData', { error: error });
+
+      if (item && item.save) {
+        item.storageFailedAt = Date.now();
+        item.save(function(saveError) {
+          if (saveError) {
+            log('error', 'Item controller failed to update item after failure to store it', { error: saveError });
           }
 
-          done(null, JSON.parse(res.body));
-        } catch (error) {
-          logger.error('Item controller ' + error.message, {
-            storageId: storage.id,
-            userId: user.id,
-            path: path
-          });
-
-          return done(new Error(error.message.capitalizeFirstLetter()));
-        }
-      });
-    } catch (error) {
-      logger.error(error.message, {
-        userId: user.id,
-        storageId: storage.id
-      });
-      return done(error);
+          return done(error);
+        });
+      } else {
+        done(error);
+      }
+    } else {
+      log('trace', 'Item controller succeeded to storeItemData');
+      done();
     }
   });
-}
+};
+
+/**
+ * Store file to storage on behalf of user.
+ * @param {User} user - User object
+ * @param {Storage} storage - Storage object
+ * @param {string} path - Path to store file on storage
+ * @param {Object} data - Object that represents data for file
+ * @param {function} done - Error-first callback function with object representing HTTP response body from storage request as second parameter
+ */
+itemController.storeFile = function(user, storage, path, data, done) {
+  var controller = this;
+  var log = logger.scopedLog();
+
+  var validate = function(done) {
+    validateParams([{
+      name: 'user', variable: user, required: true, requiredProperties: ['id']
+    }, {
+      name: 'storage', variable: storage, required: true, requiredProperties: ['id', 'host', { name: 'itemUrl', type: 'function' }]
+    }, {
+      name: 'path', variable: path, required: true, requiredType: 'string', regex: /^\/[\w\/]*\w+\.\w+$/
+    }, {
+      name: 'data', variable: data, required: true, requiredType: ['buffer', 'object']
+    }, {
+      name: 'done', variable: done, required: true, requiredType: 'function'
+    }], function(error) {
+      if (!error) {
+        var mediaType = mime.lookup(path);
+
+        if (mediaType === 'image/jpeg' && !(data instanceof Buffer)) {
+          error = new Error('Path parameter with jpg extension not provided with binary data');
+        } else if (mediaType === 'application/json' && (data instanceof Buffer)) {
+          error = new Error('Path parameter with json extension not provided with parseable data');
+        } else if (itemController.hasSupportedMediaType(path) === false) {
+          error = new Error('Parameter path extension indicates unsupported media type');
+        }
+      }
+
+      done(error);
+    });
+  };
+
+  var prepareData = function(done) {
+    if (!(data instanceof Buffer)) {
+      data = JSON.stringify(data);
+    }
+
+    done();
+  };
+
+  var setupLog = function(done) {
+    log = logger.scopedLog({
+      path: path,
+      storageId: storage.id,
+      userId: user.id
+    });
+
+    done();
+  };
+
+  var findUserStorageAuth = function(done) {
+    UserStorageAuth.findOne({
+      storageId: storage.id,
+      userId: user.id
+    }, function(error, userStorageAuth) {
+      if(!error && !userStorageAuth) {
+        error = new Error('Failed to retrieve userStorageAuth');
+      }
+
+      done(error, userStorageAuth);
+    });
+  };
+
+  var storeFile = function(userStorageAuth, done) {
+    var options = {
+      url: storage.itemUrl(path, userStorageAuth),
+      body: data,
+      headers: { 'Content-Type': mime.lookup(path) }
+    };
+
+    request.put(options, function(error, res, body) {
+      if (!error) {
+        error = request.statusCodeError(res.statusCode);
+      }
+
+      if (!error) {
+        body = JSON.parse(body);
+      }
+
+      done(error, body);
+    });
+  };
+
+  async.waterfall([
+    validate,
+    prepareData,
+    setupLog,
+    findUserStorageAuth,
+    storeFile
+  ], function(error, responseBody) {
+    if (error) {
+      log('error', 'Item controller failed to store file', { error: error }); 
+    }
+
+    done(error, responseBody);
+  });
+};
+
+/**
+ * Return resource found at URL.
+ * @param {string} URL of resource with extension that corresponds to a supported media type
+ * @param {function} done - Error-first callback function with formatted data representing resource as second parameter
+ */
+itemController.getResource = function(url, done) {
+  var controller = this;
+  var log = logger.scopedLog();
+
+  var validate = function(done) {
+    validateParams([{
+      name: 'url', variable: url, required: true, requiredType: 'string', regex: urlRegex
+    }], function(error) {
+      if (!error && itemController.hasSupportedMediaType(url) === false) {
+        error = new Error('Parameter url indicates unsupported media type');
+      }
+
+      done(error);
+    });
+  };
+
+  var setupLog = function(done) {
+    log = logger.scopedLog({
+      url: url
+    });
+
+    done();
+  };
+
+  var getResource = function(done) {
+    var mediaType = mime.lookup(url);
+
+    request({
+      url: url,
+      headers: {
+        'Content-Type': mediaType
+      }
+    }, function(error, res, body) {
+      if (!error) {
+        error = request.statusCodeError(res.statusCode);
+      }
+
+      if (!error) {
+        switch(mediaType) {
+          case 'image/jpeg':
+            body = new Buffer(body);
+            break;
+          default:
+            try {
+              body = JSON.parse(body);
+            } catch (error) {}
+            break;
+        }
+      }
+
+      done(error, body);
+    });
+  };
+
+  async.waterfall([
+    validate, 
+    setupLog,
+    getResource
+  ], function(error, resource) {
+    if (error) {
+      log('error', 'Item controller failed to get resource', { error: error }); 
+    }
+
+    done(error, resource);
+  });
+};
 
 module.exports = itemController;

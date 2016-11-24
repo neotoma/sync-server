@@ -5,9 +5,9 @@ var statusController = require('../controllers/status.js');
 module.exports = function(app, socket) {
   var listeners = {};
 
-  var itemSyncVerified = function(item) {
+  var storedItemData = function(item) {
     if (socket.request.user.logged_in && item.userId == socket.request.user.id) {
-      logger.trace('itemSyncVerified', { itemId: item.id });
+      logger.trace('storedItemData', { itemId: item.id });
 
       statusController.json(function(error, data) {
         if (!error) {
@@ -22,8 +22,8 @@ module.exports = function(app, socket) {
     }
   }
 
-  listeners['itemSyncVerified'] = itemSyncVerified;
-  app.on('itemSyncVerified', itemSyncVerified); 
+  listeners['storedItemData'] = storedItemData;
+  app.on('storedItemData', storedItemData); 
 
   return listeners;
 }

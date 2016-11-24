@@ -52,7 +52,7 @@ describe('new status', function() {
       assert(status.createdAt);
       assert(status.updatedAt);
 
-      self._id = status._id;
+      self.id = status.id;
       self.createdAt = status.createdAt;
       self.updatedAt = status.updatedAt;
 
@@ -62,7 +62,7 @@ describe('new status', function() {
 
   it('has toObject', function() {
     var object = this.status.toObject();
-    assert.equal(object.id, this._id);
+    assert.equal(object.id, this.id);
     assert.equal(object.userId, wh.attributes.userId);
     assert.equal(object.storageId, wh.attributes.storageId);
     assert.equal(object.sourceId, wh.attributes.sourceId);
@@ -77,17 +77,18 @@ describe('new status', function() {
 
   it('can be found with findOrCreate', function(done) {
     var self = this;
+
     Status.findOrCreate(wh.attributes, function(error, status) {
-      assert.equal(status.id, self.status.id);
+      assert.equal(status.id, self.id);
       done(error);
     });
   });
 
   it('can be created with findOrCreate', function(done) {
-    var attributes = Object.clone(wh.attributes);
-    attributes.userId = wh.attributes.userId + 'x';
-
     var self = this;
+    var attributes = Object.clone(wh.attributes);
+    attributes.userId = attributes.userId + 'x';
+
     Status.findOrCreate(attributes, function(error, status) {
       assert.equal(typeof status.id, 'string');
       assert.notEqual(status.id, self.status.id);

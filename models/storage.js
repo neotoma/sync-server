@@ -19,23 +19,23 @@ module.exports = function(attributes) {
     throw new Error('Property host of attributes not a string');
   }
 
-  if (attributes.path && typeof attributes.path !== 'function') {
-    throw new Error('Property path of attributes not a function');
+  if (attributes.itemUrl && typeof attributes.itemUrl !== 'function') {
+    throw new Error('Property itemUrl of attributes not a function');
   }
 
   this.id = attributes.id;
   this.host = attributes.host;
 
-  if (attributes.path) {
-    this.path = attributes.path;
+  if (attributes.itemUrl) {
+    this.itemUrl = attributes.itemUrl;
   } else {
-    this.path = function(subPath, userStorageAuth) {
-      if (!subPath) {
-        throw new Error('Parameter subPath undefined or null');
+    this.itemUrl = function(path, userStorageAuth) {
+      if (!path) {
+        throw new Error('Parameter path undefined or null');
       }
 
-      if (typeof subPath !== 'string') {
-        throw new Error('Parameter subPath not string');
+      if (typeof path !== 'string') {
+        throw new Error('Parameter path not string');
       }
 
       if (!userStorageAuth) {
@@ -46,7 +46,7 @@ module.exports = function(attributes) {
         throw new Error('Parameter userStorageAuth has no storageToken property');
       }
 
-      return '/' + subPath + '?access_token=' + userStorageAuth.storageToken;
+      return 'https://' + this.host + path + '?access_token=' + userStorageAuth.storageToken;
     };
   }
 };
