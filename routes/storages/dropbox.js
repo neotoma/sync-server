@@ -133,7 +133,7 @@ module.exports = function(app) {
             res.redirect('/storages/dropbox/auth');
           } else {
             if (req.session.storagesDropboxAuthRedirectURL) {
-              logger.info('Dropbox auth-callback route redirecting to remembered URL', { url: req.session.storagesDropboxAuthRedirectURL });
+              logger.trace('Dropbox auth-callback route redirecting to remembered URL', { url: req.session.storagesDropboxAuthRedirectURL });
               var storagesDropboxAuthRedirectURL = req.session.storagesDropboxAuthRedirectURL;
               req.session.storagesDropboxAuthRedirectURL = null;
               res.redirect(storagesDropboxAuthRedirectURL);

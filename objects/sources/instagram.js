@@ -4,8 +4,8 @@ var ContentType = require('../../models/contentType');
 var logger = require('../../lib/logger');
 
 var contentTypes = [
-  new ContentType('image'),
-  new ContentType('video'),
+  new ContentType({ id: 'image' }),
+  new ContentType({ id: 'video' }),
 ];
 
 var instagram = new Source({
@@ -16,10 +16,7 @@ var instagram = new Source({
   contentTypes: contentTypes,
   host: 'api.instagram.com',
   clientId: process.env.SYNC_SOURCES_INSTAGRAM_CLIENT_ID || logger.fatal('Client ID not provided by environment for Instagram config'),
-  clientSecret: process.env.SYNC_SOURCES_INSTAGRAM_CLIENT_SECRET || logger.fatal('Client secret not provided by environment for Instagram config'),
-  itemAssetLinks: {
-    standardResolutionImage: 'images.standard_resolution.url'
-  }
+  clientSecret: process.env.SYNC_SOURCES_INSTAGRAM_CLIENT_SECRET || logger.fatal('Client secret not provided by environment for Instagram config')
 });
 
 instagram.itemsPagePath = function(contentType, userSourceAuth, pagination) {
@@ -44,12 +41,12 @@ instagram.itemDescription = function(item) {
   return description;
 };
 
-instagram.isValidItemJSON = function(itemJSON, contentType) {
+instagram.validItemType = function(type, contentType) {
   switch (contentType.id) {
     case 'image':
-      return (itemJSON.type == 'image');
+      return (type === 'image');
     case 'video':
-      return (itemJSON.type == 'video');
+      return (type === 'video');
     default:
       return false;
   }

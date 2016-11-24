@@ -179,7 +179,7 @@ module.exports = function(app) {
               if (error) {
                 error.message = 'Unable to authenticate session after verifying contact';
               } else {
-                logger.info('Session authenticated after verifying contact');
+                logger.trace('Session authenticated after verifying contact');
               }
 
               callback(error, user);

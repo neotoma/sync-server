@@ -1,34 +1,30 @@
-var config = require('../config');
+require('../../lib/prototypes/object.js');
+var db = require('../db');
+var wh = require('../warehouse/userSourceAuth');
 var assert = require('assert');
 var UserSourceAuth = require('../../models/userSourceAuth');
-var mongoose = require('../../lib/mongoose');
-
-var userSourceAuthAttributes = {
-  userId: 'userSourceAuthUserId',
-  sourceId: 'userSourceAuthSourceId',
-  sourceToken: 'userSourceAuthSourceToken',
-  sourceUserId: 'userSourceAuthSourceUserId'
-};
 
 describe('new userSourceAuth', function() {
+  before(db.clear);
+  
   before(function() {
-    this.userSourceAuth = new UserSourceAuth(userSourceAuthAttributes);
+    this.userSourceAuth = new UserSourceAuth(wh.attributes);
   });
 
   it('has userId', function() {
-    assert.equal(this.userSourceAuth.userId, userSourceAuthAttributes.userId);
+    assert.equal(this.userSourceAuth.userId, wh.attributes.userId);
   });
 
   it('has sourceId', function() {
-    assert.equal(this.userSourceAuth.sourceId, userSourceAuthAttributes.sourceId);
+    assert.equal(this.userSourceAuth.sourceId, wh.attributes.sourceId);
   });
 
   it('has sourceToken', function() {
-    assert.equal(this.userSourceAuth.sourceToken, userSourceAuthAttributes.sourceToken);
+    assert.equal(this.userSourceAuth.sourceToken, wh.attributes.sourceToken);
   });
 
   it('has sourceUserId', function() {
-    assert.equal(this.userSourceAuth.sourceUserId, userSourceAuthAttributes.sourceUserId);
+    assert.equal(this.userSourceAuth.sourceUserId, wh.attributes.sourceUserId);
   });
 
   it('can save and have id, timestamps', function(done) {
@@ -51,30 +47,28 @@ describe('new userSourceAuth', function() {
   it('has toObject', function() {
     var object = this.userSourceAuth.toObject();
     assert.equal(object.id, this._id);
-    assert.equal(object.userId, userSourceAuthAttributes.userId);
-    assert.equal(object.sourceId, userSourceAuthAttributes.sourceId);
-    assert.equal(object.sourceToken, userSourceAuthAttributes.sourceToken);
-    assert.equal(object.sourceUserId, userSourceAuthAttributes.sourceUserId);
-
-    // Hack: asserts failing on equivalency without use of toString()
-    assert.equal(object.createdAt.toString(), this.createdAt.toString());
-    assert.equal(object.updatedAt.toString(), this.updatedAt.toString());
+    assert.equal(object.userId, wh.attributes.userId);
+    assert.equal(object.sourceId, wh.attributes.sourceId);
+    assert.equal(object.sourceToken, wh.attributes.sourceToken);
+    assert.equal(object.sourceUserId, wh.attributes.sourceUserId);
+    assert.deepEqual(object.createdAt.toString(), this.createdAt.toString());
+    assert.deepEqual(object.updatedAt.toString(), this.updatedAt.toString());
   });
 
   it('can be found with findOrCreate', function(done) {
     var self = this;
-    UserSourceAuth.findOrCreate(userSourceAuthAttributes, function(error, userSourceAuth) {
+    UserSourceAuth.findOrCreate(wh.attributes, function(error, userSourceAuth) {
       assert.equal(userSourceAuth.id, self.userSourceAuth.id);
       done(error);
     });
   });
 
   it('can be created with findOrCreate', function(done) {
-    var newUserSourceAuthAttributes = userSourceAuthAttributes;
-    newUserSourceAuthAttributes.userId = 'newUserSourceAuthUserId';
+    var attributes = Object.clone(wh.attributes);
+    attributes.userId = wh.attributes.userId + 'x';
 
     var self = this;
-    UserSourceAuth.findOrCreate(newUserSourceAuthAttributes, function(error, userSourceAuth) {
+    UserSourceAuth.findOrCreate(attributes, function(error, userSourceAuth) {
       assert.equal(typeof userSourceAuth.id, 'string');
       assert.notEqual(userSourceAuth.id, self.userSourceAuth.id);
       done(error);
