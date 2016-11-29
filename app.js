@@ -1,3 +1,4 @@
+require('dotenv').config();
 var express = require('express');
 var logger = require('./lib/logger');
 var passport = require('./lib/passport');
@@ -19,16 +20,16 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 try {
-  if (!process.env.SYNC_HOST) {
+  if (!process.env.SYNC_SERVER_HOST) {
     throw new Error('App failed to find host variable from environment');
   }
 
-  if (!process.env.SYNC_PORT) {
+  if (!process.env.SYNC_SERVER_PORT) {
     throw new Error('App failed to find port variable from environment');
   }
 
-  app.origin = 'https://' + process.env.SYNC_HOST + ':' + process.env.SYNC_PORT;
-  app.port = process.env.SYNC_PORT;
+  app.origin = 'https://' + process.env.SYNC_SERVER_HOST + ':' + process.env.SYNC_SERVER_PORT;
+  app.port = process.env.SYNC_SERVER_PORT;
 } catch (error) {
   logger.fatal(error.message);
   throw error;
@@ -36,6 +37,6 @@ try {
 
 require('./routes')(app);
 
-logger.info('App loaded in ' + process.env.NODE_ENV + ' environment');
+logger.info('App loaded in ' + process.env.SYNC_SERVER_ENV + ' environment');
 
 module.exports = app;

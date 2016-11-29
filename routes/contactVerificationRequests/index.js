@@ -44,8 +44,8 @@ module.exports = function(app) {
           if (contactVerificationRequest.method === 'email') {
             mailer.sendMail({
               to: contactVerificationRequest.contact,
-              subject: 'Please verify your email address to get notified about ' + process.env.SYNC_NAME,
-              text: 'Thanks for submitting your email address to ' + process.env.SYNC_NAME + ' so we can notify you when it becomes available!\n\nHowever, before we can do so, we need you to confirm your address by visiting:\n\n' + contactVerificationRequest.clientOrigin + '/contactVerificationRequests/' + contactVerificationRequest._id + '?code=' + contactVerificationRequest.code + ' \n\n\nPlease take a second to do so!\n\nNote: If you weren\'t the one to submit your email address to us, don\'t worry; we won\'t contact you further about this matter. You can simply ignore this message.'
+              subject: 'Please verify your email address to get notified about ' + process.env.SYNC_SERVER_NAME,
+              text: 'Thanks for submitting your email address to ' + process.env.SYNC_SERVER_NAME + ' so we can notify you when it becomes available!\n\nHowever, before we can do so, we need you to confirm your address by visiting:\n\n' + contactVerificationRequest.clientOrigin + '/contactVerificationRequests/' + contactVerificationRequest._id + '?code=' + contactVerificationRequest.code + ' \n\n\nPlease take a second to do so!\n\nNote: If you weren\'t the one to submit your email address to us, don\'t worry; we won\'t contact you further about this matter. You can simply ignore this message.'
             }, function(error, mailerRes) {
               if (error) {
                 logger.error('App failed to send email for new contactVerificationRequest', { reason: error.message });

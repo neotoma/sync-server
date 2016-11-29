@@ -1,5 +1,6 @@
-*.env
 *.sublime-workspace
+.certs*
+.env*
 .DS_Store
 logs/
 node_modules/

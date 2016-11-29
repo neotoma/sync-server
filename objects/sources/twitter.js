@@ -12,8 +12,8 @@ var twitter = new Source({
   logoGlyphPath: '/images/logos/twitter-glyph.svg',
   contentTypes: contentTypes,
   host: 'api.twitter.com',
-  consumerKey: process.env.SYNC_SOURCES_TWITTER_CONSUMER_KEY || logger.fatal('Client ID not provided by environment for Twitter config'),
-  consumerSecret: process.env.SYNC_SOURCES_TWITTER_CONSUMER_SECRET || logger.fatal('Client secret not provided by environment for Twitter config'),
+  consumerKey: process.env.SYNC_SERVER_SOURCES_TWITTER_CONSUMER_KEY || logger.fatal('Client ID not provided by environment for Twitter config'),
+  consumerSecret: process.env.SYNC_SERVER_SOURCES_TWITTER_CONSUMER_SECRET || logger.fatal('Client secret not provided by environment for Twitter config'),
   host: 'api.twitter.com'
 });
 

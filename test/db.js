@@ -1,4 +1,6 @@
-process.env.NODE_ENV = 'test';
+process.env.SYNC_SERVER_ENV = 'test';
+require('dotenv').config();
+
 var mongoose = require('../lib/mongoose');
 
 var clear = function(done) {

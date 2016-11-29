@@ -18,8 +18,8 @@ var foursquare = new Source({
   host: 'api.foursquare.com',
   apiVersion: '20150712',
   itemsLimit: 250,
-  clientId: process.env.SYNC_SOURCES_FOURSQUARE_CLIENT_ID || logger.fatal('Client ID not provided by environment for foursquare config'),
-  clientSecret: process.env.SYNC_SOURCES_FOURSQUARE_CLIENT_SECRET || logger.fatal('Client secret not provided by environment for foursquare config')
+  clientId: process.env.SYNC_SERVER_SOURCES_FOURSQUARE_CLIENT_ID || logger.fatal('Client ID not provided by environment for foursquare config'),
+  clientSecret: process.env.SYNC_SERVER_SOURCES_FOURSQUARE_CLIENT_SECRET || logger.fatal('Client secret not provided by environment for foursquare config')
 });
 
 foursquare.itemsPageUrl = function(contentType, userSourceAuth, pagination) {

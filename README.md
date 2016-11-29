@@ -1,138 +1,119 @@
-# Sync
+# Sync server
 
-This is an API-centric service for synchronizing data between sources and storages per the [Asheville project specification](https://github.com/asheville/spec).
+This repository contains the source code for a service that synchronizes data from sources to storage on behalf of users per the [Asheville project specification](https://github.com/asheville/spec).
 
-# Hosts
+## Setting up the environment
 
-Hosts must support SSL and be configured with the following environment variables:
+The code requires several environment variables either to run the server or deploy it to another system. The following environment variables can be declared by adding a file named `.env` (in [INI format](https://en.wikipedia.org/wiki/INI_file)) to the base directory, assuming they're not declared elsewhere in the system already. Such a file will be ignored by Git.
 
-```
-SYNC_HOST=<host for this app, including port>
-SYNC_WEB_HOST=<host for web app, including port>
-SYNC_DEPLOY_HOST=<host for web app deployment elsewhere>
-SYNC_DEPLOY_HOST_DIR=<host directory for deployment elsewhere>
-SYNC_DEPLOY_HOST_USERNAME=<host username for deployment elsewhere>
-SYNC_SSL_KEY=<path to file with SSL key>
-SYNC_SSL_CRT=<path to file with SSL certificate>
-SYNC_SSL_INT_CRT=<path to file with SSL intermediate CA certificate>
-```
+- `SYNC_SERVER_ENV`: Type of environment within which to run the app, affecting the behavior of services such as database, logging, and mailing. Must be assigned value `development`, `test`, or `production` (e.g. `development`; required to run app)
+- `SYNC_SERVER_NAME`: Name used by the app to identity itself with users (e.g. "Asheville"; required to run app)
+- `SYNC_SERVER_MAILER_SENDER_EMAIL`: Email address used by app to send email (e.g. `support@example.com`; required to run app)
+- `SYNC_SERVER_MAILER_DEV_RECIPIENT_EMAIL`: Email address used by the app to manually test the delivery of email (e.g. `developer@example.com`; required to run app in the development environment but not required to run it in other environments nor to deploy)
+- `SYNC_SERVER_MAILER_LOGGER_EMAIL`: Email address used by the app to report high-priority log events by email (e.g. "developer-support@example.com"; optional)
+- `SYNC_SERVER_CERTS_DIR`: Local system path to a directory with the SSL certificate files `key`, `crt` and `ca-bundle` needed by the app to serve HTTPs requests (e.g. `./certs`; required to run app)
+- `SYNC_SERVER_HOST`: Host address for the app (e.g. `127.0.0.1`; required to run app)
+- `SYNC_SERVER_PORT`: Port through which to run the app (e.g. `1234`; required to run app)
+- `SYNC_SERVER_WEB_HOST`: Host address for the web client intended to communicate with the app exclusively via cross-origin HTTP requests; used to set HTTP access control (CORS) (e.g. `example.com:9019`; optional)
+- `SYNC_SERVER_DEPLOY_HOST_USERNAME`: User name with which to SSH into remote deployment server (e.g. `root`; required to deploy app)
+- `SYNC_SERVER_DEPLOY_HOST`: Host address for the remote deployment server (e.g. `example.com`; required to deploy app)
+- `SYNC_SERVER_DEPLOY_HOST_DIR`: Remote system path to app directory on deployment server (e.g. `/var/www/sync-server`; required to deploy app)
+- `SYNC_SERVER_DEPLOY_CERTS_DIR`: Local system path to a directory with the SSL certificate files `key`, `crt` and `ca-bundle` needed by the app to serve HTTPs requests *remotely on the deployment server* (e.g. `./certs`; required to deploy app)
 
-## Database
-
-User data is managed by [MongoDB](http://www.mongodb.org/), the host of which must be indicated by the following environment variables:
-
-```
-SYNC_MONGODB_HOST=<mongodb service host>
-```
-
-Example: `127.0.0.1`
+You can execute the following from the base directory to initiate such a config file with default values:
 
 ```
-SYNC_MONGODB_PORT=<mongodb service port>
+printf "SYNC_SERVER_ENV=development\nSYNC_SERVER_NAME=Asheville\nSYNC_SERVER_CERTS_DIR=.certs\nSYNC_SERVER_HOST=127.0.0.1\nSYNC_SERVER_PORT=4201" > .env
 ```
 
-Example: `27017`
+Note that you must add an `SYNC_SERVER_MAILER_SENDER_EMAIL` value to this file or email delivery will fail while running the app. Other deployment-required variables are also omitted.
 
-## Sessions
+If you intend to deploy the server to another system using scripts within the "Developing and deploying the server" section below, you must also create a `.env-deploy` file in the base directory, one that will be ignored by Git and used upon deployment to create an `.env` file remotely, thereby setting environment variables on the deployment server. The following can be executed from the base directory to initiate such a file:
+
+```
+printf "SYNC_SERVER_ENV=production\nSYNC_SERVER_NAME=Asheville\nSYNC_SERVER_CERTS_DIR=.certs\nSYNC_SERVER_PORT=4201" > .env-deploy
+```
+
+Note that you must add `SYNC_SERVER_HOST` and `SYNC_SERVER_MAILER_SENDER_EMAIL` values to this file or the app will fail to run or deliver emails in deployment.
+
+---
+
+In addition to the above environment variables, the following need to be added for all environments to run the app successfuly.
+
+### Database
+
+State data is managed by [MongoDB](http://www.mongodb.org/), access to which must be indicated by the following environment variables:
+
+- `SYNC_SERVER_MONGODB_HOST`: Host address for the MongoDB service (e.g. `127.0.0.1`; required to run app)
+- `SYNC_SERVER_MONGODB_PORT`: Port through which to access the MongoDB service (e.g. `27017`; required to run app)
+
+### Sessions
 
 User sessions are handled by [Express](http://expressjs.com/) and [Passport](http://passportjs.org/), which rely on the following environment variable:
 
-```
-SYNC_SESSIONS_SECRET=<secret passphrase>
-```
-
-Use a randomly generated, secure, alphanumeric string for this value.
-
-## Storages
-
-Storages are points of destination for syncronizing data from sources. Users can authenticate them to initiate syncing.
-
-#### Endpoints
-
-- GET `/userStorageAuths`: retrieve all storage authentications for session user
-- DELETE `/userStorageAuths/:id`: delete a storage authentication
+- `SYNC_SERVER_SESSIONS_SECRET`: Secret, non-obvious string used to prevent session tampering (e.g. `oc]7kwM)R*UX3&` but *generate your own*; required)
 
 ### Dropbox
 
-#### Environment Variables
-
 The Dropbox storage module relies on the following environment variables:
 
-```
-SYNC_STORAGES_DROPBOX_APP_KEY=<dropbox developer app key>
-SYNC_STORAGES_DROPBOX_APP_SECRET=<dropbox developer app secret>
-```
+- `SYNC_SERVER_STORAGES_DROPBOX_APP_KEY`: Dropbox developer app key (required)
+- `SYNC_SERVER_STORAGES_DROPBOX_APP_SECRET`: Dropbox developer app secret (required) 
 
-You can find these on the [Dropbox developer website](https://dropbox.com/developers/apps). Register an app for Asheville and configure the redirect URI to be the app host plus the path `/storages/dropbox/auth-callback` (e.g. `http://localhost:9090/storages/dropbox/auth-callback`).
-
-#### Endpoints
-
-- GET `/storages/dropbox/auth`: authenticate Dropbox account
-- GET `/storages/dropbox/auth-callback`: process Dropbox account authentication
-
-## Sources
-
-Sources are points of origin for syncronizing data to storage. Users can authenticate them to initiate syncing.
-
-#### Endpoints
-
-- GET `/sources`: retrieve all available sources
-- GET `/userSourceAuths`: retrieve all source authentications for session user
-- DELETE `/userSourceAuths/:id`: delete a source authentication
+You can find these on the [Dropbox developer website](https://dropbox.com/developers/apps). Register an app and configure the redirect URI to be the app host plus the path `/storages/dropbox/auth-callback` (e.g. `https://127.0.0.1:9090/storages/dropbox/auth-callback`).
 
 ### foursquare
 
-#### Environment Variables
-
 The foursquare source module relies on the following environment variables:
 
-```
-SYNC_SOURCES_FOURSQUARE_CLIENT_ID=<foursquare developer app client ID>
-SYNC_SOURCES_FOURSQUARE_CLIENT_SECRET=<foursquare developer app client secret>
-```
+- `SYNC_SERVER_SOURCES_FOURSQUARE_CLIENT_ID`: foursquare developer app client ID (required)
+- `SYNC_SERVER_SOURCES_FOURSQUARE_CLIENT_SECRET`: foursquare developer app client secret (required)
 
-You can find these on the [foursquare developer website](https://foursquare.com/developers/apps). Register an app for Asheville if you haven't already and set a redirect URI as your host suffixed with `/sources/foursquare/auth-callback` (e.g. `http://localhost:9090/sources/foursquare/auth-callback`).
-
-#### Endpoints
-
-- GET `/sources/foursquare/auth`: authenticate foursquare account
-- GET `/sources/foursquare/auth-callback`: process foursquare account authentication
+You can find these on the [foursquare developer website](https://foursquare.com/developers/apps). Register an app and set a redirect URI as your host suffixed with `/sources/foursquare/auth-callback` (e.g. `https://127.0.0.1:9090/sources/foursquare/auth-callback`).
 
 ### Instagram
 
-#### Environment Variables
-
 The Instagram source module relies on the following environment variables:
 
-```
-SYNC_SOURCES_INSTAGRAM_CLIENT_ID=<instagram developer app client ID>
-SYNC_SOURCES_INSTAGRAM_CLIENT_SECRET=<instagram developer app client secret>
-```
+- `SYNC_SERVER_SOURCES_INSTAGRAM_CLIENT_ID`: Instagram developer app client ID (required)
+- `SYNC_SERVER_SOURCES_INSTAGRAM_CLIENT_SECRET`: Instagram developer app client secret (required)
 
-You can find these on the [Instagram developer website](https://instagram.com/developer). Register an app for Asheville if you haven't already and set the redirect URI as your host suffixed with `/sources/instagram/auth-callback` (e.g. `http://localhost:9090/sources/instagram/auth-callback`).
+You can find these on the [Instagram developer website](https://instagram.com/developer). Register an app and set the redirect URI as your host suffixed with `/sources/instagram/auth-callback` (e.g. `https://127.0.0.1:9090/sources/instagram/auth-callback`).
 
 ### Twitter
 
-#### Environment Variables
-
 The Twitter source module relies on the following environment variables:
 
-```
-SYNC_SOURCES_TWITTER_CONSUMER_KEY=<twitter developer app consumer key>
-SYNC_SOURCES_TWITTER_CONSUMER_SECRET=<twitter developer app consumer secret>
-```
+- `SYNC_SERVER_SOURCES_TWITTER_CONSUMER_KEY`: Twitter developer app client ID (required)
+- `SYNC_SERVER_SOURCES_TWITTER_CONSUMER_SECRET`: Twitter developer app client secret (required)
 
-You can find these on the [Twitter application management website](https://apps.twitter.com/). Register an app for Asheville if you haven't already and set the callback URL as your host suffixed with `/sources/twitter/auth-callback` (e.g. `http://localhost:9090/sources/twitter/auth-callback`).
+You can find these on the [Twitter application management website](https://apps.twitter.com/). Register an app and set the callback URL as your host suffixed with `/sources/twitter/auth-callback` (e.g. `http://127.0.0.1:9090/sources/twitter/auth-callback`).
 
-#### Endpoints
+## Running the server
 
-- GET `/sources/twitter/auth`: authenticate twitter account
-- GET `/sources/twitter/auth-callback`: process twitter account authentication
+Once the environment is ready per above, and [Node.js](http://nodejs.org/) with [NPM](https://www.npmjs.com/) is installed, simply run `npm install` to install dependencies and `node app-server.js` to fire the server up.
 
-## Statuses
+## Endpoints
 
-Statuses are objects that report the latest sync status for a particular user, source and content type.
+The following endpoints are supported by the app:
 
-#### Endpoints
+- GET `/userStorageAuths`: Retrieve all storage authentications for session user
+- DELETE `/userStorageAuths/:id`: Delete a storage authentication
+- GET `/storages/dropbox/auth`: Authenticate Dropbox account
+- GET `/storages/dropbox/auth-callback`: Process Dropbox account authentication
+- GET `/sources`: Retrieve all available sources
+- GET `/userSourceAuths`: Retrieve all source authentications for session user
+- DELETE `/userSourceAuths/:id`: Delete a source authentication
+- GET `/sources/foursquare/auth`: Authenticate foursquare account
+- GET `/sources/foursquare/auth-callback`: Process foursquare account authentication
+- GET `/sources/twitter/auth`: Authenticate twitter account
+- GET `/sources/twitter/auth-callback`: Process twitter account authentication
+- GET `/statuses`: Retrieve all statuses for session user
 
-- GET `/statuses`: retrieve all statuses for session user
+## Developing and deploying the server
+
+With [Grunt](gruntjs.com) installed in addition to establishing your environment accordingly per the instructions above, you can run any of the following scripts to help with development and deployment:
+
+- `grunt dev`: Runs the server and automatically reloads it when code changes are made during development
+- `grunt deploy`: Runs all tests locally, deploys the server remotely, runs `npm install` remotely to ensure the installation of dependencies, and either starts or restarts the server remotely with [forever](https://github.com/foreverjs/forever). Ensure that Node with NPM and forever are installed remotely before running this script.
+- `grunt deploy-post-tests`: Deploys the app just as above but without running all tests locally first

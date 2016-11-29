@@ -18,10 +18,10 @@ module.exports = function(app, source) {
     passReqToCallback: true
   };
 
-  var clientId = process.env['SYNC_SOURCES_' + source.id.toUpperCase() + '_CLIENT_ID'];
-  var clientSecret = process.env['SYNC_SOURCES_' + source.id.toUpperCase() + '_CLIENT_SECRET'];
-  var consumerKey = process.env['SYNC_SOURCES_' + source.id.toUpperCase() + '_CONSUMER_KEY'];
-  var consumerSecret = process.env['SYNC_SOURCES_' + source.id.toUpperCase() + '_CONSUMER_SECRET'];
+  var clientId = process.env['SYNC_SERVER_SOURCES_' + source.id.toUpperCase() + '_CLIENT_ID'];
+  var clientSecret = process.env['SYNC_SERVER_SOURCES_' + source.id.toUpperCase() + '_CLIENT_SECRET'];
+  var consumerKey = process.env['SYNC_SERVER_SOURCES_' + source.id.toUpperCase() + '_CONSUMER_KEY'];
+  var consumerSecret = process.env['SYNC_SERVER_SOURCES_' + source.id.toUpperCase() + '_CONSUMER_SECRET'];
 
   if (clientId && clientSecret) {
     strategyParams.clientID = clientId;

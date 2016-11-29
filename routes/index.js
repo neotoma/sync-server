@@ -2,10 +2,10 @@ var logger = require('../lib/logger');
 var cors = require('cors');
 
 var corsMiddleware = function(req, res, next) {
-  if (process.env.SYNC_WEB_HOST) {
+  if (process.env.SYNC_SERVER_WEB_HOST) {
     var origins = [
-      'http://' + process.env.SYNC_WEB_HOST, 
-      'https://' + process.env.SYNC_WEB_HOST
+      'http://' + process.env.SYNC_SERVER_WEB_HOST, 
+      'https://' + process.env.SYNC_SERVER_WEB_HOST
     ];
 
     var corsOptions = {
