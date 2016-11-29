@@ -10,7 +10,7 @@ The code requires several environment variables either to run the server or depl
 - `SYNC_SERVER_NAME`: Name used by the app to identity itself with users (e.g. "Asheville"; required to run app)
 - `SYNC_SERVER_MAILER_SENDER_EMAIL`: Email address used by app to send email (e.g. `support@example.com`; required to run app)
 - `SYNC_SERVER_MAILER_DEV_RECIPIENT_EMAIL`: Email address used by the app to manually test the delivery of email (e.g. `developer@example.com`; required to run app in the development environment but not required to run it in other environments nor to deploy)
-- `SYNC_SERVER_MAILER_LOGGER_EMAIL`: Email address used by the app to report high-priority log events by email (e.g. "developer-support@example.com"; optional)
+- `SYNC_SERVER_MAILER_LOGGER_EMAIL`: Email address used by the app to report high-priority log events by email (e.g. `developer-support@example.com`; optional)
 - `SYNC_SERVER_CERTS_DIR`: Local system path to a directory with the SSL certificate files `key`, `crt` and `ca-bundle` needed by the app to serve HTTPs requests (e.g. `.certs`; required to run app)
 - `SYNC_SERVER_HOST`: Host address for the app (e.g. `127.0.0.1`; required to run app)
 - `SYNC_SERVER_PORT`: Port through which to run the app (e.g. `1234`; required to run app)
