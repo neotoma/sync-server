@@ -3,6 +3,8 @@ var ContentType = require('../../models/contentType');
 var logger = require('../../lib/logger');
 var fs = require('fs');
 
+var jpegData = Buffer.from([0x62, 0x75, 0x66, 0x66, 0x65, 0x72]);
+
 // Model sub-warehouses
 var subwarehouses = {
   contactVerificationRequest: require('./contactVerificationRequest'),
@@ -26,7 +28,7 @@ var warehouse = {
   // JPEG
   jpegUrl: 'http://example.com/foo.jpg',
   jpegPath: '/foo.jpg',
-  jpegData: Buffer.from([0x62, 0x75, 0x66, 0x66, 0x65, 0x72]),
+  jpegData: jpegData,
 
   // Misc
   bytes: 1234,
