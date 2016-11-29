@@ -11,34 +11,36 @@ The code requires several environment variables either to run the server or depl
 - `SYNC_SERVER_MAILER_SENDER_EMAIL`: Email address used by app to send email (e.g. `support@example.com`; required to run app)
 - `SYNC_SERVER_MAILER_DEV_RECIPIENT_EMAIL`: Email address used by the app to manually test the delivery of email (e.g. `developer@example.com`; required to run app in the development environment but not required to run it in other environments nor to deploy)
 - `SYNC_SERVER_MAILER_LOGGER_EMAIL`: Email address used by the app to report high-priority log events by email (e.g. "developer-support@example.com"; optional)
-- `SYNC_SERVER_CERTS_DIR`: Local system path to a directory with the SSL certificate files `key`, `crt` and `ca-bundle` needed by the app to serve HTTPs requests (e.g. `./certs`; required to run app)
+- `SYNC_SERVER_CERTS_DIR`: Local system path to a directory with the SSL certificate files `key`, `crt` and `ca-bundle` needed by the app to serve HTTPs requests (e.g. `.certs`; required to run app)
 - `SYNC_SERVER_HOST`: Host address for the app (e.g. `127.0.0.1`; required to run app)
 - `SYNC_SERVER_PORT`: Port through which to run the app (e.g. `1234`; required to run app)
 - `SYNC_SERVER_WEB_HOST`: Host address for the web client intended to communicate with the app exclusively via cross-origin HTTP requests; used to set HTTP access control (CORS) (e.g. `example.com:9019`; optional)
 - `SYNC_SERVER_DEPLOY_HOST_USERNAME`: User name with which to SSH into remote deployment server (e.g. `root`; required to deploy app)
 - `SYNC_SERVER_DEPLOY_HOST`: Host address for the remote deployment server (e.g. `example.com`; required to deploy app)
 - `SYNC_SERVER_DEPLOY_HOST_DIR`: Remote system path to app directory on deployment server (e.g. `/var/www/sync-server`; required to deploy app)
-- `SYNC_SERVER_DEPLOY_CERTS_DIR`: Local system path to a directory with the SSL certificate files `key`, `crt` and `ca-bundle` needed by the app to serve HTTPs requests *remotely on the deployment server* (e.g. `./certs`; required to deploy app)
+- `SYNC_SERVER_DEPLOY_CERTS_DIR`: Local system path to a directory with the SSL certificate files `key`, `crt` and `ca-bundle` needed by the app to serve HTTPs requests *remotely on the deployment server* (e.g. `.certs-deploy`; required to deploy app)
 
-You can execute the following from the base directory to initiate such a config file with default values:
+Note that you can create a directory called `.certs-deploy` within the base directory to satisfy the `SYNC_SERVER_DEPLOY_CERTS_DIR` and it will be ignored by Git.
+
+You can execute the following from the base directory to initiate a `.env` file with default values:
 
 ```
-printf "SYNC_SERVER_ENV=development\nSYNC_SERVER_NAME=Asheville\nSYNC_SERVER_CERTS_DIR=.certs\nSYNC_SERVER_HOST=127.0.0.1\nSYNC_SERVER_PORT=4201" > .env
+printf "SYNC_SERVER_ENV=development\nSYNC_SERVER_NAME=Asheville\nSYNC_SERVER_CERTS_DIR=.certs\nSYNC_SERVER_HOST=127.0.0.1\nSYNC_SERVER_PORT=4201\nSYNC_SERVER_DEPLOY_CERTS_DIR=.certs-deploy" > .env
 ```
 
-Note that you must add an `SYNC_SERVER_MAILER_SENDER_EMAIL` value to this file or email delivery will fail while running the app. Other deployment-required variables are also omitted.
+Note that you must add an `SYNC_SERVER_MAILER_SENDER_EMAIL` value to this file or email delivery may fail while running the app. Other deployment-required variables are also omitted.
 
-If you intend to deploy the server to another system using scripts within the "Developing and deploying the server" section below, you must also create a `.env-deploy` file in the base directory, one that will be ignored by Git and used upon deployment to create an `.env` file remotely, thereby setting environment variables on the deployment server. The following can be executed from the base directory to initiate such a file:
+If you intend to deploy the server to another system using scripts within the "Developing and deploying the server" section below, you can also create a `.env-deploy` file in the base directory, one that will be ignored by Git and used upon deployment to create an `.env` file remotely, thereby setting environment variables on the deployment server. The following can be executed from the base directory to initiate such a file:
 
 ```
 printf "SYNC_SERVER_ENV=production\nSYNC_SERVER_NAME=Asheville\nSYNC_SERVER_CERTS_DIR=.certs\nSYNC_SERVER_PORT=4201" > .env-deploy
 ```
 
-Note that you must add `SYNC_SERVER_HOST` and `SYNC_SERVER_MAILER_SENDER_EMAIL` values to this file or the app will fail to run or deliver emails in deployment.
+Note that you must add `SYNC_SERVER_HOST` and `SYNC_SERVER_MAILER_SENDER_EMAIL` values to this file or the app may fail to run or deliver emails in deployment.
 
 ---
 
-In addition to the above environment variables, the following need to be added for all environments to run the app successfuly.
+In addition to the above variables, the following need to be added for all environments to run the app successfuly.
 
 ### Database
 
