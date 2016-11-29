@@ -73,14 +73,19 @@ module.exports = function(grunt) {
   // Run tests and deploy
   grunt.registerTask('deploy', [
     'mochaTest:main',
-    'deploy-post-tests'
+    'deploy-dependencies',
+    'deploy-app'
   ]);
 
-  // Deploy to host after running tests
-  grunt.registerTask('deploy-post-tests', [
-    'rsync:app',
+  // Deploy environment config files and certificate files
+  grunt.registerTask('deploy-dependencies', [
     'rsync:certs',
-    'rsync:env',
+    'rsync:env'
+  ]);
+
+  // Deploy app, install modules and start/restart
+  grunt.registerTask('deploy-app', [
+    'rsync:app',
     'force:sshexec:npmInstall',
     'sshexec:foreverRestartAll'
   ]);

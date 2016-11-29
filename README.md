@@ -116,6 +116,7 @@ The following endpoints are supported by the app:
 
 With [Grunt](gruntjs.com) installed in addition to establishing your environment accordingly per the instructions above, you can run any of the following scripts to help with development and deployment:
 
-- `grunt dev`: Runs the server and automatically reloads it when code changes are made during development
-- `grunt deploy`: Runs all tests locally, deploys the server remotely, runs `npm install` remotely to ensure the installation of dependencies, and either starts or restarts the server remotely with [forever](https://github.com/foreverjs/forever). Ensure that Node with NPM and forever are installed remotely before running this script.
-- `grunt deploy-post-tests`: Deploys the app just as above but without running all tests locally first
+- `grunt dev`: Runs the app and automatically reloads it when code changes are made during development
+- `grunt deploy`: Runs all tests locally, deploys environment and certificate file dependencies, deploys the app remotely, runs `npm install` remotely to ensure the installation of dependencies, and either starts or restarts the app remotely with [forever](https://github.com/foreverjs/forever). Ensure that Node with NPM and forever are installed remotely before running this script.
+- `grunt deploy-dependencies`: Deploys environment and certificate file dependencies.
+- `grunt deploy-app`: Deploys the app remotely, runs `npm install` remotely to ensure the installation of dependencies, and either starts or restarts the app remotely with forever.
