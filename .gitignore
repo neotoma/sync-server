@@ -1,7 +1,7 @@
-*.sublime-workspace
-*.log
 .certs*
-.env*
 .DS_Store
-node_modules/
+.env*
+.sublime-workspace
+app.log
+node_modules
 npm-debug.log
