@@ -4,7 +4,7 @@ var logger = require('./lib/logger');
 
 var keyPath = process.env.SYNC_SERVER_CERTS_DIR + '/key';
 var certPath = process.env.SYNC_SERVER_CERTS_DIR + '/crt';
-var caPath = process.env.SYNC_SERVER_CERTS_DIR + '/ca-bundle';
+var caPath = process.env.SYNC_SERVER_CERTS_DIR + '/ca';
 
 try {
   if (!process.env.SYNC_SERVER_HOST) {
