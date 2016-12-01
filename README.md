@@ -18,9 +18,9 @@ The code requires several environment variables either to run the server or depl
 - `SYNC_SERVER_DEPLOY_HOST_USERNAME`: User name with which to SSH into remote deployment server (e.g. `root`; required to deploy app)
 - `SYNC_SERVER_DEPLOY_HOST`: Host address for the remote deployment server (e.g. `example.com`; required to deploy app)
 - `SYNC_SERVER_DEPLOY_HOST_DIR`: Remote system path to app directory on deployment server (e.g. `/var/www/sync-server`; required to deploy app)
-- `SYNC_SERVER_DEPLOY_CERTS_DIR`: Local system path to a directory with the SSL certificate files `key`, `crt` and `ca-bundle` needed by the app to serve HTTPs requests *remotely on the deployment server* (e.g. `.certs-deploy`; required to deploy app). This directory will be copied to `.certs` within the base directory of the app on the deployment server so the environment variable `SYNC_SERVER_CERTS_DIR` must be set to `.certs` in deployment unless this directory is later moved.
+- `SYNC_SERVER_DEPLOY_CERTS_DIR`: Local system path to a directory with the SSL certificate files `key`, `crt` and `ca-bundle` needed by the app to serve HTTPs requests *remotely on the deployment server* (e.g. `.certs-deploy`; required to deploy app). This directory will be copied to `.certs` within the base directory of the app on the deployment server so the environment variable `SYNC_SERVER_CERTS_DIR` must be set to `.certs` in the deployment environment unless this directory is later moved.
 
-Note that you can create a directory called `.certs-deploy` within the base directory to satisfy the `SYNC_SERVER_DEPLOY_CERTS_DIR` and it will be ignored by Git.
+Note that you can create a directory called `.certs-deploy` within the base directory to satisfy the `SYNC_SERVER_DEPLOY_CERTS_DIR` variable and it will be ignored by Git.
 
 You can execute the following from the base directory to initiate a `.env` file with default values:
 

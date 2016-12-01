@@ -7,6 +7,17 @@ var certPath = process.env.SYNC_SERVER_CERTS_DIR + '/crt';
 var caPath = process.env.SYNC_SERVER_CERTS_DIR + '/ca-bundle';
 
 try {
+  if (!process.env.SYNC_SERVER_HOST) {
+    throw new Error('App failed to find host variable from environment');
+  }
+
+  if (!process.env.SYNC_SERVER_PORT) {
+    throw new Error('App failed to find port variable from environment');
+  }
+
+  app.origin = 'https://' + process.env.SYNC_SERVER_HOST + ':' + process.env.SYNC_SERVER_PORT;
+  app.port = process.env.SYNC_SERVER_PORT;
+  
   if (!fs.existsSync(keyPath)) {
     throw new Error('App server failed to find SSL key file');
   }

@@ -19,22 +19,6 @@ app.use(require('express-session')({
 app.use(passport.initialize());
 app.use(passport.session());
 
-try {
-  if (!process.env.SYNC_SERVER_HOST) {
-    throw new Error('App failed to find host variable from environment');
-  }
-
-  if (!process.env.SYNC_SERVER_PORT) {
-    throw new Error('App failed to find port variable from environment');
-  }
-
-  app.origin = 'https://' + process.env.SYNC_SERVER_HOST + ':' + process.env.SYNC_SERVER_PORT;
-  app.port = process.env.SYNC_SERVER_PORT;
-} catch (error) {
-  logger.fatal(error.message);
-  throw error;
-}
-
 require('./routes')(app);
 
 logger.info('App loaded in ' + process.env.SYNC_SERVER_ENV + ' environment');
