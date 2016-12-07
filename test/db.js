@@ -1,5 +1,5 @@
 process.env.SYNC_SERVER_ENV = 'test';
-require('dotenv').config();
+require('dotenv').config({ path: __dirname + '/../.env' });
 
 var mongoose = require('../lib/mongoose');
 

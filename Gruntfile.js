@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: __dirname + '/.env' });
 
 module.exports = function(grunt) {
   'use strict';
@@ -16,12 +16,12 @@ module.exports = function(grunt) {
     },
     rsync: {
       options: {
+        args: ['--rsync-path="mkdir -p ' + process.env.SYNC_SERVER_DEPLOY_HOST_DIR + ' && rsync"'],
         host: process.env.SYNC_SERVER_DEPLOY_HOST_USERNAME + '@' + process.env.SYNC_SERVER_DEPLOY_HOST,
         recursive: true
       },
       app: {
         options: {
-          args: ['--rsync-path="mkdir -p ' + process.env.SYNC_SERVER_DEPLOY_HOST_DIR + ' && rsync"'],
           exclude: [
             '.DS_Store',
             '.git',
@@ -57,36 +57,44 @@ module.exports = function(grunt) {
       npmInstall: {
         command: 'cd ' + process.env.SYNC_SERVER_DEPLOY_HOST_DIR + ' && npm install --production'
       },
-      foreverRestartAll: {
+      forever: {
         command: 'cd ' + process.env.SYNC_SERVER_DEPLOY_HOST_DIR + ' && forever restart app-server.js || forever start app-server.js'
+      },
+      systemd: {
+        command: 'systemctl restart syncserver || systemctl start syncserver'
       }
     }
   });
 
   require('load-grunt-tasks')(grunt);
 
-  // Run local web server for development
-  grunt.registerTask('dev', [
+  grunt.registerTask('dev', 'Run local web server for development', [
     'nodemon:dev'
   ]);
 
-  // Run tests and deploy
-  grunt.registerTask('deploy', [
+  grunt.registerTask('deploy', 'Run tests and deploy', [
     'mochaTest:main',
     'deploy-dependencies',
     'deploy-app'
   ]);
 
-  // Deploy environment config files and certificate files
-  grunt.registerTask('deploy-dependencies', [
+  grunt.registerTask('deploy-dependencies', 'Deploy environment config files and certificate files', [
     'rsync:certs',
     'rsync:env'
   ]);
-
-  // Deploy app, install modules and start/restart
-  grunt.registerTask('deploy-app', [
+ 
+  grunt.registerTask('deploy-app', 'Deploy app and install modules', [
     'rsync:app',
-    'force:sshexec:npmInstall',
-    'sshexec:foreverRestartAll'
+    'force:sshexec:npmInstall'
+  ]);
+
+  grunt.registerTask('deploy-forever', 'Deploy app, install modules and start/restart with forever', [
+    'deploy',
+    'sshexec:forever'
+  ]);
+
+  grunt.registerTask('deploy-systemd', 'Deploy app, install modules and start/restart with systemd', [
+    'deploy',
+    'sshexec:systemd'
   ]);
 };
