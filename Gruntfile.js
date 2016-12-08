@@ -1,4 +1,4 @@
-require('dotenv').config({ path: __dirname + '/.env' });
+require('./lib/env');
 
 module.exports = function(grunt) {
   'use strict';

@@ -1,4 +1,4 @@
-require('dotenv').config({ path: __dirname + '/.env' });
+require('./lib/env');
 
 var express = require('express');
 var logger = require('./lib/logger');
