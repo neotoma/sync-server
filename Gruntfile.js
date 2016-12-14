@@ -88,13 +88,11 @@ module.exports = function(grunt) {
     'force:sshexec:npmInstall'
   ]);
 
-  grunt.registerTask('deploy-forever', 'Deploy app, install modules and start/restart with forever', [
-    'deploy',
+  grunt.registerTask('forever', 'Start/restart app remotely with forever', [
     'sshexec:forever'
   ]);
 
-  grunt.registerTask('deploy-systemd', 'Deploy app, install modules and start/restart with systemd', [
-    'deploy',
+  grunt.registerTask('systemd', 'Start/restart app remotely with systemd', [
     'sshexec:systemd'
   ]);
 };
