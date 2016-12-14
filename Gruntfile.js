@@ -68,7 +68,7 @@ module.exports = function(grunt) {
 
   require('load-grunt-tasks')(grunt);
 
-  grunt.registerTask('dev', 'Run local web server for development', [
+  grunt.registerTask('dev', 'Run app locally and reload upon changes', [
     'nodemon:dev'
   ]);
 
