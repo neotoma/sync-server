@@ -61,7 +61,7 @@ module.exports = function(grunt) {
         command: 'cd ' + process.env.SYNC_SERVER_DEPLOY_HOST_DIR + ' && forever restart app-server.js || forever start app-server.js'
       },
       systemd: {
-        command: 'systemctl restart syncserver || systemctl start syncserver'
+        command: 'sudo systemctl restart syncserver || sudo systemctl start syncserver'
       }
     }
   });
