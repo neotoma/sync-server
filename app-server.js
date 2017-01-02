@@ -15,7 +15,6 @@ try {
     throw new Error('App failed to find port variable from environment');
   }
 
-  app.origin = 'https://' + process.env.SYNC_SERVER_HOST + ':' + process.env.SYNC_SERVER_PORT;
   app.port = process.env.SYNC_SERVER_PORT;
   
   if (!fs.existsSync(keyPath)) {

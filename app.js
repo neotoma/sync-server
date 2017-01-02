@@ -20,6 +20,8 @@ app.use(require('express-session')({
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.host = 'https://' + process.env.SYNC_SERVER_HOST + ':' + process.env.SYNC_SERVER_PORT;
+
 require('./routes')(app);
 
 logger.info('App loaded in ' + process.env.SYNC_SERVER_ENV + ' environment');
