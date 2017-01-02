@@ -25,7 +25,7 @@ module.exports = function(app) {
   passport.use(new dropboxPassport.Strategy({
       clientID: process.env.SYNC_SERVER_STORAGES_DROPBOX_APP_KEY || logger.fatal('Dropbox storage router failed to find app key in environment'),
       clientSecret: process.env.SYNC_SERVER_STORAGES_DROPBOX_APP_SECRET || logger.fatal('Dropbox storage router failed to find app secret in environment'),
-      callbackURL: app.origin + '/storages/dropbox/auth-callback',
+      callbackURL: app.host + '/storages/dropbox/auth-callback',
       passReqToCallback: true
     },
     function(req, accessToken, refreshToken, profile, done) {
