@@ -6,9 +6,9 @@ var instagram = require('../../objects/sources/instagram');
 var twitter = require('../../objects/sources/twitter');
 
 module.exports = function(app) {
-  require('./router')(app, foursquare);
-  require('./router')(app, instagram);
-  require('./router')(app, twitter);
+  require('./source')(app, foursquare);
+  require('./source')(app, instagram);
+  require('./source')(app, twitter);
 
   app.get('/sources', app.authFilter, function(req, res) {
     var json = { sources: [] };
