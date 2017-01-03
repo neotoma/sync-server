@@ -206,9 +206,9 @@ module.exports = function(app) {
             logger.milestone('App verified contactVerificationRequest', meta);
 
             res.json({
-              'data': {
-                'type': 'contactVerificationRequest',
-                'attributes': contactVerificationRequest.toObject()
+              data: {
+                type: 'contactVerificationRequest',
+                attributes: contactVerificationRequest.toObject()
               }
             });
           }

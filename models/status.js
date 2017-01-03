@@ -6,7 +6,7 @@ module.exports = ModelFactory.new('status', {
   sourceId: { type: String, required: true },
   contentTypeId: { type: String, required: true },
   totalItemsAvailable: Number,
-  totalItemsSynced: Number,
+  totalItemsStored: Number,
   totalItemsPending: Number,
   lastSyncedItemId: String
 });

@@ -108,9 +108,6 @@ module.exports = function(app, source) {
           userId: user.id,
           error: error
         });
-      } else {
-        var storage = require('../../objects/storages/' + userStorageAuth.storageId);
-        itemController.syncAllForAllContentTypes(app, req.user, storage, source);
       }
 
       if (req.session.sourceAuthRedirectPath) {

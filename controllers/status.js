@@ -40,7 +40,7 @@ module.exports = {
               if (error) {
                 return callback(error);
               } else {
-                status.totalItemsSynced = count;
+                status.totalItemsStored = count;
 
                 if (count) {
                   Item.findOne({ sourceId: status.sourceId, contentTypeId: status.contentTypeId }).sort({ storageVerifiedAt: -1 }).exec(function(error, item) {

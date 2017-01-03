@@ -85,7 +85,7 @@ module.exports = function(app) {
   });
 
   app.delete('/sessions/:id', function(req, res) {
-    if (req.params.id == req.session.id) {
+    if (req.params.id === req.session.id) {
       req.logout();
     }
 

@@ -31,8 +31,8 @@ describe('new status', function() {
     assert.equal(this.status.totalItemsAvailable, wh.attributes.totalItemsAvailable);
   });
 
-  it('has totalItemsSynced', function() {
-    assert.equal(this.status.totalItemsSynced, wh.attributes.totalItemsSynced);
+  it('has totalItemsStored', function() {
+    assert.equal(this.status.totalItemsStored, wh.attributes.totalItemsStored);
   });
 
   it('has totalItemsPending', function() {
@@ -68,7 +68,7 @@ describe('new status', function() {
     assert.equal(object.sourceId, wh.attributes.sourceId);
     assert.equal(object.contentTypeId, wh.attributes.contentTypeId);
     assert.equal(object.totalItemsAvailable, wh.attributes.totalItemsAvailable);
-    assert.equal(object.totalItemsSynced, wh.attributes.totalItemsSynced);
+    assert.equal(object.totalItemsStored, wh.attributes.totalItemsStored);
     assert.equal(object.totalItemsPending, wh.attributes.totalItemsPending);
     assert.equal(object.lastSyncedItemId, wh.attributes.lastSyncedItemId);
     assert.deepEqual(object.createdAt.toString(), this.createdAt.toString());

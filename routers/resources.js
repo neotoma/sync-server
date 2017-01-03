@@ -1,11 +1,7 @@
 var pluralize = require('pluralize');
+require('../lib/prototypes/string.js');
 
 const DEFAULT_PAGE_LIMIT = 25;
-
-/* From http://jamesroberts.name/blog/2010/02/22/string-functions-for-javascript-trim-to-camel-case-to-dashed-and-to-underscore/ */
-var camelToUnderscore = function(string) {
-  return string.replace(/(?:^|\.?)([A-Z])/g, function (x,y){return "_" + y.toLowerCase()}).replace(/^_/, "");
-};
 
 module.exports = function(app, modelConfigs) {
   var get = function(req, res, model, supportedSortAttributes) {
@@ -55,7 +51,7 @@ module.exports = function(app, modelConfigs) {
       }
 
       var json = { }
-      json[pluralize(camelToUnderscore(model.modelName))] = resources.map(function(resource) {
+      json[pluralize(model.modelName.lowercaseFirstLetter())] = resources.map(function(resource) {
         return resource.toObject();
       });
 
