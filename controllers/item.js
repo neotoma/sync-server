@@ -1,63 +1,325 @@
-require('../lib/prototypes/object.js');
-require('../lib/prototypes/string.js');
-var logger = require('../lib/logger');
-var Status = require('../models/status');
-var User = require('../models/user');
-var Item = require('../models/item');
-var UserSourceAuth = require('../models/userSourceAuth');
-var UserStorageAuth = require('../models/userStorageAuth');
-var async = require('async');
-var pluralize = require('pluralize');
-var request = require('../lib/request');
-var mime = require('mime-types');
-var urlParser = require('url');
-var fs = require('fs');
-var validateParams = require('../lib/validateParams');
-var urlRegex = require('../lib/urlRegex');
-var itemController = {};
+/**
+ * Serves functions for manipulating items and related documents
+ * @module
+ */
 
 /**
- * Returns whether URL with extension indicates media type supported by controller operations
- * If able to determine media type with extension, returns boolean.
- * If unable to determine media type with extension, returns no value.
- * @param {string} url - URL
+ * Error-first callback with data representing resource as second parameter.
+ * @callback resourceCallback
+ * @param {Error} error - Error encountered during attempt to retrieve resource
+ * @param {Object} resource - Response body representing resource
  */
-itemController.hasSupportedMediaType = function(url) {
+
+/**
+ * Page of item data objects from source
+ * @typedef {object} Page
+ */
+
+var _ = require('lodash');
+var async = require('async');
+var debug = require('../lib/debug')('syncServer:itemController');
+var Item = require('../models/item');
+var logger = require('../lib/logger');
+var mime = require('../lib/mime');
+var pluralize = require('pluralize');
+var formatJSON = require('format-json');
+var request = require('../lib/request');
+var Status = require('../models/status');
+var Url = require('url');
+var urlRegex = require('../lib/urlRegex');
+var UserSourceAuth = require('../models/userSourceAuth');
+var UserStorageAuth = require('../models/userStorageAuth');
+var validateParams = require('../lib/validateParams');
+
+/**
+ * Callback resource found at URL.
+ * @param {string} url - URL of resource with extension that corresponds to a supported media type.
+ * @param {module:controllers/item~resourceCallback} done
+ */
+module.exports.getResource = function(url, done) {
+  var log = logger.scopedLog();
+
+  var validate = function(done) {
+    validateParams([{
+      name: 'url', variable: url, required: true, requiredType: 'string', regex: urlRegex
+    }], function(error) {
+      if (!error && module.exports.hasSupportedMediaType(url) === false) {
+        error = new Error('Parameter url indicates unsupported media type');
+      }
+
+      done(error);
+    });
+  };
+
+  var setupLog = function(done) {
+    debug.start('getResource %s', url);
+
+    log = logger.scopedLog({
+      url: url
+    });
+
+    done();
+  };
+
+  var getResource = function(done) {
+    var mediaType = mime.lookup(url);
+    mediaType = mediaType ? mediaType : 'application/json';
+
+    request({
+      url: url,
+      headers: {
+        'Content-Type': mediaType
+      }
+    }, function(error, res, body) {
+      if (error) {
+        return done(error);
+      } else if (request.statusCodeError(res.statusCode)) {
+        return done(request.statusCodeError(res.statusCode));
+      }
+
+      switch(mediaType) {
+        case 'image/jpeg':
+          var resource = new Buffer(body);
+          break;
+        case 'application/json':
+          try {
+            var resource = JSON.parse(body);
+          } catch (error) {
+            return done(new Error('Unable to parse resource'));
+          }
+          break;
+        default:
+          return done('Unrecognized media type encountered');
+      }
+
+      debug.success('getResource (mediaType: %s)', mediaType);
+      done(undefined, resource);
+    });
+  };
+
+  async.waterfall([
+    validate, 
+    setupLog,
+    getResource
+  ], function(error, resource) {
+    if (error) {
+      log('error', 'Item controller failed to get resource', { error: error }); 
+    }
+
+    done(error, resource);
+  });
+};
+
+/**
+ * Return whether URL with extension indicates media type supported by controller operations.
+ * @param {string} url - URL
+ * @returns {boolean|undefined} Whether media type supported by controller operations
+ */
+module.exports.hasSupportedMediaType = function(url) {
   validateParams([{
     name: 'url', variable: url, required: true, requiredType: 'string'
   }]);
 
-  if (urlParser.parse(url).pathname.indexOf('.') === -1) {
+  var pathname = Url.parse(url).pathname;
+  var lastSegment = (pathname.lastIndexOf('/') !== -1) ? pathname.substr(pathname.lastIndexOf('/') + 1) : pathname;
+
+  if (lastSegment.indexOf('.') === -1) {
     return;
   }
 
-  return (['image/jpeg', 'application/json'].indexOf(mime.lookup(url)) !== -1);
+  debug('hasSupportedMediaType url %s, mime %s', lastSegment, mime.lookup(lastSegment));
+
+  return (['image/jpeg', 'application/json'].indexOf(mime.lookup(lastSegment)) !== -1);
 };
 
 /**
- * Returns file system path used to store item on storage
- * @param {Item} item - Item
- */ 
-itemController.storagePath = function(item) {
+ * Return array of item data objects from within page object from source for contentType
+ * @param {module:controllers/item~Page} page
+ * @param {Source} source
+ * @param {ContentType} contentType
+ * @returns {Object[]} ItemDataObjects
+ */
+module.exports.itemDataObjectsFromPage = function(page, source, contentType) {
   validateParams([{
-    name: 'item', variable: item, required: true, requiredProperties: ['id', 'contentTypeId']
+    name: 'page', variable: page, required: true, requiredType: 'object'
+  }, {
+    name: 'source', variable: source, required: true, requiredProperties: ['itemDataObjectsFromPagePathTemplate']
   }]);
 
-  return '/' + pluralize(item.contentTypeId) + '/' + item.id + '.json';
+  var path = source.itemDataObjectsFromPagePath(contentType);
+
+  debug.trace('itemDataObjectsFromPage path: %s', path);
+
+  var itemDataObjects = path ? _.get(page, path, []) : page;
+
+  debug.trace('itemDataObjectsFromPage total: %s', itemDataObjects.length);
+
+  return itemDataObjects;
+};
+
+/**
+ * Return URL for making a GET request for items from source.
+ * @param {Object} source - Source from which to retrieve items.
+ * @param {Object} contentType - ContentType of items.
+ * @param {Object} userSourceAuth - UserSourceAuth used to make request.
+ * @param {Object} pagination - Pagination used to make request.
+ * @returns {string} URL for making a GET request
+ */
+module.exports.itemsGetUrl = function(source, contentType, userSourceAuth, pagination) {
+  validateParams([{
+    name: 'source', variable: source, required: true, requiredProperties: ['host']
+  }, {
+    name: 'contentType', variable: contentType, required: true, requiredProperties: ['name']
+  }, {
+    name: 'userSourceAuth', variable: userSourceAuth, required: true, requiredProperties: ['sourceToken']
+  }, {
+    name: 'pagination', variable: pagination
+  }]);
+
+  return source.itemsGetUrl({
+    accessToken: userSourceAuth.sourceToken,
+    apiVersion: source.apiVersion,
+    contentTypePluralCamelName: contentType.pluralCamelName(),
+    contentTypePluralLowercaseName: contentType.pluralLowercaseName(),
+    host: source.host,
+    limit: source.itemsLimit,
+    maxId: (typeof pagination !== 'undefined' && pagination.maxId) ? pagination.maxId : undefined,
+    offset: (typeof pagination !== 'undefined' && pagination.offset) ? pagination.offset : 0,
+    next: (typeof pagination !== 'undefined' && pagination.next) ? pagination.next : undefined,
+    sourceName: source.name
+  });  
+};
+
+/**
+ * Returns total number of items available from page object returned by source.
+ * Note: This is the total across all pages available from source, not just available within given page.
+ * @param {Object} page - Page of items.
+ * @param {source} source - Source of items page.
+ * @param {Object} contentType - ContentType of items.
+ * @returns {number} Total number of items available.
+ */
+module.exports.totalItemsAvailableFromPage = function(page, source, contentType) {
+  validateParams([{
+    name: 'page', variable: page, required: true, requiredType: 'object'
+  }, {
+    name: 'source', variable: source, required: true
+  }]);
+
+  var path = source.totalItemsAvailableFromPagePath(contentType);
+
+  debug.trace('totalItemsAvailableFromPage path: %s', path);
+
+  var total = path ? _.get(page, path) : page;
+
+  debug.trace('totalItemsAvailableFromPage total: %s', total);
+
+  return total;
+};
+
+
+
+/**
+ * Returns error from items page if error exists within.
+ * @param {Object} page - Items page.
+ * @returns {error} Error
+ */
+module.exports.itemsPageError = function(page) {
+  validateParams([{
+    name: 'page', variable: page, required: true, requiredType: 'object'
+  }]);
+
+  if (page.meta && page.meta.code && Number(page.meta.code) >= 400) {
+    if (page.meta.errorDetail) {
+      var message = `${page.meta.errorDetail} (${page.meta.code})`;
+    } else if (page.meta.errorType) {
+      var message = `HTTP status code ${page.meta.code}, ${page.meta.errorType}`;
+    } else {
+      var message = `HTTP status code ${page.meta.code}`;
+    }
+
+    return new Error(message);
+  }
+};
+
+
+/**
+ * Returns pagination for next items page after current items page.
+ * @param {Object} page - Current items page.
+ * @param {Object} pagination - Pagination of current items page.
+ * @param {Object} contentType - ContentType of current items page.
+ * @returns {Object} Pagination for next items page.
+ */
+module.exports.itemsPageNextPagination = function(page, pagination, contentType) {
+  validateParams([{
+    name: 'page', variable: page, required: true, requiredType: 'object'
+  }, {
+    name: 'contentType', variable: contentType, requiredProperties: ['pluralCamelName']
+  }]);
+
+  var nextPagination;
+  
+  debug.start('itemsPageNextPagination (pagination: %o)', pagination);
+  
+  if (page.response && page.response[contentType.pluralLowercaseName()] && page.response[contentType.pluralLowercaseName()].items && page.response[contentType.pluralLowercaseName()].items.length) {
+    if (pagination && pagination.offset) {
+      nextPagination = { offset: pagination.offset + page.response[contentType.pluralLowercaseName()].items.length };
+    } else {
+      nextPagination = { offset: page.response[contentType.pluralLowercaseName()].items.length };
+    }
+  }
+
+  if (page.data && page.data.pagination && page.data.pagination.next_max_id) {
+    nextPagination = { maxId: page.data.pagination.next_max_id };
+  }
+
+  if (page.links && page.links.next) {
+    nextPagination = { next: page.links.next };
+  }
+
+  if (page.paging && page.paging.next) {
+    nextPagination = { next: page.paging.next };
+  };
+
+  debug.success('itemsPageNextPagination (nextPagination: %o)', nextPagination);
+
+  return nextPagination;
+};
+
+
+
+/**
+ * Callbacks file system path used to store item on storage.
+ * @param {Item} item - Item.
+ * @param {Object} data - Raw item data from source.
+ * @param {function} done - Error-first callback function expecting file system path as second parameter.
+ */
+module.exports.storagePath = function(item, data, done) {
+  var validate = function(done) {
+    validateParams([{
+      name: 'item', variable: item, required: true, requiredProperties: ['id', 'contentType']
+    }], done);
+  };
+
+  var storagePath = function(done) {
+    var path = '/' + item.source.pluralKebabName() + '/' + item.contentType.pluralKebabName() + '/' + item.slug(data) + '.json'
+    debug.success('storagePath: %s', path);
+    done(undefined, path);
+  };
+
+  async.waterfall([validate, storagePath], done);
 };
 
 /**
  * Store all items of all supported contentTypes found from source for user.
  * Persist new Items in database for any not previously stored.
  * Emit event on app for each Item once stored.
- * @param {User} user - User for which to retrieve items from source and store them in storage
- * @param {Source} source - Source from which to retrieve items
- * @param {Storage} storage - Storage within which to store items
- * @param {Object} app – App object on which to emit item storage events (optional)
- * @param {function} done - Error-first callback function expecting no additional parameters (optional)
+ * @param {User} user - User for which to retrieve items from source and store them in storage.
+ * @param {Source} source - Source from which to retrieve items.
+ * @param {Storage} storage - Storage within which to store items.
+ * @param {Object} [app] – App object on which to emit item storage events.
+ * @param {callback} done
  */
-itemController.storeAllForUserStorageSource = function(user, source, storage, app, done) {
-  var controller = this;
+module.exports.storeAllForUserStorageSource = function(user, source, storage, app, done) {
   var log = logger.scopedLog();
 
   var validate = function(done) {
@@ -73,28 +335,31 @@ itemController.storeAllForUserStorageSource = function(user, source, storage, ap
   };
 
   var setupLog = function(done) {
+    debug.start('storeAllForUserStorageSource');
+
     log = logger.scopedLog({
-      userId: user.id,
-      sourceId: source.id,
-      storageId: storage.id
+      user: user.id,
+      source: source.id,
+      storage: storage.id
     });
 
     done();
   };
 
-  var storeAllItems = function(done) {
-    log('trace', 'Item controller started to store all items');
-    
-    async.eachSeries(source.contentTypes, function(contentType, done) {
-      controller.storeAllForUserStorageSourceContentType(user, source, storage, contentType, app, done);
-    }, done);
+  var storeAllForUserStorageSourceContentType = function(contentType, done) {
+    module.exports.storeAllForUserStorageSourceContentType(user, source, storage, contentType, app, done);
   };
 
-  async.series([validate, setupLog, storeAllItems], function(error) {
+  var storeAllItems = function(done) {
+    debug.start('storeAllItems (contentTypes: %s)', source.contentTypes.length);
+    async.eachSeries(source.contentTypes, storeAllForUserStorageSourceContentType, done);
+  };
+
+  async.waterfall([validate, setupLog, storeAllItems], function(error) {
     if (error) {
       log('error', 'Item controller failed to store all items', { error: error });
     } else {
-      log('trace', 'Item controller stored all items');
+      debug.success('storeAllForUserStorageSource');
     }
 
     done(error);
@@ -105,15 +370,14 @@ itemController.storeAllForUserStorageSource = function(user, source, storage, ap
  * Store all items of contentType found from source for user.
  * Persist new Items in database for any not previously stored.
  * Emit event on app for each Item once stored.
- * @param {User} user - User for which to retrieve items from source and store them in storage
- * @param {Source} source - Source from which to retrieve items
- * @param {Storage} storage - Storage within which to store items
- * @param {ContentType} contentType - ContentType of which to retrieve items
- * @param {Object} app – App object on which to emit item storage events (optional)
- * @param {function} done - Error-first callback function expecting no additional parameters (optional)
+ * @param {User} user - User for which to retrieve items from source and store them in storage.
+ * @param {Source} source - Source from which to retrieve items.
+ * @param {Storage} storage - Storage within which to store items.
+ * @param {ContentType} contentType - ContentType of which to retrieve items.
+ * @param {Object} [app] – App object on which to emit item storage events.
+ * @param {callback} done
  */
-itemController.storeAllForUserStorageSourceContentType = function(user, source, storage, contentType, app, done) {
-  var controller = this;
+module.exports.storeAllForUserStorageSourceContentType = function(user, source, storage, contentType, app, done) {
   var log = logger.scopedLog();
 
   var validate = function(done) {
@@ -131,43 +395,42 @@ itemController.storeAllForUserStorageSourceContentType = function(user, source, 
   };
 
   var setupLog = function(done) {
+    debug.start('storeAllForUserStorageSourceContentType');
+
     log = logger.scopedLog({
-      userId: user.id,
-      sourceId: source.id,
-      storageId: storage.id,
-      contentTypeId: contentType.id
+      user: user.id,
+      source: source.id,
+      storage: storage.id,
+      contentType: contentType.id
     });
 
     done();
   };
 
   var storeAllItems = function(done) {
-    log('trace', 'Item controller started to store all items');
-
-    var storeAllItemsPages = function myself(error, pagination) {
+    var storeAllItemPages = function myself(error, pagination) {
       if (error) {
-        log('error', 'Item controller failed to store page of items', { error: error });
-
         if (done) {
           done(error);
         }
       } else {
         if (pagination) {
-          controller.storeItemsPage(user, source, storage, contentType, pagination, app, myself);
+          module.exports.storeItemsPage(user, source, storage, contentType, pagination, app, myself);
         } else if (done) {
           done();
         }
       }
     }
 
-    storeAllItemsPages(null, { offset: 0 });
+    storeAllItemPages(null, { offset: 0 });
   };
 
   async.series([validate, setupLog, storeAllItems], function(error) {
     if (error) {
+      debug.error('storeAllForUserStorageSourceContentType (message: %s)', error.message);
       log('error', 'Item controller failed to store all items', { error: error });
     } else {
-      log('trace', 'Item controller stored all items');
+      debug.success('storeAllForUserStorageSourceContentType');
     }
 
     done(error);
@@ -178,16 +441,15 @@ itemController.storeAllForUserStorageSourceContentType = function(user, source, 
  * Store all items of contentType found from source for user.
  * Persist new Items in database for any not previously stored.
  * Emit event on app for each Item once stored.
- * @param {User} user - User for which to retrieve items from source and store them in storage
- * @param {Source} source - Source from which to retrieve items
- * @param {Storage} storage - Storage within which to store items
- * @param {ContentType} contentType - ContentType of which to retrieve items
- * @param {Object} pagination – Object containing pagination information
- * @param {Object} app – App object on which to emit item storage events (optional)
- * @param {function} done - Error-first callback function expecting nextPagination object as second parameter (optional)
+ * @param {User} user - User for which to retrieve items from source and store them in storage.
+ * @param {Source} source - Source from which to retrieve items.
+ * @param {Storage} storage - Storage within which to store items.
+ * @param {ContentType} contentType - ContentType of which to retrieve items.
+ * @param {Object} pagination – Object containing pagination information.
+ * @param {Object} [app] – App object on which to emit item storage events.
+ * @param {callback} done
  */
-itemController.storeItemsPage = function(user, source, storage, contentType, pagination, app, done) {
-  var controller = this;
+module.exports.storeItemsPage = function(user, source, storage, contentType, pagination, app, done) {
   var log = logger.scopedLog();
   var ids, page, userSourceAuth, status;
 
@@ -195,7 +457,7 @@ itemController.storeItemsPage = function(user, source, storage, contentType, pag
     validateParams([{
       name: 'user', variable: user, required: true, requiredProperties: ['id']
     }, {
-      name: 'source', variable: source, required: true, requiredProperties: ['id', 'itemsPageUrl']
+      name: 'source', variable: source, required: true, requiredProperties: ['id']
     }, {
       name: 'storage', variable: storage, required: true, requiredProperties: ['id']
     }, {
@@ -208,15 +470,16 @@ itemController.storeItemsPage = function(user, source, storage, contentType, pag
   };
 
   var setupLog = function(done) {
+    debug.start('## storeItemsPage (contentType: %s, pagination: %o)', contentType.id, pagination);
+
     ids = {
-      userId: user.id,
-      storageId: storage.id,
-      sourceId: source.id,
-      contentTypeId: contentType.id
+      user: user.id,
+      storage: storage.id,
+      source: source.id,
+      contentType: contentType.id
     };
 
-    log = logger.scopedLog(Object.assign({ pagination: pagination }, ids));
-    log('trace', 'Item controller started to store page of items');
+    log = logger.scopedLog(Object.assign({}, pagination, ids));
     done();
   };
 
@@ -229,8 +492,8 @@ itemController.storeItemsPage = function(user, source, storage, contentType, pag
 
   var findUserSourceAuth = function(done) {
     UserSourceAuth.findOne({
-      userId: user.id,
-      sourceId: source.id
+      user: user.id,
+      source: source.id
     }, function(error, foundUserSourceAuth) {
       if (!foundUserSourceAuth && !error) {
         error = new Error('Failed to find userSourceAuth');
@@ -242,66 +505,66 @@ itemController.storeItemsPage = function(user, source, storage, contentType, pag
   }
 
   var getItemsPageResource = function(done) {
-    var url = source.itemsPageUrl(contentType, userSourceAuth, pagination);
-
-    if (!url) {
-      return done('Failed to determine source.itemsPageUrl');
-    }
-
-    controller.getResource(url, done);
+    module.exports.getResource(module.exports.itemsGetUrl(source, contentType, userSourceAuth, pagination), done);
   }
 
-  var getItemObjects = function(resource, done) {
+  var getItemDataObjects = function(resource, done) {
     page = resource;
-    var error = source.itemsPageError(page);
+    var error = module.exports.itemsPageError(page);
 
     if (error) {
-      return done(new Error('Failed to retrieve valid page: ' + error.message));
+      return done(new Error('Failed to retrieve valid item objects page. ' + error.message));
     }
 
-    var itemDataObjects = source.itemsPageDataObjects(page, contentType);
+    var itemDataObjects = module.exports.itemDataObjectsFromPage(page, source, contentType);
+    var totalItemsAvailable = module.exports.totalItemsAvailableFromPage(page, source, contentType);
 
-    if (!itemDataObjects) {
-      itemDataObjects = [];
-    }
-
-    if (pagination.offset === 0) {
-      status.totalItemsAvailable = source.itemsPageTotalAvailable(page, contentType);
+    if (totalItemsAvailable && pagination.offset === 0) {
+      status.totalItemsAvailable = totalItemsAvailable;
       status.save();
     }
 
-    itemDataObjects = itemDataObjects.filter(function(itemDataObject) {
-      return (itemDataObject.type === contentType.id);
-    });
-
     if (!itemDataObjects || !itemDataObjects.length) {
-      log('trace', 'Item controller retrieved page with no data to persist while storing page of items');
+      debug.warning('storeItemsPage retrieved page with no data (contentType: %s, pagination: %o)', contentType.id, pagination);
     }
 
-    done(undefined, itemDataObjects.map(function(data) {
-      return {
-        data: data,
-        userId: user.id,
-        storageId: storage.id,
-        sourceId: source.id,
-        contentTypeId: contentType.id,
-        sourceItemId: data.id
-      };
-    }));
+    done(undefined, itemDataObjects);
   };
 
-  var persistItemObjects = function(itemObjects, done) {
-    async.mapSeries(itemObjects, controller.persistItemObject, done);
+  var persistItemDataObjects = function(itemDataObjects, done) {
+    var count = 0;
+    async.mapSeries(itemDataObjects, function(itemDataObject, done) {
+      count++;
+      debug('persistItemDataObject #%s', count);
+      
+      module.exports.persistItemDataObject(itemDataObject, {
+        user: user,
+        storage: storage,
+        source: source,
+        contentType: contentType
+      }, (error, item) => {
+        done(error, {
+          item: item,
+          data: itemDataObject
+        });
+      });
+    }, done);
   };
 
-  var storeItemsData = function(items, done) {
-    async.eachSeries(items, function(item, done) {
-      controller.storeItemData(item, app, done);
+  var storeItemsData = function(itemPairs, done) {
+    var count = 0;
+    async.eachSeries(itemPairs, function(itemPair, done) {
+      count++;
+      if (!itemPair.item.storageVerifiedAt) {
+        module.exports.storeItemData(itemPair.item, itemPair.data, app, done);
+      } else {
+        done();
+      }
     }, done);
   };
 
   var determineNextPagination = function(done) {
-    done(null, source.itemsPageNextPagination(page, contentType, pagination));
+    done(undefined, module.exports.itemsPageNextPagination(page, pagination, contentType));
   };
 
   async.waterfall([
@@ -310,13 +573,15 @@ itemController.storeItemsPage = function(user, source, storage, contentType, pag
     findOrCreateStatus,
     findUserSourceAuth,
     getItemsPageResource,
-    getItemObjects,
-    persistItemObjects,
+    getItemDataObjects,
+    persistItemDataObjects,
     storeItemsData,
     determineNextPagination
   ], function(error, nextPagination) {
     if (error) {
       log('error', 'Item controller failed to store page of items', { error: error });
+    } else {
+      debug.success('storeItemsPage (contentType: %s, pagination: %o, nextPagination: %o)', contentType.id, pagination, nextPagination);
     }
 
     done(error, nextPagination);
@@ -325,63 +590,62 @@ itemController.storeItemsPage = function(user, source, storage, contentType, pag
 
 /**
  * Persist an object representing Item data to the database and return corresponding Item.
- * Create new Item in database if none with corresponding IDs exists. Otherwise retrieve existing Item.
- * Update Item with data provided by object param before returning.
- * @param {Object} object - Basic object containing Item properties
- * @param {function} done - Error-first callback function expecting Item as second parameter
+ * Create new Item in database if none with corresponding IDs exists; otherwise retrieve existing Item.
+ * Update Item with data provided by itemDataObject param before returning.
+ * @param {Object} itemDataObject - Basic itemDataObject containing Item data.
+ * @param {Object} relationships - Relationships to use for persistence of item with itemDataObject.
+ * @param {function} done - Error-first callback function expecting Item as second parameter.
  */
-itemController.persistItemObject = function(object, done) {
-  var ids;
+module.exports.persistItemDataObject = function(itemDataObject, relationships, done) {
+  var conditions;
   var log = logger.scopedLog();
-
-  var test = function(done) {
-    done();
-  };
 
   var validate = function(done) {
     validateParams([{
-      name: 'object', variable: object, required: true, requiredProperties: ['userId', 'storageId', 'sourceId', 'contentTypeId', 'sourceItemId', 'data']
+      name: 'itemDataObject', variable: itemDataObject, required: true, requiredProperties: ['id']
+    }, {
+      name: 'relationships', variable: relationships, required: true, requiredProperties: ['user', 'storage', 'source', 'contentType']
     }], done);
   };
 
-  var collectIds = function(done) {
-    ids = {
-      userId: object.userId,
-      storageId: object.storageId,
-      sourceId: object.sourceId,
-      contentTypeId: object.contentTypeId,
-      sourceItemId: object.sourceItemId,
+  var compileConditions = function(done) {
+    debug.start('persistItemDataObject');
+
+    conditions = {
+      user: relationships.user.id,
+      storage: relationships.storage.id,
+      source: relationships.source.id,
+      contentType: relationships.contentType.id,
+      sourceItem: itemDataObject.id,
     };
     done();
   };
 
   var setupLog = function(done) {
-    log = logger.scopedLog(ids);
+    log = logger.scopedLog(conditions);
     done();
   };
 
-  var persistItemObject = function(done) {
-    Item.findOrCreate(ids, function(error, item) {
+  var persistItemDataObject = function(done) {
+    Item.findOrCreate(conditions, function(error, item) {
       if (error) {
         done(error);
       } else {
-        item.data = object.data;
-        item.save(function(error) {
-          done(error, item);
-        });
+        done(error, item);
       }
     });
   };
 
   async.waterfall([
-    test,
     validate,
-    collectIds,
+    compileConditions,
     setupLog,
-    persistItemObject
+    persistItemDataObject
   ], function(error, item) {
     if (error) {
-      log('error', 'Item controller failed to persist item object', { error: error });
+      log('error', 'Item controller failed to persist item data object', { error: error });
+    } else {
+      debug.success('persistItemDataObject');
     }
 
     done(error, item);
@@ -393,59 +657,67 @@ itemController.persistItemObject = function(object, done) {
  * Update attemptedAt, failedAt and verifiedAt timestamps as appropriate during process.
  * Update storageError if storage fails.
  * Update storageBytes and storagePath if storage succeeds.
- * @param {Item} item - Item object
- * @param {Object} app – App object on which to emit item storage events (optional)
- * @param {function} done - Error-first callback function expecting no additional parameters
+ * @param {Item} item - Item object.
+ * @param {Object} data - Raw item data from source.
+ * @param {Object} app – App object on which to emit item storage events (optional).
+ * @param {callback} done
  */
-itemController.storeItemData = function(item, app, done) {
-  var controller = this;
+module.exports.storeItemData = function(item, data, app, done) {
   var log = logger.scopedLog();
 
   var validate = function(done) {
     validateParams([{
-      name: 'item', variable: item, required: true, requiredProperties: ['userId', 'storageId', 'data', 'save']
+      name: 'item', variable: item, required: true, requiredProperties: ['user', 'storage', 'save']
+    }, {
+      name: 'data', variable: data, required: true, requiredType: 'object'
     }], done);
   };
 
   var setupLog = function(done) {
-    log = logger.scopedLog({ itemId: item.id });
+    debug.start('storeItemData');
+    log = logger.scopedLog({ item: item.id });
     done();
   };
 
-  var getUser = function(done) {
-    User.findById(item.userId, function(error, user) {
-      if (!error && !user) {
-        error = new Error('No user found for item');
-      }
-      
-      done(error, user);
+  var determinePath = function(done) {
+    module.exports.storagePath(item, data, function(error, path) {
+      debug.success('storeItemData:determinePath: %s', path);
+      done(error, path);
     });
   };
 
-  var getStorage = function(user, done) {
-    try {
-      done(undefined, user, require('../objects/storages/' + item.storageId));
-    } catch (error) {
-      done(new Error('Item controller failed to load storage for item before storing data'));
-    }
-  };
-
-  var updateStorageAttemptedAt = function(user, storage, done) {
+  var updateStorageAttemptedAt = function(path, done) {
     item.storageAttemptedAt = Date.now();
     item.save(function(error) {
-      done(error, user, storage);
+      done(error, path);
     });
   };
 
-  var storeFile = function(user, storage, done) {
-    controller.storeFile(user, storage, itemController.storagePath(item), item.data, done);
+  var storeFile = function(path, done) {
+    module.exports.storeFile(item.user, item.storage, path, data, (error, storeFileResult) => {
+      if (error) {
+        debug.error('storeFile item %s, error %o, storeFileResult %o', item.id, error, storeFileResult);
+        item.storageError = error.message;
+        item.storageFailedAt = Date.now();
+        item.save((saveError) => {
+          done(error, storeFileResult);
+        });
+      } else {
+        done(undefined, storeFileResult);
+      }
+    });
   };
 
   var updateStorageProperties = function(storeFileResult, done) {
     item.storageVerifiedAt = Date.now();
     item.storageFailedAt = undefined;
-    item.storageBytes = storeFileResult.bytes;
+    item.storageBytes = storeFileResult.size;
+    item.storagePath = storeFileResult.path_lower;
     item.save(function(error) {
+      if (!error) {
+        debug.success('updateStorageProperties');
+      }
+
       done(error);
     });
   };
@@ -458,13 +730,10 @@ itemController.storeItemData = function(item, app, done) {
     done();
   };
 
-  log('trace', 'Item controller started to store item data');
-
   async.waterfall([
     validate,
     setupLog,
-    getUser, 
-    getStorage,
+    determinePath,
     updateStorageAttemptedAt,
     storeFile,
     updateStorageProperties,
@@ -486,7 +755,7 @@ itemController.storeItemData = function(item, app, done) {
         done(error);
       }
     } else {
-      log('trace', 'Item controller succeeded to storeItemData');
+      debug.success('storeItemData');
       done();
     }
   });
@@ -494,23 +763,22 @@ itemController.storeItemData = function(item, app, done) {
 
 /**
  * Store file to storage on behalf of user.
- * @param {User} user - User object
- * @param {Storage} storage - Storage object
- * @param {string} path - Path to store file on storage
- * @param {Object} data - Object that represents data for file
- * @param {function} done - Error-first callback function with object representing HTTP response body from storage request as second parameter
+ * @param {User} user - User object.
+ * @param {Object} storage - Storage object.
+ * @param {string} path - Path to store file on storage.
+ * @param {Object} data - Object that represents data for file.
+ * @param {function} done - Error-first callback function with object representing HTTP response body from storage request as second parameter.
  */
-itemController.storeFile = function(user, storage, path, data, done) {
-  var controller = this;
+module.exports.storeFile = function(user, storage, path, data, done) {
   var log = logger.scopedLog();
 
   var validate = function(done) {
     validateParams([{
       name: 'user', variable: user, required: true, requiredProperties: ['id']
     }, {
-      name: 'storage', variable: storage, required: true, requiredProperties: ['id', 'host', { name: 'itemUrl', type: 'function' }]
+      name: 'storage', variable: storage, required: true, requiredProperties: ['id', 'host']
     }, {
-      name: 'path', variable: path, required: true, requiredType: 'string', regex: /^\/[\w\/]*\w+\.\w+$/
+      name: 'path', variable: path, required: true, requiredType: 'string'
     }, {
       name: 'data', variable: data, required: true, requiredType: ['buffer', 'object']
     }, {
@@ -523,7 +791,7 @@ itemController.storeFile = function(user, storage, path, data, done) {
           error = new Error('Path parameter with jpg extension not provided with binary data');
         } else if (mediaType === 'application/json' && (data instanceof Buffer)) {
           error = new Error('Path parameter with json extension not provided with parseable data');
-        } else if (itemController.hasSupportedMediaType(path) === false) {
+        } else if (module.exports.hasSupportedMediaType(path) === false) {
           error = new Error('Parameter path extension indicates unsupported media type');
         }
       }
@@ -533,6 +801,7 @@ itemController.storeFile = function(user, storage, path, data, done) {
   };
 
   var prepareData = function(done) {
+    debug.start('storeFile (path: %s)', path);
     if (!(data instanceof Buffer)) {
       data = JSON.stringify(data);
     }
@@ -543,8 +812,8 @@ itemController.storeFile = function(user, storage, path, data, done) {
   var setupLog = function(done) {
     log = logger.scopedLog({
       path: path,
-      storageId: storage.id,
-      userId: user.id
+      storage: storage.id,
+      user: user.id
     });
 
     done();
@@ -552,8 +821,8 @@ itemController.storeFile = function(user, storage, path, data, done) {
 
   var findUserStorageAuth = function(done) {
     UserStorageAuth.findOne({
-      storageId: storage.id,
-      userId: user.id
+      storage: storage.id,
+      user: user.id
     }, function(error, userStorageAuth) {
       if(!error && !userStorageAuth) {
         error = new Error('Failed to retrieve userStorageAuth');
@@ -565,12 +834,14 @@ itemController.storeFile = function(user, storage, path, data, done) {
 
   var storeFile = function(userStorageAuth, done) {
     var options = {
-      url: storage.itemUrl(path, userStorageAuth),
       body: data,
-      headers: { 'Content-Type': mime.lookup(path) }
+      headers: storage.headers(path, userStorageAuth),
+      url: storage.itemPutUrl(path, userStorageAuth)
     };
 
-    request.put(options, function(error, res, body) {
+    debug('storeFile:options %o', options);
+
+    request.post(options, function(error, res, body) {
       if (!error) {
         error = request.statusCodeError(res.statusCode);
       }
@@ -578,6 +849,8 @@ itemController.storeFile = function(user, storage, path, data, done) {
       if (!error) {
         body = JSON.parse(body);
       }
+      
+      debug('storeFile body %o, error %o', body, error);
 
       done(error, body);
     });
@@ -597,77 +870,3 @@ itemController.storeFile = function(user, storage, path, data, done) {
     done(error, responseBody);
   });
 };
-
-/**
- * Return resource found at URL.
- * @param {string} URL of resource with extension that corresponds to a supported media type
- * @param {function} done - Error-first callback function with formatted data representing resource as second parameter
- */
-itemController.getResource = function(url, done) {
-  var controller = this;
-  var log = logger.scopedLog();
-
-  var validate = function(done) {
-    validateParams([{
-      name: 'url', variable: url, required: true, requiredType: 'string', regex: urlRegex
-    }], function(error) {
-      if (!error && itemController.hasSupportedMediaType(url) === false) {
-        error = new Error('Parameter url indicates unsupported media type');
-      }
-
-      done(error);
-    });
-  };
-
-  var setupLog = function(done) {
-    log = logger.scopedLog({
-      url: url
-    });
-
-    done();
-  };
-
-  var getResource = function(done) {
-    var mediaType = mime.lookup(url);
-
-    request({
-      url: url,
-      headers: {
-        'Content-Type': mediaType
-      }
-    }, function(error, res, body) {
-      if (!error) {
-        error = request.statusCodeError(res.statusCode);
-      }
-
-      if (!error) {
-        switch(mediaType) {
-          case 'image/jpeg':
-            body = new Buffer(body);
-            break;
-          default:
-            try {
-              body = JSON.parse(body);
-            } catch (error) {}
-            break;
-        }
-      }
-
-      done(error, body);
-    });
-  };
-
-  async.waterfall([
-    validate, 
-    setupLog,
-    getResource
-  ], function(error, resource) {
-    if (error) {
-      log('error', 'Item controller failed to get resource', { error: error }); 
-    }
-
-    done(error, resource);
-  });
-};
-
-module.exports = itemController;

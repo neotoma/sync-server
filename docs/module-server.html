@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>server - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ContactVerification.html">ContactVerification</a></li><li><a href="module-models_contactVerificationRequest-ContactVerificationRequest.html">ContactVerificationRequest</a></li><li><a href="module-models_contentType-ContentType.html">ContentType</a></li><li><a href="module-models_item-Item.html">Item</a></li><li><a href="module-models_job-Job.html">Job</a></li><li><a href="module-models_notificationRequest-NotificationRequest.html">NotificationRequest</a></li><li><a href="module-models_source-Source.html">Source</a></li><li><a href="module-models_status-Status.html">Status</a></li><li><a href="module-models_storage-Storage.html">Storage</a></li><li><a href="module-models_userSourceAuth-UserSourceAuth.html">UserSourceAuth</a></li><li><a href="module-models_userStorageAuth-UserStorageAuth.html">UserStorageAuth</a></li><li><a href="module-models_user-User.html">User</a></li></ul><h3>Modules</h3><ul><li><a href="module-app.html">app</a></li><li><a href="module-assertions_functionCallbacksError.html">assertions/functionCallbacksError</a></li><li><a href="module-assertions_functionCallbacksNoError.html">assertions/functionCallbacksNoError</a></li><li><a href="module-assertions_functionCallbacksResult.html">assertions/functionCallbacksResult</a></li><li><a href="module-assertions_functionReturnsResult.html">assertions/functionReturnsResult</a></li><li><a href="module-assertions_functionThrowsError.html">assertions/functionThrowsError</a></li><li><a href="module-assertions_functionThrowsNoError.html">assertions/functionThrowsNoError</a></li><li><a href="module-assertions_index.html">assertions/index</a></li><li><a href="module-assertions_it.html">assertions/it</a><ul class='methods'><li data-type='method'><a href="module-assertions_it.html#~compiledDescription">compiledDescription</a></li></ul></li><li><a href="module-assertions_objectHasProperties.html">assertions/objectHasProperties</a></li><li><a href="module-assertions_objectHasProperty.html">assertions/objectHasProperty</a></li><li><a href="module-assertions_objectMethodReturnsResult.html">assertions/objectMethodReturnsResult</a></li><li><a href="module-assertions_objectSavesAndHasProperties.html">assertions/objectSavesAndHasProperties</a></li><li><a href="module-assertions_objectToObjectMethodReturnsProperties.html">assertions/objectToObjectMethodReturnsProperties</a></li><li><a href="module-assertions_result.html">assertions/result</a></li><li><a href="module-assertions_route.html">assertions/route</a></li><li><a href="module-controllers_item.html">controllers/item</a><ul class='methods'><li data-type='method'><a href="module-controllers_item.html#.getResource">getResource</a></li><li data-type='method'><a href="module-controllers_item.html#.hasSupportedMediaType">hasSupportedMediaType</a></li><li data-type='method'><a href="module-controllers_item.html#.itemDataObjectsFromPage">itemDataObjectsFromPage</a></li><li data-type='method'><a href="module-controllers_item.html#.itemsGetUrl">itemsGetUrl</a></li><li data-type='method'><a href="module-controllers_item.html#.itemsPageError">itemsPageError</a></li><li data-type='method'><a href="module-controllers_item.html#.itemsPageNextPagination">itemsPageNextPagination</a></li><li data-type='method'><a href="module-controllers_item.html#.persistItemDataObject">persistItemDataObject</a></li><li data-type='method'><a href="module-controllers_item.html#.storagePath">storagePath</a></li><li data-type='method'><a href="module-controllers_item.html#.storeAllForUserStorageSource">storeAllForUserStorageSource</a></li><li data-type='method'><a href="module-controllers_item.html#.storeAllForUserStorageSourceContentType">storeAllForUserStorageSourceContentType</a></li><li data-type='method'><a href="module-controllers_item.html#.storeFile">storeFile</a></li><li data-type='method'><a href="module-controllers_item.html#.storeItemData">storeItemData</a></li><li data-type='method'><a href="module-controllers_item.html#.storeItemsPage">storeItemsPage</a></li><li data-type='method'><a href="module-controllers_item.html#.totalItemsAvailableFromPage">totalItemsAvailableFromPage</a></li></ul></li><li><a href="module-factories_model.html">factories/model</a><ul class='methods'><li data-type='method'><a href="module-factories_model.html#.new">new</a></li></ul></li><li><a href="module-lib_debug.html">lib/debug</a></li><li><a href="module-lib_env.html">lib/env</a></li><li><a href="module-lib_jsonapi.html">lib/jsonapi</a><ul class='methods'><li data-type='method'><a href="module-lib_jsonapi.html#.allowed">allowed</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.compiledQueryConditions">compiledQueryConditions</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.modelQueryConditions">modelQueryConditions</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.parsedModelQueryConditions">parsedModelQueryConditions</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.parsedQueryConditions">parsedQueryConditions</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.routeModelDeleteObjectResource">routeModelDeleteObjectResource</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.routeModelGetObjectResource">routeModelGetObjectResource</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.routeModelGetObjectsResource">routeModelGetObjectsResource</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.routeModelPatchObjectResource">routeModelPatchObjectResource</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.routeModelPostObjectResource">routeModelPostObjectResource</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.routeModelResource">routeModelResource</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.routeModelResources">routeModelResources</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.routeResource">routeResource</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.validateQueryData">validateQueryData</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.validateRequestBody">validateRequestBody</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.validateRequestUrl">validateRequestUrl</a></li></ul></li><li><a href="module-lib_logger.html">lib/logger</a><ul class='methods'><li data-type='method'><a href="module-lib_logger.html#.req">req</a></li><li data-type='method'><a href="module-lib_logger.html#.scopedLog">scopedLog</a></li></ul></li><li><a href="module-lib_request.html">lib/request</a></li><li><a href="module-lib_unpopulatedProperties.html">lib/unpopulatedProperties</a></li><li><a href="module-lib_warehouse.html">lib/warehouse</a><ul class='methods'><li data-type='method'><a href="module-lib_warehouse.html#.itemDataObject">itemDataObject</a></li><li data-type='method'><a href="module-lib_warehouse.html#.itemDataObjects">itemDataObjects</a></li><li data-type='method'><a href="module-lib_warehouse.html#.itemPage">itemPage</a></li><li data-type='method'><a href="module-lib_warehouse.html#.itemPages">itemPages</a></li><li data-type='method'><a href="module-lib_warehouse.html#.itemRelationships">itemRelationships</a></li><li data-type='method'><a href="module-lib_warehouse.html#.many">many</a></li><li data-type='method'><a href="module-lib_warehouse.html#.manySaved">manySaved</a></li><li data-type='method'><a href="module-lib_warehouse.html#.mockProperties">mockProperties</a></li><li data-type='method'><a href="module-lib_warehouse.html#.one">one</a></li><li data-type='method'><a href="module-lib_warehouse.html#.oneSaved">oneSaved</a></li></ul></li><li><a href="module-models_contactVerification.html">models/contactVerification</a></li><li><a href="module-models_contactVerificationRequest.html">models/contactVerificationRequest</a></li><li><a href="module-models_contentType.html">models/contentType</a><ul class='methods'><li data-type='method'><a href="module-models_contentType.html#camelName">camelName</a></li><li data-type='method'><a href="module-models_contentType.html#lowercaseName">lowercaseName</a></li><li data-type='method'><a href="module-models_contentType.html#pluralCamelName">pluralCamelName</a></li><li data-type='method'><a href="module-models_contentType.html#pluralLowercaseName">pluralLowercaseName</a></li></ul></li><li><a href="module-models_index.html">models/index</a></li><li><a href="module-models_item.html">models/item</a></li><li><a href="module-models_job.html">models/job</a></li><li><a href="module-models_notificationRequest.html">models/notificationRequest</a></li><li><a href="module-models_source.html">models/source</a></li><li><a href="module-models_status.html">models/status</a></li><li><a href="module-models_storage.html">models/storage</a><ul class='methods'><li data-type='method'><a href="module-models_storage.html#headers">headers</a></li><li data-type='method'><a href="module-models_storage.html#itemPutUrl">itemPutUrl</a></li></ul></li><li><a href="module-models_user.html">models/user</a></li><li><a href="module-models_userSourceAuth.html">models/userSourceAuth</a></li><li><a href="module-models_userStorageAuth.html">models/userStorageAuth</a></li><li><a href="module-server.html">server</a></li><li><a href="module-tests_createPopulatedProperties.html">tests/createPopulatedProperties</a></li><li><a href="module-tests_factory.html">tests/factory</a></li><li><a href="module-tests_models.html">tests/models</a></li><li><a href="module-tests_routers.html">tests/routers</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">server</h1>
+    
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        
+            
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Initiate app server</div>
+        
+
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="server.js.html">server.js</a>, <a href="server.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Feb 21 2017 18:11:10 GMT+0100 (CET) using the Minami theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

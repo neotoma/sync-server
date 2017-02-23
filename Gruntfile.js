@@ -1,17 +1,33 @@
-require('./lib/env');
+/**
+ * Configure Grunt scripts
+ * @module
+ */
+
+require('./lib/env')();
+var loadGruntTasks = require('load-grunt-tasks');
 
 module.exports = function(grunt) {
   'use strict';
 
   grunt.initConfig({
-    nodemon: {
-      dev: {
-        script: 'app-server.js'
+    clean: {
+      jsdoc: 'docs'
+    },
+    jsdoc: {
+      build: {
+        options: {
+          configure : '.jsdoc.json'
+        }
       }
     },
     mochaTest: {
-      main: {
-        src: ['test/**/*.js']
+      tests: {
+        src: ['tests/**/*.js']
+      }
+    },
+    nodemon: {
+      dev: {
+        script: 'server.js'
       }
     },
     rsync: {
@@ -58,22 +74,40 @@ module.exports = function(grunt) {
         command: 'cd ' + process.env.SYNC_SERVER_DEPLOY_HOST_DIR + ' && npm install --production'
       },
       forever: {
-        command: 'cd ' + process.env.SYNC_SERVER_DEPLOY_HOST_DIR + ' && forever restart app-server.js || forever start app-server.js'
+        command: 'cd ' + process.env.SYNC_SERVER_DEPLOY_HOST_DIR + ' && forever restart server.js || forever start server.js'
       },
       systemd: {
         command: 'sudo systemctl restart syncserver || sudo systemctl start syncserver'
       }
+    },
+    watch: {
+      jsdoc: {
+        files: ['.jsdoc.json', 'README.md', '**/*.js', '!**/node_modules/**', '!**/docs/**'],
+        tasks: ['jsdoc']
+      }
     }
   });
 
-  require('load-grunt-tasks')(grunt);
+  loadGruntTasks(grunt);
+
+  grunt.registerTask('jsdoc:rebuild', 'Delete and regenerate docs', [
+    'clean:jsdoc',
+    'jsdoc:build'
+  ]);
+
+  grunt.registerTask('jsdoc-dev', 'Regenerate docs upon changes', [
+    'jsdoc:rebuild',
+    'watch:jsdoc'
+  ]);
 
   grunt.registerTask('dev', 'Run app locally and reload upon changes', [
+    'jsdoc:rebuild',
     'nodemon:dev'
   ]);
 
   grunt.registerTask('deploy', 'Run tests and deploy', [
-    'mochaTest:main',
+    'jsdoc:rebuild',
+    'mochaTest:tests',
     'deploy-dependencies',
     'deploy-app'
   ]);

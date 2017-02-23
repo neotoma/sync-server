@@ -1,7 +1,7 @@
-var Status = require('../models/status');
-var Item = require('../models/item');
 var async = require('async');
+var Item = require('../models/item');
 var logger = require('../lib/logger');
+var Status = require('../models/status');
 
 module.exports = {
   json: function(callback, attributes) {
@@ -16,9 +16,9 @@ module.exports = {
 
       var findItems = function(status, callback) {
         Item.count({
-          userId: status.userId,
-          sourceId: status.sourceId,
-          contentTypeId: status.contentTypeId,
+          user: status.user.id,
+          source: status.source.id,
+          contentType: status.contentType.id,
           storageAttemptedAt: { '$ne': null },
           '$and': [{
             storageVerifiedAt: null
@@ -32,9 +32,9 @@ module.exports = {
             status.totalItemsPending = count;
             
             Item.count({
-              userId: status.userId,
-              sourceId: status.sourceId,
-              contentTypeId: status.contentTypeId,
+              user: status.user.id,
+              source: status.source.id,
+              contentType: status.contentType.id,
               storageVerifiedAt: { '$ne': null }
             }, function(error, count) {
               if (error) {
@@ -43,9 +43,12 @@ module.exports = {
                 status.totalItemsStored = count;
 
                 if (count) {
-                  Item.findOne({ sourceId: status.sourceId, contentTypeId: status.contentTypeId }).sort({ storageVerifiedAt: -1 }).exec(function(error, item) {
+                  Item.findOne({ 
+                    source: status.source.id, 
+                    contentType: status.contentType.id 
+                  }).sort({ storageVerifiedAt: -1 }).exec(function(error, item) {
                     if (item) {
-                      status.lastSyncedItemId = item.get('id');
+                      status.lastStoredItem = item.get('id');
                       items.push(item);
                     }
 

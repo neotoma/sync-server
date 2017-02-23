@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>models/contactVerificationRequest.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ContactVerification.html">ContactVerification</a></li><li><a href="module-models_contactVerificationRequest-ContactVerificationRequest.html">ContactVerificationRequest</a></li><li><a href="module-models_contentType-ContentType.html">ContentType</a></li><li><a href="module-models_item-Item.html">Item</a></li><li><a href="module-models_job-Job.html">Job</a></li><li><a href="module-models_notificationRequest-NotificationRequest.html">NotificationRequest</a></li><li><a href="module-models_source-Source.html">Source</a></li><li><a href="module-models_status-Status.html">Status</a></li><li><a href="module-models_storage-Storage.html">Storage</a></li><li><a href="module-models_userSourceAuth-UserSourceAuth.html">UserSourceAuth</a></li><li><a href="module-models_userStorageAuth-UserStorageAuth.html">UserStorageAuth</a></li><li><a href="module-models_user-User.html">User</a></li></ul><h3>Modules</h3><ul><li><a href="module-app.html">app</a></li><li><a href="module-assertions_functionCallbacksError.html">assertions/functionCallbacksError</a></li><li><a href="module-assertions_functionCallbacksNoError.html">assertions/functionCallbacksNoError</a></li><li><a href="module-assertions_functionCallbacksResult.html">assertions/functionCallbacksResult</a></li><li><a href="module-assertions_functionReturnsResult.html">assertions/functionReturnsResult</a></li><li><a href="module-assertions_functionThrowsError.html">assertions/functionThrowsError</a></li><li><a href="module-assertions_functionThrowsNoError.html">assertions/functionThrowsNoError</a></li><li><a href="module-assertions_index.html">assertions/index</a></li><li><a href="module-assertions_it.html">assertions/it</a><ul class='methods'><li data-type='method'><a href="module-assertions_it.html#~compiledDescription">compiledDescription</a></li></ul></li><li><a href="module-assertions_objectHasProperties.html">assertions/objectHasProperties</a></li><li><a href="module-assertions_objectHasProperty.html">assertions/objectHasProperty</a></li><li><a href="module-assertions_objectMethodReturnsResult.html">assertions/objectMethodReturnsResult</a></li><li><a href="module-assertions_objectSavesAndHasProperties.html">assertions/objectSavesAndHasProperties</a></li><li><a href="module-assertions_objectToObjectMethodReturnsProperties.html">assertions/objectToObjectMethodReturnsProperties</a></li><li><a href="module-assertions_result.html">assertions/result</a></li><li><a href="module-assertions_route.html">assertions/route</a></li><li><a href="module-controllers_item.html">controllers/item</a><ul class='methods'><li data-type='method'><a href="module-controllers_item.html#.getResource">getResource</a></li><li data-type='method'><a href="module-controllers_item.html#.hasSupportedMediaType">hasSupportedMediaType</a></li><li data-type='method'><a href="module-controllers_item.html#.itemDataObjectsFromPage">itemDataObjectsFromPage</a></li><li data-type='method'><a href="module-controllers_item.html#.itemsGetUrl">itemsGetUrl</a></li><li data-type='method'><a href="module-controllers_item.html#.itemsPageError">itemsPageError</a></li><li data-type='method'><a href="module-controllers_item.html#.itemsPageNextPagination">itemsPageNextPagination</a></li><li data-type='method'><a href="module-controllers_item.html#.persistItemDataObject">persistItemDataObject</a></li><li data-type='method'><a href="module-controllers_item.html#.storagePath">storagePath</a></li><li data-type='method'><a href="module-controllers_item.html#.storeAllForUserStorageSource">storeAllForUserStorageSource</a></li><li data-type='method'><a href="module-controllers_item.html#.storeAllForUserStorageSourceContentType">storeAllForUserStorageSourceContentType</a></li><li data-type='method'><a href="module-controllers_item.html#.storeFile">storeFile</a></li><li data-type='method'><a href="module-controllers_item.html#.storeItemData">storeItemData</a></li><li data-type='method'><a href="module-controllers_item.html#.storeItemsPage">storeItemsPage</a></li><li data-type='method'><a href="module-controllers_item.html#.totalItemsAvailableFromPage">totalItemsAvailableFromPage</a></li></ul></li><li><a href="module-factories_model.html">factories/model</a><ul class='methods'><li data-type='method'><a href="module-factories_model.html#.new">new</a></li></ul></li><li><a href="module-lib_debug.html">lib/debug</a></li><li><a href="module-lib_env.html">lib/env</a></li><li><a href="module-lib_jsonapi.html">lib/jsonapi</a><ul class='methods'><li data-type='method'><a href="module-lib_jsonapi.html#.allowed">allowed</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.compiledQueryConditions">compiledQueryConditions</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.modelQueryConditions">modelQueryConditions</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.parsedModelQueryConditions">parsedModelQueryConditions</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.parsedQueryConditions">parsedQueryConditions</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.routeModelDeleteObjectResource">routeModelDeleteObjectResource</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.routeModelGetObjectResource">routeModelGetObjectResource</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.routeModelGetObjectsResource">routeModelGetObjectsResource</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.routeModelPatchObjectResource">routeModelPatchObjectResource</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.routeModelPostObjectResource">routeModelPostObjectResource</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.routeModelResource">routeModelResource</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.routeModelResources">routeModelResources</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.routeResource">routeResource</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.validateQueryData">validateQueryData</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.validateRequestBody">validateRequestBody</a></li><li data-type='method'><a href="module-lib_jsonapi.html#.validateRequestUrl">validateRequestUrl</a></li></ul></li><li><a href="module-lib_logger.html">lib/logger</a><ul class='methods'><li data-type='method'><a href="module-lib_logger.html#.req">req</a></li><li data-type='method'><a href="module-lib_logger.html#.scopedLog">scopedLog</a></li></ul></li><li><a href="module-lib_request.html">lib/request</a></li><li><a href="module-lib_unpopulatedProperties.html">lib/unpopulatedProperties</a></li><li><a href="module-lib_warehouse.html">lib/warehouse</a><ul class='methods'><li data-type='method'><a href="module-lib_warehouse.html#.itemDataObject">itemDataObject</a></li><li data-type='method'><a href="module-lib_warehouse.html#.itemDataObjects">itemDataObjects</a></li><li data-type='method'><a href="module-lib_warehouse.html#.itemPage">itemPage</a></li><li data-type='method'><a href="module-lib_warehouse.html#.itemPages">itemPages</a></li><li data-type='method'><a href="module-lib_warehouse.html#.itemRelationships">itemRelationships</a></li><li data-type='method'><a href="module-lib_warehouse.html#.many">many</a></li><li data-type='method'><a href="module-lib_warehouse.html#.manySaved">manySaved</a></li><li data-type='method'><a href="module-lib_warehouse.html#.mockProperties">mockProperties</a></li><li data-type='method'><a href="module-lib_warehouse.html#.one">one</a></li><li data-type='method'><a href="module-lib_warehouse.html#.oneSaved">oneSaved</a></li></ul></li><li><a href="module-models_contactVerification.html">models/contactVerification</a></li><li><a href="module-models_contactVerificationRequest.html">models/contactVerificationRequest</a></li><li><a href="module-models_contentType.html">models/contentType</a><ul class='methods'><li data-type='method'><a href="module-models_contentType.html#camelName">camelName</a></li><li data-type='method'><a href="module-models_contentType.html#lowercaseName">lowercaseName</a></li><li data-type='method'><a href="module-models_contentType.html#pluralCamelName">pluralCamelName</a></li><li data-type='method'><a href="module-models_contentType.html#pluralLowercaseName">pluralLowercaseName</a></li></ul></li><li><a href="module-models_index.html">models/index</a></li><li><a href="module-models_item.html">models/item</a></li><li><a href="module-models_job.html">models/job</a></li><li><a href="module-models_notificationRequest.html">models/notificationRequest</a></li><li><a href="module-models_source.html">models/source</a></li><li><a href="module-models_status.html">models/status</a></li><li><a href="module-models_storage.html">models/storage</a><ul class='methods'><li data-type='method'><a href="module-models_storage.html#headers">headers</a></li><li data-type='method'><a href="module-models_storage.html#itemPutUrl">itemPutUrl</a></li></ul></li><li><a href="module-models_user.html">models/user</a></li><li><a href="module-models_userSourceAuth.html">models/userSourceAuth</a></li><li><a href="module-models_userStorageAuth.html">models/userStorageAuth</a></li><li><a href="module-server.html">server</a></li><li><a href="module-tests_createPopulatedProperties.html">tests/createPopulatedProperties</a></li><li><a href="module-tests_factory.html">tests/factory</a></li><li><a href="module-tests_models.html">tests/models</a></li><li><a href="module-tests_routers.html">tests/routers</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">models/contactVerificationRequest.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * ContactVerificationRequest model
+ * @module
+ */
+
+var async = require('async');
+var crypto = require('crypto');
+var logger = require('../lib/logger');
+var mailer = require('../lib/mailer');
+var modelFactory = require('../factories/model');
+
+/**
+ * Represents request to verify contact information
+ * @class ContactVerificationRequest
+ * @property {boolean} [authenticateSession=false] - Whether to authenticate the client's session upon verification
+ * @property {string} clientOrigin - Origin URL of client that requested contact verification (e.g. "https://example.com")
+ * @property {string} [code] - Secure code generated to fulfill request
+ * @property {string} contact - Contact identifier used to send request using method (e.g. "user@example.com")
+ * @property {Object[]} [createNotificationRequests] - Array of properties for notification requests to create related to user upon verification
+ * @property {event} createNotificationRequests[].event - Event for new notification request
+ * @property {boolean} [createUser=false] - Whether to create a user upon verification if one doesn't already exist with matching contact info
+ * @property {string} method - Method used to send request to contact (e.g. "email")
+ * @property {boolean} [verified=false] - Whether document has been verified 
+ */
+module.exports = modelFactory.new('ContactVerificationRequest', {
+  authenticateSession: { type: Boolean, default: false },
+  clientOrigin: { type: String, required: true },
+  code: String,
+  contact: {
+    type: String,
+    required: true,
+    validate: {
+      validator: function(value) {
+        return mailer.isValidEmail(value);
+      },
+      message: '"{VALUE}" is not a supported contact value'
+    }
+  },
+  createNotificationRequests: {
+    type: Array,
+    validate: {
+      validator: function(value) {
+        try {
+          if (['undefined', 'object'].indexOf(typeof value) === -1) {
+            throw new Error('Invalid value found');
+          } else if (typeof value === 'object') {
+            value.forEach(function(notificationRequest) {
+              if (typeof notificationRequest.event === 'undefined') {
+                throw new Error('Invalid notificationRequest found');
+              }
+            });
+          }
+
+          return true;
+        } catch (error) {
+          return false;
+        }
+      },
+      message: '"{VALUE}" is not a supported createNotificationRequests value'
+    }
+  },
+  createUser: { type: Boolean, default: false },
+  method: {
+    type: String,
+    required: true,
+    validate: {
+      validator: function(value) {
+        return (['email'].indexOf(value) > -1);
+      },
+      message: '"{VALUE}" is not a supported method value'
+    }
+  },
+  verified: { type: Boolean, default: false }
+}, {
+  jsonapi: {
+    get: 'admin',
+    patch: 'admin',
+    post: {
+      allowed: 'public',
+      queryConditions: {
+        code: undefined
+      },
+
+      /**
+       * Generate and deliver verification code after POST
+       * @param {Object} req - Express request object
+       * @param {Object} res - Express response object
+       * @param {Object} contactVerificationRequest - Mongoose contactVerificationRequest document created by POST request
+       * @param {function} done - Callback function expecting error, res, req and contactVerificationRequest params
+       */
+      post: function(req, res, contactVerificationRequest, done) {
+        var generateCodeAndSave = (done) => {
+          crypto.randomBytes(32, (error, buffer) => {
+            if (error) {
+              return done(new Error(`Failed to generate code: ${error.message}`));
+            }
+
+            contactVerificationRequest.code = buffer.toString('hex');
+            contactVerificationRequest.save(done);
+          });
+        };
+
+        var deliverCode = (done) => {
+          if (contactVerificationRequest.method === 'email') {
+            mailer.sendMail({
+              to: contactVerificationRequest.contact,
+              subject: 'Please verify your email address to get notified about ' + process.env.SYNC_SERVER_NAME,
+              text: 'Thanks for submitting your email address to ' + process.env.SYNC_SERVER_NAME + ' so we can notify you when it becomes available!\n\nHowever, before we can do so, we need you to confirm your address by visiting:\n\n' + contactVerificationRequest.clientOrigin + '/contactVerificationRequests/' + contactVerificationRequest._id + '?code=' + contactVerificationRequest.code + ' \n\n\nPlease take a second to do so!\n\nNote: If you weren\'t the one to submit your email address to us, don\'t worry; we won\'t contact you further about this matter. You can simply ignore this message.'
+            }, function(error) {
+              if (error) {
+                logger.error('ContactVerificationRequest model failed to send email for new contactVerificationRequest', {
+                  contactVerificationRequestId: contactVerificationRequest.id,
+                  error: error.message 
+                });
+              } else {
+                logger.milestone('ContactVerificationRequest model sent email for new contactVerificationRequest', {
+                  contactVerificationRequestId: contactVerificationRequest.id
+                });
+              }
+
+              done();
+            });
+          }
+        };
+
+        async.series([
+          generateCodeAndSave,
+          deliverCode
+        ], function(error) {
+          if (error) {
+            logger.error('ContactVerificationRequest model post-POST procedure failed', { error: error.message });
+          }
+
+          done(error, req, res, contactVerificationRequest);
+        });
+      }
+    }
+  }
+});</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Feb 21 2017 18:11:10 GMT+0100 (CET) using the Minami theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

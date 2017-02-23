@@ -1,45 +1,21 @@
-var pluralize = require('pluralize');
-require('../lib/prototypes/array');
-require('../lib/prototypes/string');
+/**
+ * ContentType model
+ * @module
+ */
 
-module.exports = function ContentType(attributes) {
-  if (!attributes) {
-    throw new Error('Parameter attributes undefined or null');
+var modelFactory = require('../factories/model');
+var nameMethods = require('./methods/name');
+
+/**
+ * Represents type of content available from source for storage
+ * @class ContentType
+ * @property {string} name - Name of contentType (e.g. "Photo")
+ */
+module.exports = modelFactory.new('ContentType', {
+  name: { type: String, required: true }
+}, {
+  jsonapi: {
+    get: 'public',
+    post: 'admin'
   }
-
-  if (!attributes.id) {
-    throw new Error('Parameter attributes has no id property');
-  }
-  
-  this.id = attributes.id;
-  this.pluralId = pluralize(attributes.id);
-  this.name = attributes.id.capitalizeFirstLetter();
-  this.pluralName = this.pluralId.capitalizeFirstLetter();
-
-  this.toObject = function(sources) {
-    var sourceIds;
-    var self = this;
-
-    if (typeof sources !== 'undefined' && sources.length > 0) {
-      sourceIds = sources.map(function(source) {
-        var sourceObject = source.toObject();
-        if (sourceObject.contentTypes && sourceObject.contentTypes.indexOf(self.id) > -1) {
-          return sourceObject.id;
-        }
-      }).clean();
-    }
-
-    var object = {
-      id: this.id,
-      pluralId: this.pluralId,
-      name: this.name,
-      pluralName: this.pluralName
-    };
-
-    if (sourceIds) {
-      object.sourceIds = sourceIds;
-    }
-
-    return object;
-  };
-}
+}, nameMethods);

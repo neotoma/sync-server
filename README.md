@@ -6,7 +6,6 @@ This repository contains the source code for an app that synchronizes data from 
 
 The code requires several environment variables to run or deploy the app. The following environment variables can be declared by adding a file named `.env` (in [INI format](https://en.wikipedia.org/wiki/INI_file)) to the base directory, assuming they're not declared elsewhere in the system already. Such a file will be ignored by Git.
 
-- `SYNC_SERVER_ENV`: Type of environment within which to run the app, affecting the behavior of services such as database, logging, and mailing. Must be assigned value `development`, `test`, or `production` (e.g. `development`; required to run app)
 - `SYNC_SERVER_NAME`: Name used by the app to identity itself with users (e.g. "Asheville"; required to run app)
 - `SYNC_SERVER_MAILER_SENDER_EMAIL`: Email address used by app to send email (e.g. `support@example.com`; required to run app)
 - `SYNC_SERVER_MAILER_DEV_RECIPIENT_EMAIL`: Email address used by the app to manually test the delivery of email (e.g. `developer@example.com`; required to run app in the development environment but not required to run it in other environments nor to deploy)
@@ -32,6 +31,7 @@ In addition to the above variables, the following need to be added for all envir
 
 State data is managed by [MongoDB](http://www.mongodb.org/), access to which must be indicated by the following environment variables:
 
+- `SYNC_SERVER_MONGODB_DATABASE`: Name of MongoDB database (e.g. 'sync_server')
 - `SYNC_SERVER_MONGODB_HOST`: Host address for the MongoDB service (e.g. `127.0.0.1`; required to run app)
 - `SYNC_SERVER_MONGODB_PORT`: Port through which to access the MongoDB service (e.g. `27017`; required to run app)
 
@@ -41,45 +41,9 @@ User sessions are handled by [Express](http://expressjs.com/) and [Passport](htt
 
 - `SYNC_SERVER_SESSIONS_SECRET`: Secret, non-obvious string used to prevent session tampering (e.g. `oc]7kwM)R*UX3&` but *generate your own*; required)
 
-### Dropbox
-
-The Dropbox storage module relies on the following environment variables:
-
-- `SYNC_SERVER_STORAGES_DROPBOX_APP_KEY`: Dropbox developer app key (required)
-- `SYNC_SERVER_STORAGES_DROPBOX_APP_SECRET`: Dropbox developer app secret (required) 
-
-You can find these on the [Dropbox developer website](https://dropbox.com/developers/apps). Register an app and configure the redirect URI to be the app host plus the path `/storages/dropbox/auth-callback` (e.g. `https://127.0.0.1:9090/storages/dropbox/auth-callback`).
-
-### foursquare
-
-The foursquare source module relies on the following environment variables:
-
-- `SYNC_SERVER_SOURCES_FOURSQUARE_CLIENT_ID`: foursquare developer app client ID (required)
-- `SYNC_SERVER_SOURCES_FOURSQUARE_CLIENT_SECRET`: foursquare developer app client secret (required)
-
-You can find these on the [foursquare developer website](https://foursquare.com/developers/apps). Register an app and set a redirect URI as your host suffixed with `/sources/foursquare/auth-callback` (e.g. `https://127.0.0.1:9090/sources/foursquare/auth-callback`).
-
-### Instagram
-
-The Instagram source module relies on the following environment variables:
-
-- `SYNC_SERVER_SOURCES_INSTAGRAM_CLIENT_ID`: Instagram developer app client ID (required)
-- `SYNC_SERVER_SOURCES_INSTAGRAM_CLIENT_SECRET`: Instagram developer app client secret (required)
-
-You can find these on the [Instagram developer website](https://instagram.com/developer). Register an app and set the redirect URI as your host suffixed with `/sources/instagram/auth-callback` (e.g. `https://127.0.0.1:9090/sources/instagram/auth-callback`).
-
-### Twitter
-
-The Twitter source module relies on the following environment variables:
-
-- `SYNC_SERVER_SOURCES_TWITTER_CONSUMER_KEY`: Twitter developer app client ID (required)
-- `SYNC_SERVER_SOURCES_TWITTER_CONSUMER_SECRET`: Twitter developer app client secret (required)
-
-You can find these on the [Twitter application management website](https://apps.twitter.com/). Register an app and set the callback URL as your host suffixed with `/sources/twitter/auth-callback` (e.g. `http://127.0.0.1:9090/sources/twitter/auth-callback`).
-
 ## Running the server
 
-Once the environment is ready per above, and [Node.js](http://nodejs.org/) with [NPM](https://www.npmjs.com/) is installed, simply run `npm install` to install dependencies and `node app-server.js` to fire the server up.
+Once the environment is ready per above, and [Node.js](http://nodejs.org/) with [NPM](https://www.npmjs.com/) is installed, simply run `npm install` to install dependencies and `node server.js` to fire the server up.
 
 ## Endpoints
 

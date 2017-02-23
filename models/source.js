@@ -1,97 +1,73 @@
-var defaultItemsLimit = 250;
+/**
+ * Source model
+ * @module
+ */
 
-module.exports = function(properties) {
-  this.id = properties.id,
-  this.name = properties.name,
-  this.enabled = properties.enabled,
-  this.logoGlyphPath = properties.logoGlyphPath,
-  this.contentTypes = properties.contentTypes,
-  this.host = properties.host,
-  this.apiVersion = properties.apiVersion;
-  this.itemsLimit = typeof properties.itemsLimit !== 'undefined' ? properties.itemsLimit : defaultItemsLimit;
-  this.clientId = properties.clientId;
-  this.clientSecret = properties.clientSecret;
-  this.consumerKey = properties.consumerKey;
-  this.consumerSecret = properties.consumerSecret;
+var modelFactory = require('../factories/model');
+var nameMethods = require('./methods/name');
+var templateCompiler = require('es6-template-strings');
 
-  this.toObject = function(userSourceAuths) {
-    var contentTypeIds;
-    var self = this;
+var methods = Object.assign({
+  itemDataObjectsFromPagePath: function(contentType) {
+    return templateCompiler(this.itemDataObjectsFromPagePathTemplate, {
+      contentTypePluralCamelName: contentType ? contentType.pluralCamelName() : undefined,
+      contentTypePluralLowercaseName: contentType ? contentType.pluralLowercaseName() : undefined
+    });
+  },
 
-    if (typeof this.contentTypes !== 'undefined') {
-      contentTypeIds = this.contentTypes.map(function(contentType) {
-        return contentType.id;
-      });
+  totalItemsAvailableFromPagePath: function(contentType) {
+    return templateCompiler(this.totalItemsAvailableFromPagePathTemplate, {
+      contentTypePluralCamelName: contentType ? contentType.pluralCamelName() : undefined,
+      contentTypePluralLowercaseName: contentType ? contentType.pluralLowercaseName() : undefined
+    });
+  },
+
+  itemsGetUrl: function(properties) {
+    if (properties.next) {
+      return properties.next;
     }
 
-    var userSourceAuthIds;
+    return templateCompiler(this.itemsGetUrlTemplate, properties);
+  }
+}, nameMethods);
 
-    if (typeof userSourceAuths !== 'undefined') {
-      userSourceAuthIds = userSourceAuths.map(function(userSourceAuth) {
-        if (userSourceAuth.sourceId == self.id) {
-          return userSourceAuth.id;
-        }
-      })
-
-      userSourceAuthIds = userSourceAuthIds.filter(function(n) { return n != undefined });
-    }
-
-    return {
-      id: this.id,
-      name: this.name,
-      enabled: this.enabled,
-      logoGlyphPath: this.logoGlyphPath,
-      host: this.host,
-      apiVersion: this.apiVersion,
-      itemsLimit: this.itemsLimit,
-      clientId: this.clientId,
-      clientSecret: this.clientSecret,
-      consumerKey: this.consumerKey,
-      consumerSecret: this.consumerSecret,
-      contentTypes: contentTypeIds,
-      userSourceAuths: userSourceAuthIds
-    };
-  };
-
-  this.itemsPageUrl = function(contentType, userSourceAuth, pagination) {
-    var offset = (typeof pagination === 'undefined') ? 0 : pagination.offset;
-    return 'https://' + this.host + '/' + contentType.pluralId + '?access_token=' + userSourceAuth.sourceToken + '&limit=' + this.itemsLimit + '&offset=' + offset;
-  };
-
-  this.itemsPageDataObjects = function(page, contentType) {
-    if (page.response && page.response[contentType.pluralId]) {
-      return page.response[contentType.pluralId].items;
-    }
-  };
-
-  this.itemsPageTotalAvailable = function(page, contentType) {
-    if (page.response && page.response[contentType.pluralId]) {
-      return page.response[contentType.pluralId].count;
-    }
-  };
-
-  this.itemsPageError = function(page) {
-    if (page.meta && page.meta.code !== 200) {
-      var message = page.meta.errorDetail ? page.meta.errorDetail : page.meta.errorType;
-      return new Error(message);
-    }
-  };
-
-  this.itemsPageNextPagination = function(page, contentType, pagination) {
-    var nextPagination;
-    
-    if (page.response && page.response[contentType.pluralId] && page.response[contentType.pluralId].length) {
-      nextPagination = {
-        offset: pagination.offset + page.results.length
-      };
-    }
-
-    return nextPagination;
-  };
-
-  this.itemDescription = function(item) {
-    return;
-  };
-}
-
-module.exports.defaultItemsLimit = defaultItemsLimit;
+/**
+ * Represents source of items for storage
+ * @class Source
+ * @property {number} apiVersion - Version of API to use for pulling items from source
+ * @property {string=} clientId - OAuth 2.0 client ID
+ * @property {string=} clientSecret - OAuth 2.0 client secret
+ * @property {module:models/contentType~ContentType[]} contentTypes - ContentTypes supported by source
+ * @property {boolean} [itemStorageEnabled=false] - Whether source is enabled for storing items in storage
+ * @property {string} [host] - Host URL for source (e.g. "api.foursquare.com")
+ * @property {number} [itemsLimit=25] - Maximum number of items to pull from source in a single page request
+ * @property {string} [logoGlyphPath] - URL path to logo glyph image file on host (e.g. "/images/logos/foursquare-glyph.svg")
+ * @property {string} name - Name of source (e.g. "foursquare")
+ * @property {string} [passportStrategy] - Strategy for Passport module (e.g. "passport-foursquare")
+ * @property {string} [itemsGetUrlTemplate=https://${host}/${contentTypePluralCamelName}?access_token=${accessToken}&limit=${limit}&offset=${offset}] - String template used to generate URLs for GET requests for items on source
+ * @property {string} [itemDataObjectsFromPagePathTemplate=data] - String template used to generate object paths to itemDataObjects found within pages returned from source
+ * @property {string} [totalItemsAvailableFromPagePathTemplate=response.${contentTypePluralCamelName}.count] - String template used to generate object paths to value representing total items available for contentType within pages returned from source
+ */
+module.exports = modelFactory.new('Source', {
+  apiVersion: String,
+  authScope: Array,
+  clientId: String,
+  clientSecret: String,
+  contentTypes: [{ ref: 'ContentType' }],
+  itemStorageEnabled: { type: Boolean, default: false },
+  host: String,
+  itemsLimit: { type: Number, default: 25 },
+  logoGlyphPath: String,
+  name: { type: String, required: true },
+  passportStrategy: String,
+  itemsGetUrlTemplate: { type: String, default: 'https://${host}/${contentTypePluralCamelName}?access_token=${accessToken}&limit=${limit}&offset=${offset}' },
+  itemDataObjectsFromPagePathTemplate: { type: String, default: 'data' },
+  totalItemsAvailableFromPagePathTemplate: String
+}, {
+  jsonapi: {
+    delete: 'admin',
+    get: 'public',
+    patch: 'admin',
+    post: 'admin'
+  }
+}, methods);

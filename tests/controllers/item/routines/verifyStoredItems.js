@@ -1,0 +1,43 @@
+var assert = require('assert');
+var async = require('async');
+var debug = require('debug')('syncServer:test:verifyStoredItems');
+var Item = require('../../../../models/item');
+var wh = require('../../../../lib/warehouse');
+
+module.exports = function(source, contentType, app, totalPages, done) {
+  debug('verifyStoredItems totalPages: %s', totalPages);
+
+  var contentTypes = contentType ? [contentType] : source.contentTypes;
+  var itemDataObjectsCount = totalPages ? totalPages * source.itemsLimit : undefined;
+  var totalItemDataObjects = 0;
+
+  async.each(contentTypes, (contentType, done) => {
+    var itemDataObjects = wh.itemDataObjects(contentType, itemDataObjectsCount);
+    totalItemDataObjects += itemDataObjects.length;
+
+    Item.count({
+      contentType: contentType.id
+    }, (error, count) => {
+      try {
+        assert.equal(count, itemDataObjects.length);
+        done();
+      } catch (error) {
+        done(error);
+      }
+    });
+  }, (error) => {
+    if (error) {
+      return done(error);
+    }
+
+    try {
+      if (app) {
+        assert.equal(app.emit.callCount, totalItemDataObjects);
+      }
+
+      done();
+    } catch (error) {
+      return done(error);
+    }
+  });
+};
