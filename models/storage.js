@@ -30,6 +30,7 @@ module.exports = modelFactory.new('Storage', {
 }, {
   jsonapi: {
     delete: 'admin',
+    filterProperties: ['clientId', 'clientSecret'],
     get: 'public',
     patch: 'admin',
     post: 'admin'

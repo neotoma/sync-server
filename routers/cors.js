@@ -12,7 +12,7 @@ module.exports = function(app, host) {
     cors({
       allowedHeaders: 'Content-Type',
       credentials: true,
-      methods: 'GET,PUT,POST,DELETE',
+      methods: 'GET,PATCH,PUT,POST,DELETE',
       origin: function(origin, done) {
         if (origin) {
           var whitelisted = ([

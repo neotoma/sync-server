@@ -5,9 +5,11 @@
 
 var async = require('async');
 var crypto = require('crypto');
+var debug = require('../lib/debug')('syncServer:contactVerificationRequest');
 var logger = require('../lib/logger');
 var mailer = require('../lib/mailer');
 var modelFactory = require('../factories/model');
+var ObjectId = require('mongoose').Types.ObjectId;
 
 /**
  * Represents request to verify contact information
@@ -22,7 +24,7 @@ var modelFactory = require('../factories/model');
  * @property {string} method - Method used to send request to contact (e.g. "email")
  * @property {boolean} [verified=false] - Whether document has been verified 
  */
-module.exports = modelFactory.new('ContactVerificationRequest', {
+module.exports = ContactVerificationRequest = modelFactory.new('ContactVerificationRequest', {
   authenticateSession: { type: Boolean, default: false },
   clientOrigin: { type: String, required: true },
   code: String,
@@ -74,7 +76,32 @@ module.exports = modelFactory.new('ContactVerificationRequest', {
 }, {
   jsonapi: {
     get: 'admin',
-    patch: 'admin',
+    patch: {
+      allowed: 'public',
+      queryConditions: function(req, done) {
+        if (!req.body.data.attributes.code) {
+          return done(new Error('Code value of attributes value not provided within data value of request'));
+        }
+
+        ContactVerificationRequest.findOne({
+          _id: ObjectId(req.body.data.id),
+          code: req.body.data.attributes.code
+        }, (error, contactVerificationRequest) => {
+
+          if (!error && !contactVerificationRequest) {
+            error = new Error('No contactVerificationRequest found with id and code');
+          }
+
+          if (error) {
+            done(error);
+          } else {
+            done(undefined, {
+              code: contactVerificationRequest.code
+            });
+          }
+        });
+      },
+    },
     post: {
       allowed: 'public',
       queryConditions: {

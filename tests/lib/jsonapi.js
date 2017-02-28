@@ -4,22 +4,21 @@ var jsonapi = require('../../lib/jsonapi');
 
 describe('jsonapi', () => {
   assertions.object.hasProperties('jsonapi', jsonapi, [
-    'modelQueryConditions',
-    'parsedQueryConditions',
-    'parsedModelQueryConditions',
-    'compiledQueryConditions',
-    'validateQueryData',
     'allowed',
-    'validateRequestUrl',
-    'validateRequestBody',
-    'routeResource',
-    'routeModelResource',
-    'routeModelGetObjectsResource',
-    'routeModelGetObjectResource',
-    'routeModelPostObjectResource',
-    'routeModelPatchObjectResource',
+    'compiledQueryConditions',
+    'modelQueryConditions',
     'routeModelDeleteObjectResource',
-    'routeModelResources'
+    'routeModelGetObjectResource',
+    'routeModelGetObjectsResource',
+    'routeModelPatchObjectResource',
+    'routeModelPostObjectResource',
+    'routeModelResource',
+    'routeModelResources',
+    'routeResource',
+    'saveRelationshipsToDocument',
+    'validateQueryData',
+    'validateRequestBody',
+    'validateRequestUrl'
   ]);
 
   var method = 'get';
@@ -57,7 +56,7 @@ describe('jsonapi', () => {
     }
   }]);
 
-  assertions.function.returnsResult('jsonapi.modelQueryConditions', jsonapi.modelQueryConditions, [{
+  assertions.function.callbacks.result('jsonapi.modelQueryConditions', jsonapi.modelQueryConditions, [{
     when: 'model with no jsonapi[method] property provided',
     params: [req, model, method],
     result: {},
