@@ -1,8 +1,8 @@
 var assert = require('assert');
 var async = require('async');
 var debug = require('debug')('syncServer:test:verifyStoredItems');
-var Item = require('../../../../models/item');
-var wh = require('../../../../lib/warehouse');
+var Item = require('app/models/item');
+var wh = require('app/lib/warehouse');
 
 module.exports = function(source, contentType, app, totalPages, done) {
   debug('verifyStoredItems totalPages: %s', totalPages);

@@ -2,7 +2,7 @@
  * Script to clear the database and populate it with objects represented by data files
  */
 
-require('./lib/env')();
+require('dotenvs')();
 var async = require('async');
 var debug = require('./lib/debug')('syncServer:loadData');
 var fs = require('fs');

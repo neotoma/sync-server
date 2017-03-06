@@ -2,6 +2,8 @@
 
 This repository contains the source code for an app that synchronizes data from sources to storage on behalf of users per [the Neotoma project documentation](https://github.com/neotoma/documentation).
 
+See also: [Code documentation](http://neotoma.github.io/sync-server/)
+
 ## Setting up the environment
 
 The code requires several environment variables to run or deploy the app. The following environment variables can be declared by adding a file named `.env` (in [INI format](https://en.wikipedia.org/wiki/INI_file)) to the base directory, assuming they're not declared elsewhere in the system already. Such a file will be ignored by Git.
@@ -36,17 +38,17 @@ Environment variables intended for running tests should be added to an `.env-tes
 
 ## Running the server
 
-Once the environment is ready per above, and [Node.js](http://nodejs.org/) with [NPM](https://www.npmjs.com/) is installed, simply run `npm install` to install dependencies and `node server.js` to fire the server up.
+Once the environment is ready per above, and [Node.js](http://nodejs.org/) with [NPM](https://www.npmjs.com/) is installed, simply run `npm install` to install dependencies in the `node_modules` directory and `node server.js` to fire the server up.
 
 ## Developing and deploying the server
 
 With [Grunt](gruntjs.com) installed in addition to establishing your environment accordingly per the instructions above, you can run any of the following scripts to help with development and deployment:
 
 - `grunt dev`: Runs the app and automatically reloads it when code changes are made during development
-- `grunt deploy`: Runs all tests locally, deploys environment and certificate file dependencies, deploys the app remotely, and runs `npm install` remotely to ensure the installation of dependencies
+- `grunt deploy-all`: Runs all tests locally, deploys environment and certificate file dependencies, deploys the app remotely, and runs `npm install` remotely to ensure the installation of dependencies
 - `grunt deploy-dependencies`: Deploys environment and certificate file dependencies.
 - `grunt deploy-app`: Deploys the app remotely and runs `npm install` remotely to ensure the installation of dependencies
 
-If you add `forever` to any of the deployment scripts (e.g. `grunt deploy forever`), [forever](https://github.com/foreverjs/forever) will be used to start or restart the app remotely post-deployment. Ensure that Node with NPM and forever are installed remotely before appending this script.
+If you add `restart-forever` to any of the deployment scripts (e.g. `grunt deploy restart-forever`), [forever](https://github.com/foreverjs/forever) will be used to start or restart the app remotely post-deployment. Ensure that Node with NPM and forever are installed remotely before appending this script.
 
-If you add `systemd` to any of the deployment scripts (e.g. `grunt deploy systemd`), [systemd](https://www.digitalocean.com/community/tutorials/systemd-essentials-working-with-services-units-and-the-journal) will be used to start or restart the app remotely post-deployment. Ensure that Node and systemd with a service for the app called `syncserver` are installed remotely before running this script.
+If you add `restart-systemd` to any of the deployment scripts (e.g. `grunt deploy restart-systemd`), [systemd](https://www.digitalocean.com/community/tutorials/systemd-essentials-working-with-services-units-and-the-journal) will be used to start or restart the app remotely post-deployment. Ensure that Node and systemd with a service for the app called `syncserver` are installed remotely before running this script.

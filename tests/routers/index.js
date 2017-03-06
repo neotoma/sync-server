@@ -1,5 +1,5 @@
-require('../../lib/env')('test');
-var app = require('../../app');
+require('dotenvs')('test');
+var app = require('app');
 var assert = require('assert');
 var request = require('supertest');
 

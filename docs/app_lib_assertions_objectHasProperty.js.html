@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>app/lib/assertions/objectHasProperty.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ContactVerification.html">ContactVerification</a></li><li><a href="module-app_models_contactVerificationRequest-ContactVerificationRequest.html">ContactVerificationRequest</a></li><li><a href="module-app_models_contentType-ContentType.html">ContentType</a></li><li><a href="module-app_models_item-Item.html">Item</a></li><li><a href="module-app_models_job-Job.html">Job</a></li><li><a href="module-app_models_notificationRequest-NotificationRequest.html">NotificationRequest</a></li><li><a href="module-app_models_source-Source.html">Source</a></li><li><a href="module-app_models_status-Status.html">Status</a></li><li><a href="module-app_models_storage-Storage.html">Storage</a></li><li><a href="module-app_models_userSourceAuth-UserSourceAuth.html">UserSourceAuth</a></li><li><a href="module-app_models_userStorageAuth-UserStorageAuth.html">UserStorageAuth</a></li><li><a href="module-app_models_user-User.html">User</a></li></ul><h3>Modules</h3><ul><li><a href="module-app_config_mongodb.html">app/config/mongodb</a></li><li><a href="module-app_config_session.html">app/config/session</a></li><li><a href="module-app_controllers_item.html">app/controllers/item</a><ul class='methods'><li data-type='method'><a href="module-app_controllers_item.html#.getResource">getResource</a></li><li data-type='method'><a href="module-app_controllers_item.html#.hasSupportedMediaType">hasSupportedMediaType</a></li><li data-type='method'><a href="module-app_controllers_item.html#.itemDataObjectsFromPage">itemDataObjectsFromPage</a></li><li data-type='method'><a href="module-app_controllers_item.html#.itemsGetUrl">itemsGetUrl</a></li><li data-type='method'><a href="module-app_controllers_item.html#.itemsPageError">itemsPageError</a></li><li data-type='method'><a href="module-app_controllers_item.html#.itemsPageNextPagination">itemsPageNextPagination</a></li><li data-type='method'><a href="module-app_controllers_item.html#.persistItemDataObject">persistItemDataObject</a></li><li data-type='method'><a href="module-app_controllers_item.html#.storagePath">storagePath</a></li><li data-type='method'><a href="module-app_controllers_item.html#.storeAllForUserStorageSource">storeAllForUserStorageSource</a></li><li data-type='method'><a href="module-app_controllers_item.html#.storeAllForUserStorageSourceContentType">storeAllForUserStorageSourceContentType</a></li><li data-type='method'><a href="module-app_controllers_item.html#.storeFile">storeFile</a></li><li data-type='method'><a href="module-app_controllers_item.html#.storeItemData">storeItemData</a></li><li data-type='method'><a href="module-app_controllers_item.html#.storeItemsPage">storeItemsPage</a></li><li data-type='method'><a href="module-app_controllers_item.html#.totalItemsAvailableFromPage">totalItemsAvailableFromPage</a></li></ul></li><li><a href="module-app_factories_model.html">app/factories/model</a><ul class='methods'><li data-type='method'><a href="module-app_factories_model.html#.new">new</a></li></ul></li><li><a href="module-app_index.html">app/index</a></li><li><a href="module-app_lib_assertions_functionCallbacksError.html">app/lib/assertions/functionCallbacksError</a></li><li><a href="module-app_lib_assertions_functionCallbacksNoError.html">app/lib/assertions/functionCallbacksNoError</a></li><li><a href="module-app_lib_assertions_functionCallbacksResult.html">app/lib/assertions/functionCallbacksResult</a></li><li><a href="module-app_lib_assertions_functionReturnsResult.html">app/lib/assertions/functionReturnsResult</a></li><li><a href="module-app_lib_assertions_functionThrowsError.html">app/lib/assertions/functionThrowsError</a></li><li><a href="module-app_lib_assertions_functionThrowsNoError.html">app/lib/assertions/functionThrowsNoError</a></li><li><a href="module-app_lib_assertions_index.html">app/lib/assertions/index</a></li><li><a href="module-app_lib_assertions_it.html">app/lib/assertions/it</a><ul class='methods'><li data-type='method'><a href="module-app_lib_assertions_it.html#~compiledDescription">compiledDescription</a></li></ul></li><li><a href="module-app_lib_assertions_objectHasProperties.html">app/lib/assertions/objectHasProperties</a></li><li><a href="module-app_lib_assertions_objectHasProperty.html">app/lib/assertions/objectHasProperty</a></li><li><a href="module-app_lib_assertions_objectMethodReturnsResult.html">app/lib/assertions/objectMethodReturnsResult</a></li><li><a href="module-app_lib_assertions_objectSavesAndHasProperties.html">app/lib/assertions/objectSavesAndHasProperties</a></li><li><a href="module-app_lib_assertions_objectToObjectMethodReturnsProperties.html">app/lib/assertions/objectToObjectMethodReturnsProperties</a></li><li><a href="module-app_lib_assertions_result.html">app/lib/assertions/result</a></li><li><a href="module-app_lib_assertions_route.html">app/lib/assertions/route</a></li><li><a href="module-app_lib_createPopulatedProperties.html">app/lib/createPopulatedProperties</a></li><li><a href="module-app_lib_debug.html">app/lib/debug</a></li><li><a href="module-app_lib_factory.html">app/lib/factory</a></li><li><a href="module-app_lib_jsonapi.html">app/lib/jsonapi</a><ul class='methods'><li data-type='method'><a href="module-app_lib_jsonapi.html#.allowed">allowed</a></li><li data-type='method'><a href="module-app_lib_jsonapi.html#.compiledQueryConditions">compiledQueryConditions</a></li><li data-type='method'><a href="module-app_lib_jsonapi.html#.modelQueryConditions">modelQueryConditions</a></li><li data-type='method'><a href="module-app_lib_jsonapi.html#.routeModelDeleteObjectResource">routeModelDeleteObjectResource</a></li><li data-type='method'><a href="module-app_lib_jsonapi.html#.routeModelGetObjectResource">routeModelGetObjectResource</a></li><li data-type='method'><a href="module-app_lib_jsonapi.html#.routeModelGetObjectsResource">routeModelGetObjectsResource</a></li><li data-type='method'><a href="module-app_lib_jsonapi.html#.routeModelPatchObjectResource">routeModelPatchObjectResource</a></li><li data-type='method'><a href="module-app_lib_jsonapi.html#.routeModelPostObjectResource">routeModelPostObjectResource</a></li><li data-type='method'><a href="module-app_lib_jsonapi.html#.routeModelResource">routeModelResource</a></li><li data-type='method'><a href="module-app_lib_jsonapi.html#.routeModelResources">routeModelResources</a></li><li data-type='method'><a href="module-app_lib_jsonapi.html#.routeResource">routeResource</a></li><li data-type='method'><a href="module-app_lib_jsonapi.html#.saveRelationshipsToDocument">saveRelationshipsToDocument</a></li><li data-type='method'><a href="module-app_lib_jsonapi.html#.validateQueryData">validateQueryData</a></li><li data-type='method'><a href="module-app_lib_jsonapi.html#.validateRequestBody">validateRequestBody</a></li><li data-type='method'><a href="module-app_lib_jsonapi.html#.validateRequestUrl">validateRequestUrl</a></li></ul></li><li><a href="module-app_lib_logger.html">app/lib/logger</a><ul class='methods'><li data-type='method'><a href="module-app_lib_logger.html#.req">req</a></li><li data-type='method'><a href="module-app_lib_logger.html#.scopedLog">scopedLog</a></li></ul></li><li><a href="module-app_lib_request.html">app/lib/request</a></li><li><a href="module-app_lib_unpopulatedProperties.html">app/lib/unpopulatedProperties</a></li><li><a href="module-app_lib_warehouse.html">app/lib/warehouse</a><ul class='methods'><li data-type='method'><a href="module-app_lib_warehouse.html#.itemDataObject">itemDataObject</a></li><li data-type='method'><a href="module-app_lib_warehouse.html#.itemDataObjects">itemDataObjects</a></li><li data-type='method'><a href="module-app_lib_warehouse.html#.itemPage">itemPage</a></li><li data-type='method'><a href="module-app_lib_warehouse.html#.itemPages">itemPages</a></li><li data-type='method'><a href="module-app_lib_warehouse.html#.itemRelationships">itemRelationships</a></li><li data-type='method'><a href="module-app_lib_warehouse.html#.many">many</a></li><li data-type='method'><a href="module-app_lib_warehouse.html#.manySaved">manySaved</a></li><li data-type='method'><a href="module-app_lib_warehouse.html#.mockProperties">mockProperties</a></li><li data-type='method'><a href="module-app_lib_warehouse.html#.one">one</a></li><li data-type='method'><a href="module-app_lib_warehouse.html#.oneSaved">oneSaved</a></li></ul></li><li><a href="module-app_models_contactVerification.html">app/models/contactVerification</a></li><li><a href="module-app_models_contactVerificationRequest.html">app/models/contactVerificationRequest</a></li><li><a href="module-app_models_contentType.html">app/models/contentType</a></li><li><a href="module-app_models_index.html">app/models/index</a></li><li><a href="module-app_models_item.html">app/models/item</a></li><li><a href="module-app_models_job.html">app/models/job</a></li><li><a href="module-app_models_notificationRequest.html">app/models/notificationRequest</a></li><li><a href="module-app_models_source.html">app/models/source</a></li><li><a href="module-app_models_status.html">app/models/status</a></li><li><a href="module-app_models_storage.html">app/models/storage</a><ul class='methods'><li data-type='method'><a href="module-app_models_storage.html#headers">headers</a></li><li data-type='method'><a href="module-app_models_storage.html#itemPutUrl">itemPutUrl</a></li></ul></li><li><a href="module-app_models_user.html">app/models/user</a></li><li><a href="module-app_models_userSourceAuth.html">app/models/userSourceAuth</a></li><li><a href="module-app_models_userStorageAuth.html">app/models/userStorageAuth</a></li><li><a href="module-app_server.html">app/server</a></li><li><a href="module-Gruntfile.html">Gruntfile</a></li><li><a href="module-tests_app.html">tests/app</a></li><li><a href="module-tests_models.html">tests/models</a></li><li><a href="module-tests_routers.html">tests/routers</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">app/lib/assertions/objectHasProperty.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Assert property of object
+ * @module
+ */
+
+var _ = require('underscore');
+var assert = require('assert');
+var ObjectId = require('mongoose').Types.ObjectId;
+
+module.exports = function(objectName, object, propertyName, propertyValue) {
+  var description = objectName + ' object has property ' + propertyName;
+
+  if (propertyValue) {
+    description += ' that matches ' + typeof propertyValue;
+  }
+
+  it(description, (done) => {
+    if (typeof propertyValue === 'object') {
+      try {
+        if (typeof object[propertyName] === 'string' &amp;&amp; ObjectId.isValid(object[propertyName])) {
+          assert(_.isEqual(ObjectId(object[propertyName]), propertyValue));
+        } else {
+          assert(_.isEqual(object[propertyName], propertyValue));
+        }
+      } catch (error) {
+        return done(new Error(`Object property "${propertyName}" does match value expected: ${JSON.stringify(object[propertyName])} !== ${propertyValue}`));
+      }
+    } else if (!propertyValue) {
+      assert(typeof object[propertyName] !== 'undefined');
+    } else {
+      try {
+        assert.deepEqual(object[propertyName], propertyValue);
+      } catch (error) {
+        return done(new Error(`Object property "${propertyName}" does match value expected: ${object[propertyName]} !== ${propertyValue}`));
+      }
+    }
+    
+    done();
+  });
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Mar 06 2017 18:53:04 GMT+0100 (CET) using the Minami theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

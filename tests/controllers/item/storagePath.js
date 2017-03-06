@@ -1,9 +1,9 @@
-require('../../../lib/env')('test');
+require('dotenvs')('test');
 var assert = require('assert');
-var assertions = require('../../../assertions');
+var assertions = require('app/lib/assertions');
 var async = require('async');
-var controller = require('../../../controllers/item');
-var wh = require('../../../lib/warehouse');
+var controller = require('app/controllers/item');
+var wh = require('app/lib/warehouse');
 
 describe('itemController.storagePath method', function() {
   assertions.function.callbacks.error(controller.storagePath, [{
@@ -24,23 +24,30 @@ describe('itemController.storagePath method', function() {
     when: 'item provided',
     params: [wh.one('item'), wh.jsonData()],
     before: function(done) {
-      var contentType = wh.one('contentType', {
-        _id: this.params[0].contentType
-      });
+      var saveContentType = (done) => {
+        wh.oneSaved('contentType', {
+          _id: this.params[0].contentType
+        }, done);
+      };
 
-      var source = wh.one('source', {
-        _id: this.params[0].source
-      });
+      var saveSource = (done) => {
+        wh.oneSaved('source', {
+          _id: this.params[0].source
+        }, done);
+      };
 
       var populateItem = (done) => {
         this.params[0].populate('contentType source', done);
       };
 
       async.series([
-        contentType.save,
-        source.save,
+        saveContentType,
+        saveSource,
         populateItem
-      ], done);
+      ], (error) => {
+        console.log('error', error);
+        done(error);
+      });
     },
     result: function(result, done) {
       assert.equal(result, `/${this.params[0].source.pluralKebabName()}/${this.params[0].contentType.pluralKebabName()}/${this.params[0].id}.json`);

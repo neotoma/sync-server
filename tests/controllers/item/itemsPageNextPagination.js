@@ -1,9 +1,9 @@
-require('../../../lib/env')('test');
+require('dotenvs')('test');
 var _ = require('lodash');
 var assert = require('assert');
-var assertions = require('../../../assertions');
-var controller = require('../../../controllers/item');
-var wh = require('../../../lib/warehouse');
+var assertions = require('app/lib/assertions');
+var controller = require('app/controllers/item');
+var wh = require('app/lib/warehouse');
 
 describe('itemController.itemsPageNextPagination method', () => {
   assertions.function.returnsResult('controller.itemsPageNextPagination', controller.itemsPageNextPagination, [{

@@ -1,6 +1,6 @@
-require('../../../lib/env')('test');
-var assertions = require('../../../assertions');
-var controller = require('../../../controllers/item');
+require('dotenvs')('test');
+var assertions = require('app/lib/assertions');
+var controller = require('app/controllers/item');
 
 describe('itemController.hasSupportedMediaType method', function() {
   assertions.function.throws.error(controller.hasSupportedMediaType, [{

@@ -1,12 +1,12 @@
-require('../../../lib/env')('test');
-var app = require('../../../app');
-var assertions = require('../../../assertions');
-var controller = require('../../../controllers/item');
-var mongoose = require('../../../lib/mongoose');
+require('dotenvs')('test');
+var app = require('app');
+var assertions = require('app/lib/assertions');
+var controller = require('app/controllers/item');
+var mongoose = require('app/lib/mongoose');
 var prepareStoreAll = require('./routines/prepareStoreAll');
 var resetAppSpy = require('./routines/resetAppSpy')(app);
 var verifyStoredItems = require('./routines/verifyStoredItems');
-var wh = require('../../../lib/warehouse');
+var wh = require('app/lib/warehouse');
 
 describe('itemController.storeAllForUserStorageSource method', function() {
   beforeEach(mongoose.removeCollections);

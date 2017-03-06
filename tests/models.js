@@ -3,21 +3,21 @@
  * @module
  */
 
-require('../lib/env')('test');
+require('dotenvs')('test');
 var assert = require('assert');
-var assertions = require('../assertions');
+var assertions = require('app/lib/assertions');
 var async = require('async');
-var createPopulatedProperties = require('./createPopulatedProperties');
+var createPopulatedProperties = require('app/lib/createPopulatedProperties');
 var debug = require('debug')('syncServer:modelTests');
-var fixtures = require('../fixtures/models');
+var fixtures = require('fixtures/models');
 var flat = require('flat');
-var models = require('../models');
-var mongoose = require('../lib/mongoose');
+var models = require('app/models');
+var mongoose = require('app/lib/mongoose');
 var ObjectId = require('mongoose').Types.ObjectId;
-var options = require('../lib/minimist');
+var options = require('app/lib/minimist');
 var templateCompiler = require('es6-template-strings');
-var unpopulatedProperties = require('../lib/unpopulatedProperties');
-var wh = require('../lib/warehouse');
+var unpopulatedProperties = require('app/lib/unpopulatedProperties');
+var wh = require('app/lib/warehouse');
 
 if (options.model) {
   var fixture = fixtures[options.model];

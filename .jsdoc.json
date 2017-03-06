@@ -5,19 +5,10 @@
     "template": "node_modules/minami"
   },
   "source": {
-    "excludePattern": "(node_modules/|docs)",
     "include": [
-      "app.js",
-      "assertions",
-      "controllers",
-      "factories",
-      "globals.js",
-      "lib",
-      "models",
+      "app",
+      "Gruntfile.js",
       "README.md",
-      "routers",
-      "server.js",
-      "socketEvents",
       "tests"
     ],
     "includePattern": ".js$"

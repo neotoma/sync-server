@@ -1,14 +1,14 @@
-require('../../../lib/env')('test');
-var app = require('../../../app');
+require('dotenvs')('test');
+var app = require('app');
 var assert = require('assert');
-var assertions = require('../../../assertions');
-var controller = require('../../../controllers/item');
-var mongoose = require('../../../lib/mongoose');
-var nock = require('../../nock');
+var assertions = require('app/lib/assertions');
+var controller = require('app/controllers/item');
+var mongoose = require('app/lib/mongoose');
+var nock = require('app/lib/nock');
 var prepareStoreAll = require('./routines/prepareStoreAll');
 var resetAppSpy = require('./routines/resetAppSpy')(app);
 var verifyStoredItems = require('./routines/verifyStoredItems');
-var wh = require('../../../lib/warehouse');
+var wh = require('app/lib/warehouse');
 
 describe('itemController.storeItemsPage method', function() {
   beforeEach(mongoose.removeCollections);

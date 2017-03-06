@@ -1,18 +1,18 @@
-require('../../../lib/env')('test');
-var app = require('../../../app');
+require('dotenvs')('test');
+var app = require('app');
 var assert = require('assert');
 var async = require('async');
-var assertions = require('../../../assertions');
-var ContentType = require('../../../models/contentType');
-var controller = require('../../../controllers/item');
-var ItemFactory = require('../../factory')('item');
-var mongoose = require('../../../lib/mongoose');
-var nock = require('../../nock');
+var assertions = require('app/lib/assertions');
+var ContentType = require('app/models/contentType');
+var controller = require('app/controllers/item');
+var ItemFactory = require('app/lib/factory')('item');
+var mongoose = require('app/lib/mongoose');
+var nock = require('app/lib/nock');
 var resetAppSpy = require('./routines/resetAppSpy')(app);
 var sinon = require('sinon');
-var UserFactory = require('../../factory')('user');
-var UserStorageAuthFactory = require('../../factory')('userStorageAuth');
-var wh = require('../../../lib/warehouse');
+var UserFactory = require('app/lib/factory')('user');
+var UserStorageAuthFactory = require('app/lib/factory')('userStorageAuth');
+var wh = require('app/lib/warehouse');
 
 describe('itemController.storeItemData method', function() {
   beforeEach(mongoose.removeCollections);
@@ -63,45 +63,65 @@ describe('itemController.storeItemData method', function() {
     when: 'provided item with json data and app',
     params: [wh.one('item'), wh.jsonData(), app],
     before: function(done) {
-      var item = this.params[0];
+      var storage, userStorageAuth;
 
-      var contentType = wh.one('contentType', {
-        _id: item.contentType
-      });
-
-      var source = wh.one('source', {
-        _id: item.source
-      });
-
-      var storage = wh.one('storage', {
-        _id: item.storage
-      });
-
-      var user = wh.one('user', {
-        _id: item.user
-      });
-
-      var userStorageAuth = wh.one('userStorageAuth', {
-        user: item.user,
-        storage: item.storage
-      });
-
-      var populateItem = function(done) {
-        item.populate('contentType source storage user', done);
+      var saveContentType = (done) => {
+        wh.oneSaved('contentType', {
+          _id: this.params[0].contentType
+        }, done);
       };
 
-      var setupNock = function(done) {
+      var saveSource = (done) => {
+        wh.oneSaved('source', {
+          _id: this.params[0].source
+        }, done);
+      };
+
+      var saveStorage = (done) => {
+        wh.oneSaved('storage', {
+          _id: this.params[0].storage
+        }, (error, savedStorage) => {
+          storage = savedStorage;
+          done(error);
+        });
+      };
+
+      var saveUser = (done) => {
+        wh.oneSaved('user', {
+          _id: this.params[0].user
+        }, done);
+      };
+
+      var saveItem = (done) => {
+        this.params[0].save(done);
+      };
+
+      var saveUserStorageAuth = (done) => {
+        wh.oneSaved('userStorageAuth', {
+          user: this.params[0].user,
+          storage: this.params[0].storage
+        }, (error, savedUserStorageAuth) => {
+          userStorageAuth = savedUserStorageAuth;
+          done(error);
+        });
+      };
+
+      var populateItem = (done) => {
+        this.params[0].populate('contentType source storage user', done);
+      };
+
+      var setupNock = (done) => {
         nock.postStorage(storage, userStorageAuth);
         done();
       };
 
       async.series([
-        contentType.save,
-        source.save,
-        storage.save,
-        user.save,
-        item.save,
-        userStorageAuth.save,
+        saveContentType,
+        saveSource,
+        saveStorage,
+        saveUser,
+        saveItem,
+        saveUserStorageAuth,
         populateItem,
         setupNock
       ], done);

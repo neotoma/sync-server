@@ -1,10 +1,10 @@
-require('../../../lib/env')('test');
+require('dotenvs')('test');
 var _ = require('lodash');
 var assert = require('assert');
-var assertions = require('../../../assertions');
-var controller = require('../../../controllers/item');
+var assertions = require('app/lib/assertions');
+var controller = require('app/controllers/item');
 var templateCompiler = require('es6-template-strings');
-var wh = require('../../../lib/warehouse');
+var wh = require('app/lib/warehouse');
 
 describe('itemController.itemsGetUrl method', function() {
   assertions.function.returnsResult('controller.itemsGetUrl', controller.itemsGetUrl, [{

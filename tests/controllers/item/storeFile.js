@@ -1,9 +1,9 @@
-require('../../../lib/env')('test');
-var assertions = require('../../../assertions');
-var controller = require('../../../controllers/item');
-var mongoose = require('../../../lib/mongoose');
-var nock = require('../../nock');
-var wh = require('../../../lib/warehouse');
+require('dotenvs')('test');
+var assertions = require('app/lib/assertions');
+var controller = require('app/controllers/item');
+var mongoose = require('app/lib/mongoose');
+var nock = require('app/lib/nock');
+var wh = require('app/lib/warehouse');
 
 var before = function(path) {
   return function(done) {

@@ -1,7 +1,7 @@
-require('../../lib/env')('test');
+require('dotenvs')('test');
 var assert = require('assert');
-var assertions = require('../../assertions');
-var wh = require('../../lib/warehouse');
+var assertions = require('app/lib/assertions');
+var wh = require('app/lib/warehouse');
 
 describe('warehouse', () => {
   assertions.object.hasProperties('warehouse', wh, 'itemDataObjects' [

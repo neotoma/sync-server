@@ -1,5 +1,10 @@
-require('../lib/env')('test');
-var app = require('../app');
+/**
+ * Run tests against app module
+ * @module
+ */
+
+require('dotenvs')('test');
+var app = require('app');
 var assert = require('assert');
 
 describe('app', function() {

@@ -3,17 +3,17 @@
  * @module
  */
 
-require('../lib/env')('test');
-var app = require('../app');
+require('dotenvs')('test');
+var app = require('app');
 var assert = require('assert');
-var assertions = require('../assertions');
+var assertions = require('app/lib/assertions');
 var async = require('async');
-var createPopulatedProperties = require('./createPopulatedProperties');
+var createPopulatedProperties = require('app/lib/createPopulatedProperties');
 var debug = require('debug')('syncServer:tests:routers');
-var fixtures = require('../fixtures/models');
+var fixtures = require('fixtures/models');
 var methods = require('methods');
-var models = require('../models');
-var mongoose = require('../lib/mongoose');
+var models = require('app/models');
+var mongoose = require('app/lib/mongoose');
 var sinon = require('sinon');
 
 Object.keys(fixtures).forEach((id) => {

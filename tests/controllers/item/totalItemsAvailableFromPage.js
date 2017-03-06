@@ -1,8 +1,8 @@
-require('../../../lib/env')('test');
+require('dotenvs')('test');
 var _ = require('lodash');
-var assertions = require('../../../assertions');
-var controller = require('../../../controllers/item');
-var wh = require('../../../lib/warehouse');
+var assertions = require('app/lib/assertions');
+var controller = require('app/controllers/item');
+var wh = require('app/lib/warehouse');
 
 describe('itemController.totalItemsAvailableFromPage', () => {
   assertions.function.returnsResult(controller.totalItemsAvailableFromPage, [{

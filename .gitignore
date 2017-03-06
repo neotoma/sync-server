@@ -1,6 +1,5 @@
+*.log
 .certs*
 .env*
-app.log
 data
 node_modules
-npm-debug.log
