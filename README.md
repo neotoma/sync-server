@@ -49,6 +49,6 @@ With [Grunt](gruntjs.com) installed in addition to establishing your environment
 - `grunt deploy-dependencies`: Deploys environment and certificate file dependencies.
 - `grunt deploy-app`: Deploys the app remotely and runs `npm install` remotely to ensure the installation of dependencies
 
-If you add `restart-forever` to any of the deployment scripts (e.g. `grunt deploy restart-forever`), [forever](https://github.com/foreverjs/forever) will be used to start or restart the app remotely post-deployment. Ensure that Node with NPM and forever are installed remotely before appending this script.
+If you add `restart-forever` to any of the deployment scripts (e.g. `grunt deploy-all restart-forever`), [forever](https://github.com/foreverjs/forever) will be used to start or restart the app remotely post-deployment. Ensure that Node with NPM and forever are installed remotely before appending this script.
 
-If you add `restart-systemd` to any of the deployment scripts (e.g. `grunt deploy restart-systemd`), [systemd](https://www.digitalocean.com/community/tutorials/systemd-essentials-working-with-services-units-and-the-journal) will be used to start or restart the app remotely post-deployment. Ensure that Node and systemd with a service for the app called `syncserver` are installed remotely before running this script.
+If you add `restart-systemd` to any of the deployment scripts (e.g. `grunt deploy-all restart-systemd`), [systemd](https://www.digitalocean.com/community/tutorials/systemd-essentials-working-with-services-units-and-the-journal) will be used to start or restart the app remotely post-deployment. Ensure that Node and systemd with a service for the app called `syncserver` are installed remotely before running this script.
