@@ -303,7 +303,7 @@ module.exports.storagePath = function(item, data, done) {
   };
 
   var storagePath = function(done) {
-    var path = '/' + item.source.pluralKebabName() + '/' + item.contentType.pluralKebabName() + '/' + item.slug(data) + '.json';
+    var path = '/' + item.source.kebabName() + '/' + item.contentType.pluralKebabName() + '/' + item.slug(data) + '.json';
     debug.success('storagePath: %s', path);
     done(undefined, path);
   };
