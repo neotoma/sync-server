@@ -1,3 +1,5 @@
+![Codeship badge](https://codeship.com/projects/00364600-b0b2-0133-c9a4-72e14e42ee1c/status?branch=master)
+
 # Sync server
 
 This repository contains the source code for an app that synchronizes data from sources to storage on behalf of users per [the Neotoma project documentation](https://github.com/neotoma/documentation).
