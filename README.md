@@ -4,7 +4,7 @@
 [![David badge](https://david-dm.org/neotoma/sync-server.svg)](https://david-dm.org/neotoma/sync-server)
 
 
-# Sync server
+# Neotoma sync server
 
 This repository contains the source code for an app that synchronizes data from sources to storage on behalf of users per [the Neotoma project documentation](https://github.com/neotoma/documentation).
 
