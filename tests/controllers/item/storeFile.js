@@ -18,7 +18,7 @@ var before = function(path) {
 };
 
 describe('itemController.storeFile method', function() {
-  beforeEach(mongoose.removeCollections);
+  beforeEach(mongoose.removeAllCollections);
   beforeEach(nock.cleanAll);
   
   assertions.function.callbacks.error(controller.storeFile, [{

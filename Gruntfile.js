@@ -4,42 +4,10 @@
  */
 
 require('dotenvs')();
-var fs = require('fs');
 var loadGruntTasks = require('load-grunt-tasks');
-var path = require('path');
 
 module.exports = function(grunt) {
   'use strict';
-
-  /**
-   * Deploy file or directory if exists to host directory
-   * @param {string} src - Path for source of file or directory relative to local repository directory
-   * @param {string} [dest] - Path for destination of file or directory relative to deployment host directory. Defaults to same value as src.
-   * @param {string} [args] – rsync arguments
-   */
-  grunt.registerTask('deploy', 'Deploy file or directory (if it exists) to host directory', function(src, dest, args) {
-    if (!grunt.file.exists(`${__dirname}/${src}`)) { return console.log('File or directory does not exist'); }
-
-    // Ensure deployment host directory exists and prepend custom arguments
-    args = args ? args : '';
-    args = `${args} --rsync-path="mkdir -p ${process.env.SYNC_SERVER_DEPLOY_HOST_DIR} && rsync"`;
-
-    // Use same path for destination as source if not declared
-    dest = dest ? dest : src;
-
-    var isDir = fs.lstatSync(src).isDirectory();
-    var dest = dest ? path.resolve(process.env.SYNC_SERVER_DEPLOY_HOST_DIR, dest) : path.resolve(process.env.SYNC_SERVER_DEPLOY_HOST_DIR, src);
-
-    if (isDir) {
-      src = src + '/';
-      dest = dest + '/';
-    }
-
-    grunt.config.set('rsync.options.args', [args]);
-    grunt.config.set('rsync.options.src', src);
-    grunt.config.set('rsync.options.dest', dest);
-    grunt.task.run('rsync:deploy');
-  });
 
   grunt.initConfig({
     clean: {
@@ -75,7 +43,7 @@ module.exports = function(grunt) {
         files: [{
           expand: true,
           cwd: './',
-          src: ['app', 'fixtures'],
+          src: ['app', 'fixtures', 'data'],
           dest: 'node_modules'
         }]
       }
@@ -95,6 +63,9 @@ module.exports = function(grunt) {
       },
       systemdRestart: {
         command: 'sudo systemctl restart syncserver || sudo systemctl start syncserver'
+      },
+      repopulateCollections: {
+        command: 'cd ' + process.env.SYNC_SERVER_DEPLOY_HOST_DIR + ' && grunt repopulate-collections'
       }
     },
     watch: {
@@ -113,6 +84,7 @@ module.exports = function(grunt) {
   });
 
   loadGruntTasks(grunt);
+  grunt.task.loadTasks('app/lib/tasks');
 
   grunt.registerTask('jsdoc-rebuild', 'Delete and regenerate docs', [
     'clean:jsdoc',
@@ -132,7 +104,8 @@ module.exports = function(grunt) {
   grunt.registerTask('deploy-all', 'Run tests and deploy all files', [
     'mochaTest:tests',
     'deploy-dependencies',
-    'deploy-app'
+    'deploy-app',
+    'deploy-data'
   ]);
 
   grunt.registerTask('deploy-certs', 'Deploy certificates to host directory', [
@@ -143,6 +116,10 @@ module.exports = function(grunt) {
     `deploy:.env-deploy:.env`
   ]);
 
+  grunt.registerTask('deploy-data', 'Deploy data to host directory', [
+    `deploy:data-deploy:data`
+  ]);
+
   grunt.registerTask('deploy-dependencies', 'Deploy environment config files and certificate files', [
     'deploy-certs',
     'deploy-env'
@@ -151,7 +128,7 @@ module.exports = function(grunt) {
   grunt.registerTask('deploy-app', 'Deploy app to host directory', [
     `deploy:Gruntfile.js`,
     `deploy:package.json`,
-    `deploy:app`,
+    `deploy:app:app:--delete`,
     'force:sshexec:npmInstall'
   ]);
 
@@ -161,5 +138,9 @@ module.exports = function(grunt) {
 
   grunt.registerTask('restart-systemd', 'Start/restart app remotely with systemd', [
     'sshexec:systemdRestart'
+  ]);
+
+  grunt.registerTask('remote-repopulate-collections', 'Remove database collections and repopulate them with resourceObjects stored in files', [
+    'sshexec:repopulateCollections'
   ]);
 };

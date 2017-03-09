@@ -48,7 +48,7 @@ Object.keys(fixtures).forEach((id) => {
 
   describe(modelName + ' model', () => {
     beforeEach((done) => {
-      async.series([mongoose.removeCollections, createPopulatedProperties(modelFixture, properties)], done);
+      async.series([mongoose.removeAllCollections, createPopulatedProperties(modelFixture, properties)], done);
     });
 
     assertions.object.hasProperty(modelName + ' model', Model, 'modelName', modelName);

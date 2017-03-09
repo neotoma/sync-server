@@ -5,14 +5,14 @@
 
 var express = require('express');
 var app = express();
-var passport = require('./lib/passport');
-var sessionConfig = require('./config/session');
-var User = require('./models/user');
+var passport = require('app/lib/passport');
+var sessionConfig = require('app/config/session');
+var User = require('app/models/user');
 
 app.use(require('cookie-parser')());
 app.use(express.static(__dirname + '/public'));
 app.use(require('compression')());
-app.use(require('./lib/morgan')('App processed request'));
+app.use(require('app/lib/morgan')('App processed request'));
 app.use(require('express-session')({
   secret: sessionConfig.secret,
   store: sessionConfig.store,
@@ -50,6 +50,6 @@ app.requireAuthentication = function(req, res, next) {
   }
 };
 
-require('./routers')(app);
+require('app/routers')(app);
 
 module.exports = app;

@@ -15,7 +15,7 @@ var UserStorageAuthFactory = require('app/lib/factory')('userStorageAuth');
 var wh = require('app/lib/warehouse');
 
 describe('itemController.storeItemData method', function() {
-  beforeEach(mongoose.removeCollections);
+  beforeEach(mongoose.removeAllCollections);
   beforeEach(resetAppSpy);
 
   assertions.function.callbacks.error(controller.storeItemData, [{

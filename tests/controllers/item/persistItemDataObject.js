@@ -8,7 +8,7 @@ var nock = require('app/lib/nock');
 var wh = require('app/lib/warehouse');
 
 describe('itemController.persistItemDataObject method', function() {
-  beforeEach(mongoose.removeCollections);
+  beforeEach(mongoose.removeAllCollections);
 
   assertions.function.callbacks.error(controller.persistItemDataObject, [{
     when: 'no itemDataObject parameter provided',

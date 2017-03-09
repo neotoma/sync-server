@@ -28,6 +28,7 @@ module.exports = modelFactory.new('UserStorageAuth', {
     delete: {
       allowed: 'user',
       queryConditions: queryConditions.userMatchesRequester
-    }
+    },
+    filterProperties: ['storageToken']
   }
 });

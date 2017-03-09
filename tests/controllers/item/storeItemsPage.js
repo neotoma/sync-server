@@ -11,7 +11,7 @@ var verifyStoredItems = require('./routines/verifyStoredItems');
 var wh = require('app/lib/warehouse');
 
 describe('itemController.storeItemsPage method', function() {
-  beforeEach(mongoose.removeCollections);
+  beforeEach(mongoose.removeAllCollections);
   beforeEach(resetAppSpy);
   
   assertions.function.callbacks.error(controller.storeItemsPage, [{

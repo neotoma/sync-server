@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>app/lib/assertions/objectMethodReturnsResult.js - Documentation</title>
+    <title>app/lib/tasks/grunt-deploy.js - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -28,7 +28,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">app/lib/assertions/objectMethodReturnsResult.js</h1>
+    <h1 class="page-title">app/lib/tasks/grunt-deploy.js</h1>
     
 
     
@@ -39,22 +39,46 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * Assert returned value of object method
+ * grunt-deploy
  * @module
  */
 
-var _ = require('underscore');
-var assert = require('assert');
+'use strict';
 
-module.exports = function(objectName, object, methodName, methodReturnValue) {
-  it(objectName + ' object method ' + methodName + ' returns ' + typeof methodReturnValue + ' result', (done) => {
-    if (typeof methodReturnValue === 'object') {
-      assert(_.isEqual(object[methodName](), propertyValue));
-    } else {
-      assert.deepEqual(object[methodName](), methodReturnValue);
+var fs = require('fs');
+var path = require('path');
+
+module.exports = function(grunt) {
+  /**
+   * Deploy file or directory (if it exists) to host directory
+   * @param {string}srcRel - Path for source of file or directory relative to local repository directory
+   * @param {string} [destRel] - Path for destination of file or directory relative to deployment host directory. Defaults to same value as src.
+   * @param {string} [args] – rsync arguments
+   */
+  grunt.registerTask('deploy', 'Deploy file or directory (if it exists) to host directory', function(srcRel, destRel, args) {
+    var srcAbs = path.resolve(process.env.SYNC_SERVER_DIR, srcRel);
+
+    if (!grunt.file.exists(srcAbs)) { return console.log('File or directory does not exist: %s', srcAbs); }
+
+    // Ensure deployment host directory exists and prepend custom arguments
+    args = args ? args : '';
+    args = `${args} --rsync-path="mkdir -p ${process.env.SYNC_SERVER_DEPLOY_HOST_DIR} &amp;&amp; rsync"`;
+
+    // Use same path for destination as source if not declared
+    destRel = destRel ? destRel : srcRel;
+
+    // Resolve relative path to dest to absolute
+    var destAbs = path.resolve(process.env.SYNC_SERVER_DEPLOY_HOST_DIR, destRel);
+
+    if (fs.lstatSync(srcAbs).isDirectory()) {
+      srcAbs = srcAbs + '/';
+      destAbs = destAbs + '/';
     }
-    
-    done();
+
+    grunt.config.set('rsync.options.args', [args]);
+    grunt.config.set('rsync.options.src', srcAbs);
+    grunt.config.set('rsync.options.dest', destAbs);
+    grunt.task.run('rsync:deploy');
   });
 };</code></pre>
         </article>

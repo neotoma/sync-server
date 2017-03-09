@@ -26,7 +26,7 @@ Object.keys(fixtures).forEach((id) => {
   describe(`${modelName} /${modelType}`, function() {
     beforeEach((done) => {
       debug('beforeEach model %s', id);
-      async.series([mongoose.removeCollections, createPopulatedProperties(modelFixture, properties)], done);
+      async.series([mongoose.removeAllCollections, createPopulatedProperties(modelFixture, properties)], done);
     });
 
     methods.forEach((method) => {

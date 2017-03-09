@@ -26,14 +26,7 @@ module.exports = new(winston.Logger)({
     milestone: 2,
     error: 1,
     fatal: 0
-  },
-  transports: [
-    new winston.transports.File({
-      level: 'trace',
-      filename: __dirname + '/../../app.log',
-      timestamp: true
-    })
-  ]
+  }
 });
 
 /**
@@ -76,5 +69,13 @@ if (module.parent.filename.indexOf('/mongodb.js') === -1) {
 if (process.env.SYNC_SERVER_LOGGER_MAILER_LEVEL) {
   module.exports.add(winstonMailerTransport, {
     level: process.env.SYNC_SERVER_LOGGER_MAILER_LEVEL
+  });
+}
+
+if (process.env.SYNC_SERVER_LOGGER_FILE_PATH) {
+  module.exports.add(winston.transports.File, {
+    level: 'trace',
+    filename: process.env.SYNC_SERVER_LOGGER_FILE_PATH,
+    timestamp: true
   });
 }

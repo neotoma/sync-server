@@ -431,6 +431,7 @@ module.exports.storeAllForUserStorageSourceContentType = function(user, source, 
       log('error', 'Item controller failed to store all items', { error: error });
     } else {
       debug.success('storeAllForUserStorageSourceContentType');
+      log('milestone', 'Item controller stored all items', { error: error });
     }
 
     done(error);

@@ -6,7 +6,7 @@ var nock = require('app/lib/nock');
 var wh = require('app/lib/warehouse');
 
 describe('itemController.getResource method', function() {
-  beforeEach(mongoose.removeCollections);
+  beforeEach(mongoose.removeAllCollections);
 
   assertions.function.callbacks.error(controller.getResource, [{
     when: 'no url parameter provided',

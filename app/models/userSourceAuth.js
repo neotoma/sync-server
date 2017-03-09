@@ -28,6 +28,7 @@ module.exports = modelFactory.new('UserSourceAuth', {
     delete: {
       allowed: 'user',
       queryConditions: queryConditions.userMatchesRequester
-    }
+    },
+    filterProperties: ['sourceToken']
   }
 });
