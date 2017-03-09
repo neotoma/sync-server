@@ -48,7 +48,7 @@ module.exports = function(tests, done) {
   };
 
   if (typeof done === 'function') {
-    async.each(tests, runTest, done)
+    async.each(tests, runTest, done);
   } else {
     tests.forEach(runTest);
   }

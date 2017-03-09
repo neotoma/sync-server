@@ -39,7 +39,7 @@ module.exports = function(app) {
           }, done);
         });
       };
-    }
+    };
 
     var populateUsers = function(done) {
       if (req.user) {

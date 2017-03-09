@@ -5,4 +5,4 @@ module.exports = function(app) {
   require('./sessions')(app);
   require('./auths')(app, require('app/models/source'));
   require('./auths')(app, require('app/models/storage'));
-}
+};

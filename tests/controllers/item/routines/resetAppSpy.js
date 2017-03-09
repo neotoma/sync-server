@@ -8,4 +8,4 @@ module.exports = function(app) {
 
     sinon.spy(app, 'emit');
   };
-}
+};

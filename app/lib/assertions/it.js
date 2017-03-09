@@ -94,7 +94,7 @@ module.exports = function(description, assertion) {
             } else {
               test.after(done);
             }
-          }
+          };
         } else {
           var after = done;
         }

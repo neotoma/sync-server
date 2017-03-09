@@ -63,20 +63,20 @@ module.exports = modelFactory.new('Job', {
 
     var runJob = function(done) {
       switch (job.name) {
-        case 'storeAllItemsForUserStorageSource':
+      case 'storeAllItemsForUserStorageSource':
 
-          debug('running job "storeAllItemsForUserStorageSource": user %s, source %s, storage %s', job.user.id, job.source.id, job.storage.id);
-          itemController.storeAllForUserStorageSource(job.user, job.source, job.storage, undefined, done);
-          break;
+        debug('running job "storeAllItemsForUserStorageSource": user %s, source %s, storage %s', job.user.id, job.source.id, job.storage.id);
+        itemController.storeAllForUserStorageSource(job.user, job.source, job.storage, undefined, done);
+        break;
 
-        case 'storeAllItemsForUserStorageSourceContentType':
+      case 'storeAllItemsForUserStorageSourceContentType':
 
-          debug('running job "storeAllItemsForUserStorageSourceContentType"');
-          itemController.storeAllForUserStorageSourceContentType(job.user, job.source, job.storage, job.contentType, undefined, done);
-          break;
+        debug('running job "storeAllItemsForUserStorageSourceContentType"');
+        itemController.storeAllForUserStorageSourceContentType(job.user, job.source, job.storage, job.contentType, undefined, done);
+        break;
 
-        default:
-          done();
+      default:
+        done();
       }
     };
 

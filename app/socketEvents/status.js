@@ -20,10 +20,10 @@ module.exports = function(app, socket) {
         contentType: item.contentType.id
       });
     }
-  }
+  };
 
   listeners['storedItemData'] = storedItemData;
   app.on('storedItemData', storedItemData); 
 
   return listeners;
-}
+};

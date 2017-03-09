@@ -51,10 +51,10 @@ mailer.sendMail = function(email, done) {
 
     done(error);
   }
-}
+};
 
 mailer.isValidEmail = function(email) {
   return this.emailRegex.test(email);
-}
+};
 
 module.exports = mailer;

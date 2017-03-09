@@ -342,7 +342,7 @@ module.exports = {
         Model.findById(document.id, (error, document) => {
           done(error, document);
         });
-      }
+      };
 
       /**
        * Executes any available post-POST routine available for Model
@@ -399,7 +399,7 @@ module.exports = {
       requireAuthentication: (['public'].indexOf(this.allowed(model, method)) === -1),
       requireAdminAuthentication: (['public', 'user'].indexOf(this.allowed(model, method)) === -1),
       validateRequestBody: validateRequestBody
-    }
+    };
 
     this.routeResource(app, method, path, middleware, done);
   },
@@ -421,7 +421,7 @@ module.exports = {
       if (req.get('Content-Type') && isModifiedContentType(req.get('Content-Type'))) {
         res.sendStatus(415);
         return;
-      };
+      }
 
       if (req.get('Accept')) {
         var badAccept = false;
@@ -634,7 +634,7 @@ module.exports = {
        */
       res.sendNotFound = function() {
         res.sendResponseDocument(null, null, null, 404);
-      }
+      };
 
       /**
        * Sends response document with error and status code
@@ -832,7 +832,7 @@ module.exports = {
               }
 
               if (errors.length > 0) {
-                var error = new Error(`Relationship resource identifier object is not properly formatted`);
+                var error = new Error('Relationship resource identifier object is not properly formatted');
                 error.errors = errors;
               }
 

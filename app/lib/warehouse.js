@@ -28,7 +28,7 @@ module.exports = {
   },
 
   pagination: () => {
-    return { offset: 0 }
+    return { offset: 0 };
   },
 
   /**
@@ -131,7 +131,7 @@ module.exports = {
       itemDataObjects.splice(0, source.itemsLimit).forEach((itemDataObject) => {
         pageItemDataObjects.push(itemDataObject);
       });
-      _.set(pages[i], source.itemDataObjectsFromPagePath(contentType), pageItemDataObjects)
+      _.set(pages[i], source.itemDataObjectsFromPagePath(contentType), pageItemDataObjects);
 
       // Populate page total items available
       _.set(pages[i], source.totalItemsAvailableFromPagePath(contentType), totalItemDataObjects);
@@ -191,7 +191,7 @@ module.exports = {
 
     var save = (document, done) => {
       document.save(done);
-    }
+    };
 
     async.each(documents, save, (error) => {
       done(error, documents);
@@ -208,7 +208,7 @@ module.exports = {
     if (ObjectId.isValid(overwriteProperties)) {
       overwriteProperties = {
         _id : overwriteProperties
-      }
+      };
     }
 
     var Model = models[modelId];

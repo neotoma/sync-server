@@ -13,6 +13,6 @@ module.exports = function(objectName, object, properties) {
   } else if (typeof properties === 'object') {
     for (var propertyName in properties) {
       objectHasProperty(objectName, object, propertyName, properties[propertyName]);
-    };
+    }
   } 
 };

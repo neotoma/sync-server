@@ -71,5 +71,5 @@ module.exports = function(modelId) {
         done(error, object);
       });
     }
-  }
+  };
 };

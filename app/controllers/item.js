@@ -78,18 +78,18 @@ module.exports.getResource = function(url, done) {
       }
 
       switch(mediaType) {
-        case 'image/jpeg':
-          var resource = new Buffer(body);
-          break;
-        case 'application/json':
-          try {
-            var resource = JSON.parse(body);
-          } catch (error) {
-            return done(new Error('Unable to parse resource'));
-          }
-          break;
-        default:
-          return done('Unrecognized media type encountered');
+      case 'image/jpeg':
+        var resource = new Buffer(body);
+        break;
+      case 'application/json':
+        try {
+          var resource = JSON.parse(body);
+        } catch (error) {
+          return done(new Error('Unable to parse resource'));
+        }
+        break;
+      default:
+        return done('Unrecognized media type encountered');
       }
 
       debug.success('getResource (mediaType: %s)', mediaType);
@@ -278,7 +278,7 @@ module.exports.itemsPageNextPagination = function(page, pagination, contentType)
 
   if (page.paging && page.paging.next) {
     nextPagination = { next: page.paging.next };
-  };
+  }
 
   debug.success('itemsPageNextPagination (nextPagination: %o)', nextPagination);
 
@@ -301,7 +301,7 @@ module.exports.storagePath = function(item, data, done) {
   };
 
   var storagePath = function(done) {
-    var path = '/' + item.source.pluralKebabName() + '/' + item.contentType.pluralKebabName() + '/' + item.slug(data) + '.json'
+    var path = '/' + item.source.pluralKebabName() + '/' + item.contentType.pluralKebabName() + '/' + item.slug(data) + '.json';
     debug.success('storagePath: %s', path);
     done(undefined, path);
   };
@@ -420,7 +420,7 @@ module.exports.storeAllForUserStorageSourceContentType = function(user, source, 
           done();
         }
       }
-    }
+    };
 
     storeAllItemPages(null, { offset: 0 });
   };
@@ -503,11 +503,11 @@ module.exports.storeItemsPage = function(user, source, storage, contentType, pag
       userSourceAuth = foundUserSourceAuth;
       done(error);
     });
-  }
+  };
 
   var getItemsPageResource = function(done) {
     module.exports.getResource(module.exports.itemsGetUrl(source, contentType, userSourceAuth, pagination), done);
-  }
+  };
 
   var getItemDataObjects = function(resource, done) {
     page = resource;
@@ -651,7 +651,7 @@ module.exports.persistItemDataObject = function(itemDataObject, relationships, d
 
     done(error, item);
   });
-}
+};
 
 /**
  * Store data contained in property of Item in storage.

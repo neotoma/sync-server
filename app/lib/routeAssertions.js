@@ -53,9 +53,9 @@ module.exports = function(app) {
               } catch (error) {
                 if (error.name === 'AssertionError') {
                   if (res.body.errors) {
-                    error.message = `Error not included in response: ${JSON.stringify(res.body.errors)} does not contain "${test.error.message}"`
+                    error.message = `Error not included in response: ${JSON.stringify(res.body.errors)} does not contain "${test.error.message}"`;
                   } else {
-                    error.message = `Error not included in response: "${test.error.message}"`
+                    error.message = `Error not included in response: "${test.error.message}"`;
                   }
                 }
 
@@ -66,7 +66,7 @@ module.exports = function(app) {
             done();
           });
         });
-      })
+      });
     }
   };
-}
+};

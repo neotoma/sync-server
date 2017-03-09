@@ -15,11 +15,12 @@ module.exports = function(grunt) {
     },
     eslint: {
       options: {
-        configFile: '.eslintrc.js'
+        configFile: '.eslintrc.js',
+        fix: true
       },
       target: [
         '**/*.js',
-        '!node_modules'
+        '!node_modules/**/*.js'
       ]
     },
     jsdoc: {
@@ -122,11 +123,11 @@ module.exports = function(grunt) {
   ]);
 
   grunt.registerTask('deploy-env', 'Deploy environment configuration to host directory', [
-    `deploy:.env-deploy:.env`
+    'deploy:.env-deploy:.env'
   ]);
 
   grunt.registerTask('deploy-data', 'Deploy data to host directory', [
-    `deploy:data-deploy:data`
+    'deploy:data-deploy:data'
   ]);
 
   grunt.registerTask('deploy-dependencies', 'Deploy environment config files and certificate files', [
@@ -135,9 +136,9 @@ module.exports = function(grunt) {
   ]);
 
   grunt.registerTask('deploy-app', 'Deploy app to host directory', [
-    `deploy:Gruntfile.js`,
-    `deploy:package.json`,
-    `deploy:app:app:--delete`,
+    'deploy:Gruntfile.js',
+    'deploy:package.json',
+    'deploy:app:app:--delete',
     'force:sshexec:npmInstall'
   ]);
 

@@ -51,7 +51,7 @@ module.exports = function(user, source, storage, contentType, done) {
   };
 
   var setupSourceNock = (userSourceAuth, done) => {
-   if (contentType) {
+    if (contentType) {
       nock.getItemPages(source, contentType, userSourceAuth, done);
     } else {
       async.each(source.contentTypes, (contentType, done) => {

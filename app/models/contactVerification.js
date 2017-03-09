@@ -96,7 +96,7 @@ module.exports = modelFactory.new('ContactVerification', {
     var updateContactVerificationRequestVerified = (contactVerificationRequest, done) => {
       contactVerificationRequest.verified = true;
       contactVerificationRequest.save(function(error, contactVerificationRequest) {
-        done(error, contactVerificationRequest)
+        done(error, contactVerificationRequest);
       });
     };
 
@@ -125,7 +125,7 @@ module.exports = modelFactory.new('ContactVerification', {
       } else {
         done(null, null, contactVerificationRequest);
       }
-    }
+    };
 
     var createNotificationRequests = (user, contactVerificationRequest, done) => {
       if (user && contactVerificationRequest.createNotificationRequests) {

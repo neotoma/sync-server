@@ -277,7 +277,7 @@ module.exports = {
         logoGlyphPath: '/source/logoGlyphPath.svg',
         name: 'Super Source',
         totalItemsAvailableFromPagePathTemplate: 'total.${contentTypePluralCamelName}'
-      }
+      };
     },
     schemaProperties: {
       apiVersion: String,
@@ -428,4 +428,4 @@ module.exports = {
       user: { ref: 'User' }
     }
   }
-}
+};
