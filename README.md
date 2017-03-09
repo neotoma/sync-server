@@ -1,4 +1,8 @@
 ![Codeship badge](https://codeship.com/projects/00364600-b0b2-0133-c9a4-72e14e42ee1c/status?branch=master)
+[![Code Climate](https://codeclimate.com/github/asheville/sync/badges/gpa.svg)](https://codeclimate.com/github/asheville/sync)
+[![Code Climate issues badge](https://codeclimate.com/github/asheville/sync/badges/issue_count.svg)](https://codeclimate.com/github/asheville/sync)
+[![David badge](https://david-dm.org/neotoma/sync-server.svg)](https://david-dm.org/neotoma/sync-server)
+
 
 # Sync server
 
