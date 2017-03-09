@@ -13,6 +13,15 @@ module.exports = function(grunt) {
     clean: {
       jsdoc: 'docs'
     },
+    eslint: {
+      options: {
+        configFile: '.eslintrc.js'
+      },
+      target: [
+        '**/*.js',
+        '!node_modules'
+      ]
+    },
     jsdoc: {
       build: {
         options: {
