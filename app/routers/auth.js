@@ -141,6 +141,8 @@ module.exports = function(app, Model, document) {
         if (error) { 
           log('error', 'Auth router failed to create session after authentication', { error: error.message });
           return res.sendStatus(500);
+        } else {
+          log('milestone', 'Auth router created session after authentication', { user: user.id });
         }
 
         if (req.session.authRedirectURL) {
