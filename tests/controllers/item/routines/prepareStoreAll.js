@@ -30,6 +30,10 @@ module.exports = function(user, source, storage, contentType, done) {
       wh.manySaved('contentType', undefined, 3, (error, contentTypes) => {
         source.contentTypes = contentTypes;
         source.save((error) => {
+          if (!error) {
+            return done(error);
+          }
+
           source.populate('contentTypes', (error) => {
             debug('added %s contentTypes to source %s', contentTypes.length, source.id);
             done(error);
@@ -80,8 +84,5 @@ module.exports = function(user, source, storage, contentType, done) {
     setupSourceNock,
     createUserStorageAuth,
     setupStorageNock
-  ], (error) => {
-    debug('prepareStoreAll done');
-    done();
-  });
+  ], done);
 };

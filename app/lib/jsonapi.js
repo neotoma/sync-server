@@ -7,6 +7,7 @@ var _ = require('lodash');
 var async = require('async');
 var bodyParser = require('body-parser');
 var debug = require('debug')('syncServer:jsonapi');
+var logger = require('app/lib/logger');
 var models = require('app/models');
 var ObjectId = require('mongoose').Types.ObjectId;
 var validateParams = require('./validateParams');
@@ -84,7 +85,7 @@ module.exports = {
   /**
    * Routes DELETE requests to resource for individual resource objects for app and Model
    * @param {Object} app - Express app
-   * @param {Object} Model - Mongoose model
+   * @param {Object} Model - Mongoose model
    */
   routeModelDeleteObjectResource: function(app, Model) {
     this.routeModelResource(app, Model, 'delete', '/' + Model.modelType() + '/:id', (req, res) => {
@@ -117,12 +118,12 @@ module.exports = {
   /**
    * Routes GET requests to resource for individual resource objects for app and model
    * @param {Object} app - Express app
-   * @param {model} model - Mongoose model
+   * @param {model} model - Mongoose model
    */
   routeModelGetObjectResource: function(app, model) {
     this.routeModelResource(app, model, 'get', '/' + model.modelType() + '/:id', (req, res) => {
       var getConditions = (done) => {
-        this.compiledQueryConditions(req, { _id: req.params.id }, model, 'get', done);
+        this.compiledQueryConditions(req, { _id: req.params.id }, model, 'get', done);
       };
 
       var findOne = (conditions, done) => {
@@ -146,12 +147,12 @@ module.exports = {
   /**
    * Routes GET requests to resource for collections of resource objects for app and model
    * @param {Object} app - Express app
-   * @param {model} model - Mongoose model
+   * @param {model} model - Mongoose model
    */
   routeModelGetObjectsResource: function(app, model) {
     this.routeModelResource(app, model, 'get', '/' + model.modelType(), (req, res) => {
       var compileConditions = (done) => {
-        var conditions = this.compiledQueryConditions(req, {}, model, 'get', done);
+        this.compiledQueryConditions(req, {}, model, 'get', done);
       };
 
       var executeQuery = (conditions, done) => {
@@ -163,7 +164,6 @@ module.exports = {
         debug('GET %O', conditions);
 
         if (req.query.sort) {
-          var sortOrder = 1;
           var sortAttributes = req.query.sort;
           var unsupportedSortAttributeFound = false;
 
@@ -212,7 +212,7 @@ module.exports = {
   /**
    * Routes POST requests to resource for individual resource objects for app and Model
    * @param {Object} app - Express app
-   * @param {Object} Model - Mongoose model
+   * @param {Object} Model - Mongoose model
    */
   routeModelPatchObjectResource: function(app, Model) {
     this.routeModelResource(app, Model, 'patch', '/' + Model.modelType() + '/:id', (req, res) => {
@@ -286,7 +286,7 @@ module.exports = {
   /**
    * Routes POST requests to resource for individual resource objects for app and Model
    * @param {Object} app - Express app
-   * @param {Object} Model - Mongoose model
+   * @param {Object} Model - Mongoose model
    */
   routeModelPostObjectResource: function(app, Model) {
     this.routeModelResource(app, Model, 'post', '/'+ Model.modelType(), (req, res) => {
@@ -381,7 +381,7 @@ module.exports = {
   /**
    * Routes requests to resource callback for app, model, method and path
    * @param {Object} app - Express app
-   * @param {model} model - Mongoose model
+   * @param {model} model - Mongoose model
    * @param {string} method - HTTP method (lowercase, e.g "get")
    * @param {string} path - Path to resource
    * @param {function} done - Express route callback expecting req and res as parameters
@@ -464,9 +464,9 @@ module.exports = {
             if (value && value._id && value.modelType) {
               if (!relationships[key] || !relationships[key].data) {
                 if (Array.isArray(document[key])) {
-                  relationships[key] = { data: [] };
+                  relationships[key] = { data: [] };
                 } else {
-                  relationships[key] = { data: {} };
+                  relationships[key] = { data: {} };
                 }
               }
 
@@ -516,7 +516,7 @@ module.exports = {
        * @param {Object} document - Mongoose document
        * @returns {Object} object - JSON API relationship object
        */
-      res.resourceIdentifierObjectFromDocument = function(document, name) {
+      res.resourceIdentifierObjectFromDocument = function(document) {
         if (!document) {
           throw new Error('No document provided');
         }
@@ -566,8 +566,8 @@ module.exports = {
 
       /**
        * Sends response document with principal data, included resources or errors
-       * @param {Object} data – Principal data (optional)
-       * @param {Object} included – Included resources (optional)
+       * @param {Object} data – Principal data (optional)
+       * @param {Object} included – Included resources (optional)
        * @param {Object} errors - Errors (optional)
        * @param {number} [status=200] - HTTP status code
        */
@@ -597,8 +597,8 @@ module.exports = {
 
       /**
        * Sends response document with principal data and included resources
-       * @param {Object} data – Principal data
-       * @param {Object} included – Included resources (optional)
+       * @param {Object} data – Principal data
+       * @param {Object} included – Included resources (optional)
        */
       res.sendData = function(data, included) {
         if (!data) {
@@ -817,10 +817,12 @@ module.exports = {
                 errors.push(new Error(`Relationship resource identifier object for "${relationshipName}" does not have type property`));
               }
 
+              var ref;
+
               if (Array.isArray(Model.schema.tree[relationshipName])) {
-                var ref = Model.schema.tree[relationshipName][0].ref;
+                ref = Model.schema.tree[relationshipName][0].ref;
               } else {
-                var ref = Model.schema.tree[relationshipName].ref;
+                ref = Model.schema.tree[relationshipName].ref;
               }
 
               if (models[_.lowerFirst(ref)].modelType() !== resourceObject.type) {
@@ -876,7 +878,7 @@ module.exports = {
    * @param {Object} data - Query data
    * @param {Object} model - Mongoose model (optional)
    * @param {string} method - HTTP method (optional)
-   * @param {function} done - Error-first callback function expecting no other parameters
+   * @param {function} done - Error-first callback function expecting no other parameters
    */
   validateQueryData: function(req, data, model, method, done) {
     var getConditions = (done) => {
@@ -887,10 +889,12 @@ module.exports = {
       var errors = [];
 
       Object.keys(conditions).forEach(function(key) {
+        var isEqualObjectId;
+        
         try {
-          var isEqualObjectId = ObjectId(_.get(data, `relationships.${key}.data.id`)).equals(conditions[key]);
+          isEqualObjectId = ObjectId(_.get(data, `relationships.${key}.data.id`)).equals(conditions[key]);
         } catch (error) {
-          var isEqualObjectId = false;
+          isEqualObjectId = false;
         }
         
         if (conditions[key] !== data.attributes[key] && !isEqualObjectId) {

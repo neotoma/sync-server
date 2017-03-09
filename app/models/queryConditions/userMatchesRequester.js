@@ -1,4 +1,3 @@
-var debug = require('debug')('syncServer:userMatchesRequester');
 var ObjectId = require('mongoose').Types.ObjectId;
 
 /**

@@ -45,7 +45,7 @@ var methods = Object.assign({
  * @property {string} name - Name of source (e.g. "foursquare")
  * @property {string} [passportStrategy] - Strategy for Passport module (e.g. "passport-foursquare")
  * @property {string} [itemsGetUrlTemplate=https://${host}/${contentTypePluralCamelName}?access_token=${accessToken}&limit=${limit}&offset=${offset}] - String template used to generate URLs for GET requests for items on source
- * @property {string} [itemDataObjectsFromPagePathTemplate=data] - String template used to generate object paths to itemDataObjects found within pages returned from source
+ * @property {string} [itemDataObjectsFromPagePathTemplate=data] - String template used to generate object paths to itemDataObjects found within pages returned from source
  * @property {string} [totalItemsAvailableFromPagePathTemplate=response.${contentTypePluralCamelName}.count] - String template used to generate object paths to value representing total items available for contentType within pages returned from source
  */
 module.exports = modelFactory.new('Source', {
@@ -54,14 +54,14 @@ module.exports = modelFactory.new('Source', {
   clientId: String,
   clientSecret: String,
   contentTypes: [{ ref: 'ContentType' }],
-  itemStorageEnabled: { type: Boolean, default: false },
+  itemStorageEnabled: { type: Boolean, default: false },
   host: String,
-  itemsLimit: { type: Number, default: 25 },
+  itemsLimit: { type: Number, default: 25 },
   logoGlyphPath: String,
-  name: { type: String, required: true },
+  name: { type: String, required: true },
   passportStrategy: String,
-  itemsGetUrlTemplate: { type: String, default: 'https://${host}/${contentTypePluralCamelName}?access_token=${accessToken}&limit=${limit}&offset=${offset}' },
-  itemDataObjectsFromPagePathTemplate: { type: String, default: 'data' },
+  itemsGetUrlTemplate: { type: String, default: 'https://${host}/${contentTypePluralCamelName}?access_token=${accessToken}&limit=${limit}&offset=${offset}' },
+  itemDataObjectsFromPagePathTemplate: { type: String, default: 'data' },
   totalItemsAvailableFromPagePathTemplate: String
 }, {
   jsonapi: {

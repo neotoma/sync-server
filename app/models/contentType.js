@@ -12,7 +12,7 @@ var nameMethods = require('./methods/name');
  * @property {string} name - Name of contentType (e.g. "Photo")
  */
 module.exports = modelFactory.new('ContentType', {
-  name: { type: String, required: true }
+  name: { type: String, required: true }
 }, {
   jsonapi: {
     get: 'public',

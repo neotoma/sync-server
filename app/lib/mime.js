@@ -1,4 +1,3 @@
-var debug = require('debug')('syncServer:mime');
 var mime = require('mime-types');
 var url = require('url');
 

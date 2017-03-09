@@ -1,5 +1,3 @@
-var assert = require('assert');
-
 describe('model factory', function() {
   describe('creates new model', function() {
     it('with toObject method');

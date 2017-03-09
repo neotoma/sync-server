@@ -46,7 +46,7 @@ describe('itemController.storeAllForUserStorageSource method', function() {
     error: 'Parameter app has no emit property'
   }, {
     when: 'emit property of app is not function',
-    params: [wh.one('user'), wh.one('source'), wh.one('storage'), { emit: 3 }],
+    params: [wh.one('user'), wh.one('source'), wh.one('storage'), { emit: 3 }],
     error: 'Property emit of parameter app is not function'
   }]);
 

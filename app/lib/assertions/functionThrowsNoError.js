@@ -3,7 +3,6 @@
  * @module
  */
 
-var assert = require('assert');
 var it = require('./it');
 
 module.exports = it('throws no error when', function(test, done) {

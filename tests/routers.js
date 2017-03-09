@@ -5,7 +5,6 @@
 
 require('dotenvs')('test');
 var app = require('app');
-var assert = require('assert');
 var assertions = require('app/lib/assertions');
 var async = require('async');
 var createPopulatedProperties = require('app/lib/createPopulatedProperties');
@@ -14,7 +13,6 @@ var fixtures = require('fixtures/models');
 var methods = require('methods');
 var models = require('app/models');
 var mongoose = require('app/lib/mongoose');
-var sinon = require('sinon');
 
 Object.keys(fixtures).forEach((id) => {
   var Model = models[id];

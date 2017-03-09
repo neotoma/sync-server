@@ -45,7 +45,6 @@ describe('itemController.storagePath method', function() {
         saveSource,
         populateItem
       ], (error) => {
-        console.log('error', error);
         done(error);
       });
     },

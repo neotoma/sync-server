@@ -8,7 +8,6 @@
 var _ = require('lodash');
 var async = require('async');
 var debug = require('app/lib/debug')('syncServer:loadData');
-var fs = require('fs');
 var models = require('app/models');
 var mongoose = require('app/lib/mongoose');
 var path = require('path');
@@ -81,7 +80,7 @@ var saveResourceObject = function(resourceObject, done) {
 module.exports = function(grunt) {
   /**
    * Remove database collections and repopulate them with resourceObjects stored in files
-   * @param {string} [args] – rsync arguments
+   * @param {string} [args] – rsync arguments
    */
   grunt.registerTask('repopulate-collections', 'Remove database collections and repopulate them with resourceObjects stored in files', function() {
     var dataPath = path.resolve(process.env.SYNC_SERVER_DIR, 'data');

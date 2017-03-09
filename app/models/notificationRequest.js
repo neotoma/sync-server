@@ -15,10 +15,10 @@ var queryConditions = require('./queryConditions');
  * @property {module:models/user~User} user - User to notify related to event
  */
 module.exports = modelFactory.new('NotificationRequest', {
-  event: { type: String, required: true },
+  event: { type: String, required: true },
   source: { ref: 'Source' },
   storage: { ref: 'Storage' },
-  user: { ref: 'User', required: true }
+  user: { ref: 'User', required: true }
 }, {
   jsonapi: {
     get: {

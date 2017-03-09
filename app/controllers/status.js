@@ -1,20 +1,17 @@
 var async = require('async');
 var Item = require('app/models/item');
-var logger = require('app/lib/logger');
 var Status = require('app/models/status');
 
 module.exports = {
-  json: function(callback, attributes) {
+  json: function(done, attributes) {
     Status.find(attributes, function(error, statuses) {
       if (error) {
-        return res.json({
-          error: error
-        });
+        return done(error);
       }
 
       var items = [];
 
-      var findItems = function(status, callback) {
+      var findItems = function(status, done) {
         Item.count({
           user: status.user.id,
           source: status.source.id,
@@ -27,7 +24,7 @@ module.exports = {
           }]
         }, function(error, count) {
           if (error) {
-            return callback(error);
+            return done(error);
           } else {
             status.totalItemsPending = count;
             
@@ -38,24 +35,24 @@ module.exports = {
               storageVerifiedAt: { '$ne': null }
             }, function(error, count) {
               if (error) {
-                return callback(error);
+                return done(error);
               } else {
                 status.totalItemsStored = count;
 
                 if (count) {
                   Item.findOne({ 
                     source: status.source.id, 
-                    contentType: status.contentType.id 
+                    contentType: status.contentType.id 
                   }).sort({ storageVerifiedAt: -1 }).exec(function(error, item) {
                     if (item) {
                       status.lastStoredItem = item.get('id');
                       items.push(item);
                     }
 
-                    callback();
+                    done();
                   });
                 } else {
-                  callback();
+                  done();
                 }
               }
             });
@@ -73,7 +70,7 @@ module.exports = {
           })
         };
 
-        callback(error, data);
+        done(error, data);
       });
     });
   }

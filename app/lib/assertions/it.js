@@ -3,8 +3,6 @@
  * @module
  */
 
-var assert = require('assert');
-
 /**
  * Test
  * @typedef {Object} test
@@ -87,16 +85,16 @@ module.exports = function(description, assertion) {
           this.timeout(test.timeout);
         }
 
+        var after = done;
+
         if (test.after) {
-          var after = function(error) {
+          after = function(error) {
             if (error) {
               done(error);
             } else {
               test.after(done);
             }
           };
-        } else {
-          var after = done;
         }
 
         if (test.before) {

@@ -41,8 +41,7 @@ mailer.sendMail = function(email, done) {
         done(error);
       });
     } else {
-      var transport = nodemailer.createTransport(stubTransport());
-      transport.sendMail(email, done);
+      nodemailer.createTransport(stubTransport()).sendMail(email, done);
     }
   } catch (error) {
     if (logger.error) {

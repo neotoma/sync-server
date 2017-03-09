@@ -20,8 +20,8 @@ var validateParams = require('app/lib/validateParams');
 module.exports = modelFactory.new('Storage', {
   clientId: String,
   clientSecret: String,
-  host: { type: String, required: true },
-  name: { type: String, required: true },
+  host: { type: String, required: true },
+  name: { type: String, required: true },
   passportStrategy: String,
   itemPutUrlTemplate: {
     type: String,
@@ -41,7 +41,7 @@ module.exports = modelFactory.new('Storage', {
    * @instance
    * @param {Object} path - Path at which to put item
    * @param {Object} userStorageAuth - UserStorageAuth used to make request
-   * @returns {string} URL
+   * @returns {string} URL
    */
   headers: function(path, userStorageAuth) {
     return {
@@ -60,7 +60,7 @@ module.exports = modelFactory.new('Storage', {
    * @instance
    * @param {Object} path - Path at which to put item
    * @param {Object} userStorageAuth - UserStorageAuth used to make request
-   * @returns {string} URL
+   * @returns {string} URL
    */
   itemPutUrl: function(path, userStorageAuth) {
     validateParams([{

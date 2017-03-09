@@ -57,7 +57,7 @@ module.exports = modelFactory.new('ContactVerification', {
   }
 }, null, function(schema) {
   schema.pre('save', function(next) {
-    if (!this.isNew) { return next(); }
+    if (!this.isNew) { return next(); }
 
     debug('pre save ContactVerificationRequest.findOne %s, code: %s', this.contactVerificationRequest, this.contactVerificationRequestCode);
 
@@ -164,7 +164,7 @@ module.exports = modelFactory.new('ContactVerification', {
       logMilestone
     ], function(error) {
       if (error) {
-        logger.error('ContactVerification model post-save procedure failed', { error: error.message });
+        logger.error('ContactVerification model post-save procedure failed', { error: error.message });
       }
 
       next(error);

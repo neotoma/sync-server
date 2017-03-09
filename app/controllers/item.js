@@ -21,8 +21,6 @@ var debug = require('app/lib/debug')('syncServer:itemController');
 var Item = require('app/models/item');
 var logger = require('app/lib/logger');
 var mime = require('app/lib/mime');
-var pluralize = require('pluralize');
-var formatJSON = require('format-json');
 var request = require('app/lib/request');
 var Status = require('app/models/status');
 var Url = require('url');
@@ -77,13 +75,15 @@ module.exports.getResource = function(url, done) {
         return done(request.statusCodeError(res.statusCode));
       }
 
+      var resource;
+
       switch(mediaType) {
       case 'image/jpeg':
-        var resource = new Buffer(body);
+        resource = new Buffer(body);
         break;
       case 'application/json':
         try {
-          var resource = JSON.parse(body);
+          resource = JSON.parse(body);
         } catch (error) {
           return done(new Error('Unable to parse resource'));
         }
@@ -163,7 +163,7 @@ module.exports.itemDataObjectsFromPage = function(page, source, contentType) {
  * @param {Object} contentType - ContentType of items.
  * @param {Object} userSourceAuth - UserSourceAuth used to make request.
  * @param {Object} pagination - Pagination used to make request.
- * @returns {string} URL for making a GET request
+ * @returns {string} URL for making a GET request
  */
 module.exports.itemsGetUrl = function(source, contentType, userSourceAuth, pagination) {
   validateParams([{
@@ -229,12 +229,14 @@ module.exports.itemsPageError = function(page) {
   }]);
 
   if (page.meta && page.meta.code && Number(page.meta.code) >= 400) {
+    var message;
+
     if (page.meta.errorDetail) {
-      var message = `${page.meta.errorDetail} (${page.meta.code})`;
+      message = `${page.meta.errorDetail} (${page.meta.code})`;
     } else if (page.meta.errorType) {
-      var message = `HTTP status code ${page.meta.code}, ${page.meta.errorType}`;
+      message = `HTTP status code ${page.meta.code}, ${page.meta.errorType}`;
     } else {
-      var message = `HTTP status code ${page.meta.code}`;
+      message = `HTTP status code ${page.meta.code}`;
     }
 
     return new Error(message);
@@ -553,9 +555,7 @@ module.exports.storeItemsPage = function(user, source, storage, contentType, pag
   };
 
   var storeItemsData = function(itemPairs, done) {
-    var count = 0;
     async.eachSeries(itemPairs, function(itemPair, done) {
-      count++;
       if (!itemPair.item.storageVerifiedAt) {
         module.exports.storeItemData(itemPair.item, itemPair.data, app, done);
       } else {
@@ -700,7 +700,7 @@ module.exports.storeItemData = function(item, data, app, done) {
         debug.error('storeFile item %s, error %o, storeFileResult %o', item.id, error, storeFileResult);
         item.storageError = error.message;
         item.storageFailedAt = Date.now();
-        item.save((saveError) => {
+        item.save(() => {
           done(error, storeFileResult);
         });
       } else {

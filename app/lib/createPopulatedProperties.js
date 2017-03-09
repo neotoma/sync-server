@@ -20,7 +20,7 @@ module.exports = function(modelFixture, properties) {
         if (modelFixture.schemaProperties[name].ref) {
           debug('creating %s document %O', modelFixture.schemaProperties[name].ref, properties[name]);
           
-          var document = wh.oneSaved(_.lowerFirst(modelFixture.schemaProperties[name].ref), properties[name], (error, document) => {
+          wh.oneSaved(_.lowerFirst(modelFixture.schemaProperties[name].ref), properties[name], (error, document) => {
             if (!error) {
               debug('created %s document %O', modelFixture.schemaProperties[name].ref, document);
             }

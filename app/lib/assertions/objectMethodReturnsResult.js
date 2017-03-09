@@ -9,7 +9,7 @@ var assert = require('assert');
 module.exports = function(objectName, object, methodName, methodReturnValue) {
   it(objectName + ' object method ' + methodName + ' returns ' + typeof methodReturnValue + ' result', (done) => {
     if (typeof methodReturnValue === 'object') {
-      assert(_.isEqual(object[methodName](), propertyValue));
+      assert(_.isEqual(object[methodName](), methodReturnValue));
     } else {
       assert.deepEqual(object[methodName](), methodReturnValue);
     }

@@ -3,8 +3,6 @@
  * @module
  */
 
-var logger = require('app/lib/logger');
-
 if (!process.env.SYNC_SERVER_MONGODB_DATABASE) {
   throw new Error('MongoDB not provided database name');
 }

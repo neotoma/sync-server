@@ -3,9 +3,7 @@
  * @module
  */
 
-var debug = require('debug')('syncServer:logger');
 var mongoDBConfig = require('app/config/mongodb');
-var util = require('util');
 var winston = require('winston');
 var winstonMailerTransport = require('./winstonMailerTransport');
 require('winston-mongodb').MongoDB;

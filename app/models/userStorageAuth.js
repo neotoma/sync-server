@@ -15,7 +15,7 @@ var queryConditions = require('./queryConditions');
  * @property {module:models/user~User} [user] - User to authenticate at storage
  */
 module.exports = modelFactory.new('UserStorageAuth', {
-  storage: { ref: 'Storage', required: true },
+  storage: { ref: 'Storage', required: true },
   storageToken: String,
   storageUser: String,
   user: { ref: 'User' }

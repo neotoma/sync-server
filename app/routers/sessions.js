@@ -63,11 +63,15 @@ module.exports = function(app) {
       populateObjectsForUser(UserSourceAuth),
       populateUsers
     ], function(error) {
-      res.sendData(data, included);
+      if (error) {
+        res.sendError(error);
+      } else {
+        res.sendData(data, included);
+      }
     });
   });
 
-  jsonapi.routeResource(app, 'delete', '/sessions/:id', { validateRequestUrl: false }, function(req, res) {
+  jsonapi.routeResource(app, 'delete', '/sessions/:id', { validateRequestUrl: false }, function(req, res) {
     if (req.params.id === req.session.id) {
       req.session.destroy(function(error) {
         if (error) {

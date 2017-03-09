@@ -18,10 +18,12 @@ module.exports = function(app, Model, document) {
     name: 'document', variable: document, required: true, requiredProperties: ['id', 'passportStrategy', 'clientId', 'clientSecret']
   }]);
 
+  var UserAuth;
+
   if (Model.modelName === 'Source') {
-    var UserAuth = UserSourceAuth;
+    UserAuth = UserSourceAuth;
   } else if (Model.modelName === 'Storage') {
-    var UserAuth = UserStorageAuth;
+    UserAuth = UserStorageAuth;
   } else {
     throw new Error('Model not supported');
   }
@@ -68,14 +70,16 @@ module.exports = function(app, Model, document) {
           done(error, userAuth, user);
         });
       } else {
+        var message;
+        
         if (!profile.displayName) {
-          var message = 'Failed to find user name within profile data';
+          message = 'Failed to find user name within profile data';
           log('error', 'Auth router ' + _.lowerFirst(message));
           return done(new Error(message));
         }
 
         if (!profile.emails || profile.emails.length < 1 || !profile.emails[0].value) {
-          var message = 'Failed to find user email within profile data';
+          message = 'Failed to find user email within profile data';
           log('error', 'Auth router ' + _.lowerFirst(message));
           return done(new Error(message));
         }
@@ -125,7 +129,7 @@ module.exports = function(app, Model, document) {
 
   app.get(path.resolve('/', Model.modelType(), document.id, 'auth-callback'), function(req, res) {
     debug.start('auth-callback');
-    passport.authenticate(strategy.name, function(error, user, info) {
+    passport.authenticate(strategy.name, function(error, user) {
       debug('authenticate-callback error: %s', error ? error.message : 'n/a');
 
       if (error) {

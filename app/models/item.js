@@ -4,14 +4,13 @@
  */
 
 var _ = require('lodash');
-var debug = require('app/lib/debug')('syncServer:Item');
 var emojiStrip = require('emoji-strip');
 var modelFactory = require('app/factories/model');
 var queryConditions = require('./queryConditions');
 var sanitizeFilename = require('sanitize-filename');
 
 var convertToFilename = function(content) {
-    return _.toLower(emojiStrip(sanitizeFilename(content).replace(/[^\x00-\x7F]/g, '').replace('.','').replace('-', ' ').replace(/  +/g, ' ').replace(/ +/g, '-').replace(/–|—+/g, '-')));
+  return _.toLower(emojiStrip(sanitizeFilename(content).replace(/[^\x00-\x7F]/g, '').replace('.','').replace('-', ' ').replace(/ {2}/g, ' ').replace(/ +/g, '-').replace(/–|—+/g, '-')));
 };
 
 /**
@@ -28,54 +27,54 @@ var convertToFilename = function(content) {
  * @property {module:models/user~User} user - User for which item was pulled from source
  */
 module.exports = modelFactory.new('Item', {
-    contentType: { ref: 'ContentType', required: true },
-    source: { ref: 'Source', required: true },
-    sourceItem: { type: String, required: true },
-    storage: { ref: 'Storage', required: true },
-    storageAttemptedAt: Date,
-    storageBytes: Number,
-    storageError: String,
-    storageFailedAt: Date,
-    storagePath: String,
-    storageVerifiedAt: Date,
-    user: { ref: 'User', required: true }
+  contentType: { ref: 'ContentType', required: true },
+  source: { ref: 'Source', required: true },
+  sourceItem: { type: String, required: true },
+  storage: { ref: 'Storage', required: true },
+  storageAttemptedAt: Date,
+  storageBytes: Number,
+  storageError: String,
+  storageFailedAt: Date,
+  storagePath: String,
+  storageVerifiedAt: Date,
+  user: { ref: 'User', required: true }
 }, {
-    jsonapi: {
-      get: {
-        allowed: 'user',
-        queryConditions: queryConditions.userMatchesRequester
+  jsonapi: {
+    get: {
+      allowed: 'user',
+      queryConditions: queryConditions.userMatchesRequester
     }
   }
 }, {
-    slug: function(data) {
-      var parts = [];
+  slug: function(data) {
+    var parts = [];
 
-      if (data) {
-        if (data.createdAt) {
-          var date = new Date(data.createdAt * 1000);
-          var dateString = date.toISOString();
-          parts.push(dateString.substring(0, dateString.indexOf('T')));
+    if (data) {
+      if (data.createdAt) {
+        var date = new Date(data.createdAt * 1000);
+        var dateString = date.toISOString();
+        parts.push(dateString.substring(0, dateString.indexOf('T')));
       }
 
-        if (data.venue && data.venue.name) {
-          parts.push(convertToFilename(data.venue.name));
+      if (data.venue && data.venue.name) {
+        parts.push(convertToFilename(data.venue.name));
       } else if (data.firstName || data.lastName) {
-          if (data.firstName) {
-            parts.push(data.firstName);
+        if (data.firstName) {
+          parts.push(data.firstName);
         }
 
-          if (data.lastName) {
-            parts.push(data.lastName);
+        if (data.lastName) {
+          parts.push(data.lastName);
         }
       } else if (data.text) {
-          parts.push(data.text);
+        parts.push(data.text);
       }
     }
 
-      if (!parts.length) {
-        parts.push(this.id);
+    if (!parts.length) {
+      parts.push(this.id);
     }
 
-      return parts.map((part) => convertToFilename(part)).join('-');
+    return parts.map((part) => convertToFilename(part)).join('-');
   }
 });

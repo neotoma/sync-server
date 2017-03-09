@@ -1,6 +1,5 @@
 require('dotenvs')('test');
 var _ = require('lodash');
-var assert = require('assert');
 var assertions = require('app/lib/assertions');
 var controller = require('app/controllers/item');
 var wh = require('app/lib/warehouse');
@@ -62,7 +61,7 @@ describe('itemController.itemsPageNextPagination method', () => {
     params: [wh.itemPage(), wh.pagination(), wh.one('contentType')],
     before: function(done) {
       this.params[1] = {};
-      this.params[0] = { data: { pagination: { } } };
+      this.params[0] = { data: { pagination: { } } };
       done();
     },
     result: undefined
@@ -71,7 +70,7 @@ describe('itemController.itemsPageNextPagination method', () => {
     params: [wh.itemPage(), wh.pagination(), wh.one('contentType')],
     before: function(done) {
       this.params[1] = {};
-      this.params[0] = { data: { pagination: { next_max_id: 999 } } };
+      this.params[0] = { data: { pagination: { next_max_id: 999 } } };
       done();
     },
     result: { maxId: 999 }

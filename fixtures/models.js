@@ -17,37 +17,47 @@ module.exports = {
         tests: [{
           document: function(mockProperties, done) {
             // With contactVerification with invalid contactVerificationRequest
+            done();
           },
           done: function(res, done) {
             // Verify an error returned in response
+            done();
           }
         }, {
           document: function(mockProperties, done) {
             // With contactVerification with invalid contactVerificationRequestCode
+            done();
           },
           done: function(res, done) {
             // Verify an error returned in response
+            done();
           }
         }, {
           document: function(mockProperties, done) {
             // With contactVerification with user and contactVerificationRequest.authenticateSession
+            done();
           },
           done: function(res, done) {
             // Verify a session has been established
+            done();
           }
         }, {
           document: function(mockProperties, done) {
             // With contactVerification with user and no contactVerificationRequest.authenticateSession
+            done();
           },
           done: function(res, done) {
             // Verify a session has not been established
+            done();
           }
         }, {
           document: function(mockProperties, done) {
             // With contactVerification with no user or contactVerificationRequest.authenticateSession
+            done();
           },
           done: function(res, done) {
             // Verify a session has not been established
+            done();
           }
         }]
       }
@@ -55,7 +65,7 @@ module.exports = {
     mockProperties: () => {
       var code = 'contactVerificationRequestCode';
 
-      return { 
+      return {
         _id: ObjectId(),
         contactVerificationRequestCode: code,
         contactVerificationRequest: {
@@ -101,7 +111,7 @@ module.exports = {
       };
     },
     schemaProperties: {
-      authenticateSession: {  type: Boolean, default: false },
+      authenticateSession: {  type: Boolean, default: false },
       clientOrigin: { type: String, required: true },
       code: String,
       contact: {
@@ -116,8 +126,8 @@ module.exports = {
         type: Array,
         validate: {
           validValue: [{
-            event: 'contactVerificationRequestEvent1',
-            event: 'contactVerificationRequestEvent2'
+            event1: 'contactVerificationRequestEvent1',
+            event2: 'contactVerificationRequestEvent2'
           }],
           invalidValue: {
             foo: 'bar'
@@ -146,13 +156,13 @@ module.exports = {
       post: 'admin'
     },
     mockProperties: () => {
-      return { 
+      return { 
         _id: ObjectId(),
         name: 'Super Widget'
       };
     },
     schemaProperties: {
-      name: { type: String, required: true }
+      name: { type: String, required: true }
     }
   },
   item: {
@@ -166,7 +176,7 @@ module.exports = {
     },
 
     mockProperties: () => {
-      return { 
+      return { 
         _id: ObjectId(),
         contentType: ObjectId(),
         source: ObjectId(),
@@ -183,17 +193,17 @@ module.exports = {
     },
     nonConditionProperties: ['data'],
     schemaProperties: {
-      contentType: { ref: 'ContentType', required: true },
-      source: { ref: 'Source', required: true },
-      sourceItem: { type: String, required: true },
-      storage: { ref: 'Storage', required: true },
+      contentType: { ref: 'ContentType', required: true },
+      source: { ref: 'Source', required: true },
+      sourceItem: { type: String, required: true },
+      storage: { ref: 'Storage', required: true },
       storageAttemptedAt: Date,
       storageBytes: Number,
       storageError: String,
       storageFailedAt: Date,
       storagePath: String,
       storageVerifiedAt: Date,
-      user: { ref: 'User', required: true }
+      user: { ref: 'User', required: true }
     }
   },
   job: {
@@ -206,7 +216,7 @@ module.exports = {
       patch: 'admin'
     },
     mockProperties: () => {
-      return { 
+      return { 
         _id: ObjectId(),
         name: 'storeAllItemsForUserStorageSource',
         source: ObjectId(),
@@ -238,7 +248,7 @@ module.exports = {
       post: 'user'
     },
     mockProperties: () => {
-      return { 
+      return { 
         _id: ObjectId(),
         event: 'notificationRequestEvent',
         user: ObjectId(),
@@ -247,10 +257,10 @@ module.exports = {
       };
     }, 
     schemaProperties: {
-      event: { type: String, required: true },
+      event: { type: String, required: true },
       source: { ref: 'Source' },
       storage: { ref: 'Storage' },
-      user: { ref: 'User', required: true }
+      user: { ref: 'User', required: true }
     }
   },
   source: {
@@ -263,7 +273,7 @@ module.exports = {
       post: 'admin'
     },
     mockProperties: () => {
-      return { 
+      return { 
         _id: ObjectId(),
         apiVersion: '99',
         authScope: ['foo','bar'],
@@ -285,14 +295,14 @@ module.exports = {
       clientId: String,
       clientSecret: String,
       contentTypes: [{ ref: 'ContentType' }],
-      itemStorageEnabled: { type: Boolean, default: false },
+      itemStorageEnabled: { type: Boolean, default: false },
       host: String,
-      itemsLimit: { type: Number, default: 25 },
+      itemsLimit: { type: Number, default: 25 },
       logoGlyphPath: String,
-      name: { type: String, required: true },
+      name: { type: String, required: true },
       passportStrategy: String,
       itemsGetUrlTemplate: String,
-      itemDataObjectsFromPagePathTemplate: { type: String, default: 'data' },
+      itemDataObjectsFromPagePathTemplate: { type: String, default: 'data' },
       totalItemsAvailableFromPagePathTemplate: String
     }
   },
@@ -303,7 +313,7 @@ module.exports = {
       get: 'user'
     },
     mockProperties: () => {
-      return { 
+      return { 
         _id: ObjectId(),
         user: ObjectId(),
         storage: ObjectId(),
@@ -316,11 +326,11 @@ module.exports = {
       };
     }, 
     schemaProperties: {
-      contentType: { ref: 'ContentType', required: true },
-      lastStoredItem: { ref: 'Item' },
-      storage: { ref: 'Storage', required: true },
-      source: { ref: 'Source', required: true },
-      user: { ref: 'User', required: true },
+      contentType: { ref: 'ContentType', required: true },
+      lastStoredItem: { ref: 'Item' },
+      storage: { ref: 'Storage', required: true },
+      source: { ref: 'Source', required: true },
+      user: { ref: 'User', required: true },
       totalItemsAvailable: Number,
       totalItemsPending: Number,
       totalItemsStored: Number
@@ -336,7 +346,7 @@ module.exports = {
       post: 'admin'
     },
     mockProperties: () => {
-      return { 
+      return { 
         _id: ObjectId(),
         clientId: 'storageClientId',
         clientSecret: 'storageClientSecret',
@@ -349,8 +359,8 @@ module.exports = {
     schemaProperties: {
       clientId: String,
       clientSecret: String,
-      host: { type: String, required: true },
-      name: { type: String, required: true },
+      host: { type: String, required: true },
+      name: { type: String, required: true },
       passportStrategy: String,
       itemPutUrlTemplate: String
     }
@@ -365,7 +375,7 @@ module.exports = {
       post: 'admin'
     },
     mockProperties: () => {
-      return { 
+      return { 
         _id: ObjectId(),
         admin: false,
         email: 'email@example.com',
@@ -373,8 +383,8 @@ module.exports = {
       };
     },
     schemaProperties: {
-      admin: { type: Boolean, default: false },
-      email: { type: String, required: true },
+      admin: { type: Boolean, default: false },
+      email: { type: String, required: true },
       name: String
     }
   },
@@ -388,7 +398,7 @@ module.exports = {
       post: 'admin'
     },
     mockProperties: () => {
-      return { 
+      return { 
         _id: ObjectId(),
         source: ObjectId(),
         sourceUser: 'userSourceAuthSourceUser',
@@ -397,7 +407,7 @@ module.exports = {
       };
     },
     schemaProperties: {
-      source: { ref: 'Source', required: true },
+      source: { ref: 'Source', required: true },
       sourceToken: String,
       sourceUser: String,
       user: { ref: 'User' }
@@ -413,7 +423,7 @@ module.exports = {
       post: 'admin'
     },
     mockProperties: () => {
-      return { 
+      return { 
         _id: ObjectId(),
         storage: ObjectId(),
         storageUser: 'userStorageAuthStorageUser',
@@ -422,9 +432,9 @@ module.exports = {
       };
     },
     schemaProperties: {
-      storage: { ref: 'Storage', required: true },
+      storage: { ref: 'Storage', required: true },
       storageToken: String,
-      storageUser: { type: String, required: true },
+      storageUser: { type: String, required: true },
       user: { ref: 'User' }
     }
   }

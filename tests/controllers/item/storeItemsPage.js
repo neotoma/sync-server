@@ -1,10 +1,8 @@
 require('dotenvs')('test');
 var app = require('app');
-var assert = require('assert');
 var assertions = require('app/lib/assertions');
 var controller = require('app/controllers/item');
 var mongoose = require('app/lib/mongoose');
-var nock = require('app/lib/nock');
 var prepareStoreAll = require('./routines/prepareStoreAll');
 var resetAppSpy = require('./routines/resetAppSpy')(app);
 var verifyStoredItems = require('./routines/verifyStoredItems');
@@ -56,7 +54,7 @@ describe('itemController.storeItemsPage method', function() {
     error: 'Parameter app has no emit property'
   }, {
     when: 'emit property of app is not function',
-    params: [wh.one('user'), wh.one('source'), wh.one('storage'), wh.one('contentType'), wh.pagination(), { emit: 3 }],
+    params: [wh.one('user'), wh.one('source'), wh.one('storage'), wh.one('contentType'), wh.pagination(), { emit: 3 }],
     error: 'Property emit of parameter app is not function'
   }]);
 

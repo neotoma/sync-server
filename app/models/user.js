@@ -14,8 +14,8 @@ var queryConditions = require('./queryConditions');
  * @property {string} [name] - Name of user
  */
 module.exports = modelFactory.new('User', {
-  admin: { type: Boolean, default: false },
-  email: { type: String, required: true },
+  admin: { type: Boolean, default: false },
+  email: { type: String, required: true },
   name: String
 }, {
   jsonapi: {

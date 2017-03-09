@@ -3,8 +3,6 @@
  */
 
 var _ = require('lodash');
-var debug = require('debug')('syncServer:modelFactory');
-var logger = require('app/lib/logger');
 var mongoose = require('app/lib/mongoose');
 var mongooseAutopopulate = require('mongoose-autopopulate');
 var pluralize = require('pluralize');
@@ -95,14 +93,16 @@ module.exports = {
       }
     };
 
+    var key;
+
     if (statics) {
-      for (var key in statics) {
+      for (key in statics) {
         Schema.statics[key] = statics[key];
       }
     }
 
     if (methods) {
-      for (var key in methods) {
+      for (key in methods) {
         Schema.methods[key] = methods[key];
       }
     }

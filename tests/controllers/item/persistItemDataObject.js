@@ -4,7 +4,6 @@ var assertions = require('app/lib/assertions');
 var async = require('async');
 var controller = require('app/controllers/item');
 var mongoose = require('app/lib/mongoose');
-var nock = require('app/lib/nock');
 var wh = require('app/lib/warehouse');
 
 describe('itemController.persistItemDataObject method', function() {

@@ -19,11 +19,11 @@ var queryConditions = require('./queryConditions');
  * @property {number} [totalItemsStored]- Total number of items last reported as stored for contentType from source
  */
 module.exports = modelFactory.new('Status', {
-  contentType: { ref: 'ContentType', required: true },
-  lastStoredItem: { ref: 'Item' },
-  source: { ref: 'Source', required: true },
-  storage: { ref: 'Storage', required: true },
-  user: { ref: 'User', required: true },
+  contentType: { ref: 'ContentType', required: true },
+  lastStoredItem: { ref: 'Item' },
+  source: { ref: 'Source', required: true },
+  storage: { ref: 'Storage', required: true },
+  user: { ref: 'User', required: true },
   totalItemsAvailable: Number,
   totalItemsPending: Number,
   totalItemsStored: Number

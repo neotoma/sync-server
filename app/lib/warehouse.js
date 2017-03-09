@@ -10,7 +10,6 @@ var itemController = require('app/controllers/item');
 var modelFixtures = require('fixtures/models');
 var models = require('app/models');
 var ObjectId = require('mongoose').Types.ObjectId;
-var templateCompiler = require('es6-template-strings');
 var validateParams = require('./validateParams');
 
 debug('models', models);
@@ -63,7 +62,7 @@ module.exports = {
     contentType = contentType ? contentType : this.one('contentType');
     count = count ? count : 234;
 
-    return itemDataObjects = this.many('item', {
+    return this.many('item', {
       contentType: contentType.id
     }, count).map((item) => {
       var itemDataObject = {
@@ -87,15 +86,15 @@ module.exports = {
    */
   itemPage: function(source, contentType, userSourceAuth, overwriteProperties) {
     if (!source) {
-      var source = this.one('source');
+      source = this.one('source');
     }
 
     if (!contentType) {
-      var contentType = this.one('contentType');
+      contentType = this.one('contentType');
     }
 
     if (!userSourceAuth) {
-      var userSourceAuth = this.one('userSourceAuth');
+      userSourceAuth = this.one('userSourceAuth');
     }
 
     return Object.assign(this.itemPages(source, contentType, userSourceAuth, 1)[0], overwriteProperties);
@@ -184,7 +183,7 @@ module.exports = {
    * @param {string} modelId - Model ID
    * @param {Object} [overwriteProperties] - Properties that should overwrite standard mock properties
    * @param {string} [count=15] - Total number of documents to return
-   * @param {function} done - Error-first callback function expecting no other parameters
+   * @param {function} done - Error-first callback function expecting no other parameters
    */
   manySaved: function(modelId, overwriteProperties, count, done) {
     var documents = this.many(modelId, overwriteProperties, count);
@@ -223,7 +222,7 @@ module.exports = {
    * Callbacks one saved mock document corresponding to given model ID
    * @param {string} modelId - Model ID
    * @param {Object} [overwriteProperties] - Properties that should overwrite standard mock properties
-   * @param {function} done - Error-first callback function expecting no other parameters
+   * @param {function} done - Error-first callback function expecting no other parameters
    */
   oneSaved: function(modelId, overwriteProperties, done) {
     var document = this.one(modelId, overwriteProperties);

@@ -18,8 +18,9 @@ module.exports = function(grunt) {
         configFile: '.eslintrc.js',
         fix: true
       },
-      target: [
+      dev: [
         '**/*.js',
+        '!docs/**/*.js',
         '!node_modules/**/*.js'
       ]
     },
@@ -112,7 +113,7 @@ module.exports = function(grunt) {
   ]);
 
   grunt.registerTask('deploy-all', 'Run tests and deploy all files', [
-    'mochaTest:tests',
+    'test',
     'deploy-dependencies',
     'deploy-app',
     'deploy-data'
@@ -152,5 +153,10 @@ module.exports = function(grunt) {
 
   grunt.registerTask('remote-repopulate-collections', 'Remove database collections and repopulate them with resourceObjects stored in files', [
     'sshexec:repopulateCollections'
+  ]);
+
+  grunt.registerTask('test', 'Test code', [
+    'eslint',
+    'mochaTest:tests'
   ]);
 };

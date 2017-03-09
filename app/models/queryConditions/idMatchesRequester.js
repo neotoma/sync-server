@@ -1,5 +1,3 @@
-var debug = require('debug')('syncServer:idMatchesRequester');
-
 /**
  * Returns query conditions that match _id attribute to requester user ID
  * @param {Object} req - Express request object

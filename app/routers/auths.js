@@ -1,6 +1,5 @@
 var auth = require('./auth');
 var logger = require('app/lib/logger');
-var path = require('path');
 var validateParams = require('app/lib/validateParams');
 
 module.exports = function(app, Model) {

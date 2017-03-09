@@ -1,5 +1,4 @@
 require('dotenvs')('test');
-var _ = require('lodash');
 var assert = require('assert');
 var assertions = require('app/lib/assertions');
 var controller = require('app/controllers/item');
@@ -54,7 +53,7 @@ describe('itemController.itemsPageError method', () => {
       assert.equal(error.message, 'HTTP status code 450');
       done();
     }
-  }, , {
+  }, {
     when: 'provided page with meta containing server error code',
     params: [wh.itemPage(wh.one('source'), wh.one('contentType'), wh.one('userSourceAuth'), {
       meta: {

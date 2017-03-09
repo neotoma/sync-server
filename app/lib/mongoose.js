@@ -4,6 +4,7 @@ var debug = require('app/lib/debug')('syncServer:mongoose');
 var mongoose = require('mongoose');
 var logger = require('./logger');
 var mongoDBConfig = require('app/config/mongodb');
+var removeCollections;
 
 mongoose.Promise = global.Promise;
 
@@ -17,21 +18,22 @@ mongoose.connection.once('open', function() {
 
 mongoose.connect(mongoDBConfig.url);
 
-mongoose.transform = function(doc, ret, options) {
+mongoose.transform = function(doc, ret) {
   delete ret._id;
   delete ret.__v;
+  var newKey;
 
   for (var key in ret) {
     // Convert ID suffixes
     if (_.endsWith(key, '_id')) {
-      var newKey = key.slice(0,-3);
+      newKey = key.slice(0,-3);
       ret[newKey] = ret[key];
       delete ret[key];
       key = newKey;
     }
 
     // Convert under_scores to camelCase
-    var newKey = key.replace(/_([a-z])/g, function (g) { return g[1].toUpperCase(); });
+    newKey = key.replace(/_([a-z])/g, function (g) { return g[1].toUpperCase(); });
 
     if (newKey != key) {
       ret[newKey] = ret[key];

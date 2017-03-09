@@ -1,4 +1,3 @@
-var async = require('async');
 var Debug = require('debug');
 var itemController = require('app/controllers/item');
 var nock = require('nock');
@@ -87,7 +86,7 @@ module.exports = {
     debug('putItems with source %s, storage %s, userStorageAuth %s for %s contentTypes', source.id, storage.id, userStorageAuth.id, contentTypes.length);
 
     contentTypes.forEach((contentType) => {
-      wh.itemDataObjects(contentType).forEach((itemDataObject) => {
+      wh.itemDataObjects(contentType).forEach(() => {
         this.postStorage(storage, userStorageAuth);
       });
     });

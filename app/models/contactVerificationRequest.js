@@ -4,8 +4,8 @@
  */
 
 var async = require('async');
+var ContactVerificationRequest;
 var crypto = require('crypto');
-var debug = require('app/lib/debug')('syncServer:contactVerificationRequest');
 var logger = require('app/lib/logger');
 var mailer = require('app/lib/mailer');
 var modelFactory = require('app/factories/model');
@@ -155,7 +155,7 @@ module.exports = ContactVerificationRequest = modelFactory.new('ContactVerificat
           deliverCode
         ], function(error) {
           if (error) {
-            logger.error('ContactVerificationRequest model post-POST procedure failed', { error: error.message });
+            logger.error('ContactVerificationRequest model post-POST procedure failed', { error: error.message });
           }
 
           done(error, req, res, contactVerificationRequest);

@@ -1,5 +1,4 @@
 require('dotenvs')('test');
-var _ = require('lodash');
 var assert = require('assert');
 var assertions = require('app/lib/assertions');
 var controller = require('app/controllers/item');

@@ -9,14 +9,14 @@ var transport = function(options) {
 
 util.inherits(transport, winston.Transport);
 
-transport.prototype.log = function(level, msg, meta, callback) {
+transport.prototype.log = function(level, msg, meta, done) {
   if (process.env.SYNC_SERVER_MAILER_LOGGER_EMAIL) {
     mailer.sendMail({
       to: process.env.SYNC_SERVER_MAILER_LOGGER_EMAIL,
       subject: process.env.SYNC_SERVER_NAME + ' event: ' + msg,
       text: msg + '\n\n' + JSON.stringify(meta)
-    }, function(error, res) {
-      callback(error, true);
+    }, function(error) {
+      done(error, true);
     });
   }
 };

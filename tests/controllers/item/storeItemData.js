@@ -3,15 +3,10 @@ var app = require('app');
 var assert = require('assert');
 var async = require('async');
 var assertions = require('app/lib/assertions');
-var ContentType = require('app/models/contentType');
 var controller = require('app/controllers/item');
-var ItemFactory = require('app/lib/factory')('item');
 var mongoose = require('app/lib/mongoose');
 var nock = require('app/lib/nock');
 var resetAppSpy = require('./routines/resetAppSpy')(app);
-var sinon = require('sinon');
-var UserFactory = require('app/lib/factory')('user');
-var UserStorageAuthFactory = require('app/lib/factory')('userStorageAuth');
 var wh = require('app/lib/warehouse');
 
 describe('itemController.storeItemData method', function() {

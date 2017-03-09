@@ -7,7 +7,6 @@ var express = require('express');
 var app = express();
 var passport = require('app/lib/passport');
 var sessionConfig = require('app/config/session');
-var User = require('app/models/user');
 
 app.use(require('cookie-parser')());
 app.use(express.static(__dirname + '/public'));

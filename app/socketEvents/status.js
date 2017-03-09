@@ -1,4 +1,3 @@
-var Item = require('app/models/item');
 var logger = require('app/lib/logger');
 var statusController = require('app/controllers/status.js');
 
@@ -7,7 +6,7 @@ module.exports = function(app, socket) {
 
   var storedItemData = function(item) {
     if (socket.request.user.logged_in && item.user == socket.request.user.id) {
-      logger.trace('storedItemData', { itemId: item.id });
+      logger.trace('storedItemData', { itemId: item.id });
 
       statusController.json(function(error, data) {
         if (!error) {

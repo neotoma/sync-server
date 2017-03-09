@@ -2,10 +2,10 @@ var logger = require('./logger');
 var morgan = require('morgan');
 
 module.exports = function(message) {
-  var message = message ? message : 'Processed request';
+  message = message ? message : 'Processed request';
 
   var stream = {
-    write: function(combinedLog, encoding){
+    write: function(combinedLog){
       logger.trace(message, { combinedLog: combinedLog });
     }
   };

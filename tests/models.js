@@ -8,12 +8,9 @@ var assert = require('assert');
 var assertions = require('app/lib/assertions');
 var async = require('async');
 var createPopulatedProperties = require('app/lib/createPopulatedProperties');
-var debug = require('debug')('syncServer:modelTests');
 var fixtures = require('fixtures/models');
-var flat = require('flat');
 var models = require('app/models');
 var mongoose = require('app/lib/mongoose');
-var ObjectId = require('mongoose').Types.ObjectId;
 var options = require('app/lib/minimist');
 var templateCompiler = require('es6-template-strings');
 var unpopulatedProperties = require('app/lib/unpopulatedProperties');
@@ -44,7 +41,6 @@ Object.keys(fixtures).forEach((id) => {
   var Model = models[id];
   var modelName = modelFixture.name;
   var properties = modelFixture.mockProperties();
-  var schemaProperties = modelFixture.schemaProperties;
 
   describe(modelName + ' model', () => {
     beforeEach((done) => {
@@ -70,7 +66,7 @@ Object.keys(fixtures).forEach((id) => {
           try {
             assert(document);
             done(undefined, document);
-          } catch (error) {
+          } catch (error) {
             return done(new Error('Document not created'));
           }
         });
@@ -83,7 +79,7 @@ Object.keys(fixtures).forEach((id) => {
           try {
             assert.equal(document.id, foundDocument.id);
             done();
-          } catch (error) {
+          } catch (error) {
             return done(new Error(`Document found does not match one created: ${foundDocument.id} !== ${document.id}`));
           }
         });
