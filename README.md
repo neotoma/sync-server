@@ -1,8 +1,8 @@
 # sync-server
 
-![Codeship badge](https://codeship.com/projects/00364600-b0b2-0133-c9a4-72e14e42ee1c/status?branch=master)
+[![Codeship badge](https://codeship.com/projects/00364600-b0b2-0133-c9a4-72e14e42ee1c/status?branch=master)](https://app.codeship.com/projects/132772)
 [![Code Climate](https://codeclimate.com/github/asheville/sync/badges/gpa.svg)](https://codeclimate.com/github/asheville/sync)
-[![Code Climate issues badge](https://codeclimate.com/github/asheville/sync/badges/issue_count.svg)](https://codeclimate.com/github/asheville/sync)
+[![Code Climate issues badge](https://codeclimate.com/github/asheville/sync/badges/issue_count.svg)](https://codeclimate.com/github/asheville/sync/issues)
 [![David badge](https://david-dm.org/neotoma/sync-server.svg)](https://david-dm.org/neotoma/sync-server)
 
 This repository contains the source code for an app that synchronizes data from sources to storage on behalf of users per [the Neotoma project documentation](https://github.com/neotoma/documentation).

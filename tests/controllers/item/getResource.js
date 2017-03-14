@@ -27,7 +27,7 @@ describe('itemController.getResource method', function() {
   }, {
     when: 'url parameter indicates non-existent resource',
     params: [wh.jsonUrl],
-    error: 'Failed to make successful request',
+    error: 'Failed to make successful request. HTTP status code: 404',
     before: function(done) {
       nock.get(wh.jsonUrl, wh.jsonData(), 404);
       done();
@@ -35,7 +35,7 @@ describe('itemController.getResource method', function() {
   }, {
     when: 'provided url without authorization',
     params: [wh.jsonUrl],
-    error: 'Failed to make authorized request',
+    error: 'Failed to make successful request. HTTP status code: 401',
     before: function(done) {
       nock.get(wh.jsonUrl, wh.jsonData(), 401);
       done();

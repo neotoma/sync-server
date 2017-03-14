@@ -72,7 +72,7 @@ describe('itemController.storeFile method', function() {
   }, {
     when: 'userStorageAuth.storageToken invalid',
     params: [wh.one('user'), wh.one('storage'), wh.jsonPath, wh.jsonData()],
-    error: 'Failed to make authorized request',
+    error: 'Failed to make successful request. HTTP status code: 401',
     before: function(done) {
       wh.oneSaved('userStorageAuth', {
         user: this.params[0],

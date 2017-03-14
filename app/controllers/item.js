@@ -287,8 +287,6 @@ module.exports.itemsPageNextPagination = function(page, pagination, contentType)
   return nextPagination;
 };
 
-
-
 /**
  * Callbacks file system path used to store item on storage.
  * @param {Item} item - Item.
@@ -359,7 +357,7 @@ module.exports.storeAllForUserStorageSource = function(user, source, storage, ap
 
   async.waterfall([validate, setupLog, storeAllItems], function(error) {
     if (error) {
-      log('error', 'Item controller failed to store all items', { error: error });
+      log('error', 'Item controller failed to store all items', { error: error.message });
     } else {
       debug.success('storeAllForUserStorageSource');
     }
@@ -580,7 +578,7 @@ module.exports.storeItemsPage = function(user, source, storage, contentType, pag
     determineNextPagination
   ], function(error, nextPagination) {
     if (error) {
-      log('error', 'Item controller failed to store page of items', { error: error });
+      log('error', 'Item controller failed to store page of items', { error: error.message });
     } else {
       debug.success('storeItemsPage (contentType: %s, pagination: %o, nextPagination: %o)', contentType.id, pagination, nextPagination);
     }
@@ -741,13 +739,13 @@ module.exports.storeItemData = function(item, data, app, done) {
     notifyApp
   ], function(error) {
     if (error) {
-      log('error', 'Item controller failed to storeItemData', { error: error });
+      log('error', 'Item controller failed to storeItemData', { error: error.message });
 
       if (item && item.save) {
         item.storageFailedAt = Date.now();
         item.save(function(saveError) {
           if (saveError) {
-            log('error', 'Item controller failed to update item after failure to store it', { error: saveError });
+            log('error', 'Item controller failed to update item after failure to store it', { error: saveError.message });
           }
 
           return done(error);
@@ -865,7 +863,7 @@ module.exports.storeFile = function(user, storage, path, data, done) {
     storeFile
   ], function(error, responseBody) {
     if (error) {
-      log('error', 'Item controller failed to store file', { error: error }); 
+      log('error', 'Item controller failed to store file', { error: error.message, responseBody: responseBody }); 
     }
 
     done(error, responseBody);
