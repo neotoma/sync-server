@@ -82,7 +82,7 @@
     "jsdoc-dev": "grunt jsdoc-dev",
     "jsdoc-rebuild": "grunt jsdoc-rebuild",
     "postinstall": "grunt symlink:modules",
-    "test": "mocha --recursive tests"
+    "test": "grunt test"
   },
   "version": "1.0.1"
 }

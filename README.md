@@ -52,6 +52,7 @@ Once the environment is ready per above, and [Node.js](http://nodejs.org/) with 
 The following commands can be executed to help with development and deployment:
 
 - `npm run dev`: Runs the app and automatically reloads it when code changes are made during development
+- `npm run test`: Runs all tests locally
 - `npm run deploy-all`: Runs all tests locally, deploys environment and certificate file dependencies, deploys the app remotely, and runs `npm install` remotely to ensure the installation of dependencies
 - `npm run deploy-dependencies`: Deploys environment and certificate file dependencies.
 - `npm run deploy-app`: Deploys the app remotely and runs `npm install` remotely to ensure the installation of dependencies

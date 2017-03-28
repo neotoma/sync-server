@@ -10,7 +10,6 @@ var app = require('app');
 var assertions = require('app/lib/assertions');
 var async = require('async');
 var createPopulatedProperties = require('app/lib/createPopulatedProperties');
-var debug = require('debug')('syncServer:tests:routers');
 var fixtures = require('fixtures/models');
 var methods = require('methods');
 var models = require('app/models');

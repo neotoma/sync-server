@@ -89,10 +89,10 @@ module.exports = function(app) {
      * @return {Object} Normalized relationships
      */
     normalizeRelationships: function(relationships) {
-      var relationships = Object.assign({}, relationships);
+      relationships = Object.assign({}, relationships);
 
       // Remove any relationships with empty data properties
-      for (key in relationships) {
+      for (var key in relationships) {
         if (!relationships[key].data) {
           delete relationships[key];
         }
@@ -520,7 +520,7 @@ module.exports = function(app) {
             }
           });
 
-          var attributes = _.mapKeys(attributes, (value, key) => {
+          attributes = _.mapKeys(attributes, (value, key) => {
             return _.kebabCase(key);
           });
 

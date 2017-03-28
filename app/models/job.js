@@ -3,7 +3,6 @@
  * @module
  */
 
-var app = require('app');
 var async = require('async');
 var debug = require('app/lib/debug')('syncServer:job');
 var itemController = require('app/controllers/item');
