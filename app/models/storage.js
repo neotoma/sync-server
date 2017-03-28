@@ -12,7 +12,9 @@ var validateParams = require('app/lib/validateParams');
  * @class Storage
  * @property {string} [clientId] - OAuth 2.0 client ID
  * @property {string} [clientSecret] - OAuth 2.0 client secret
- * @property {string} host - Host URL (e.g. "api-content.dropbox.com")
+ * @property {string} [host] - Host URL (e.g. "api-content.dropbox.com")
+ * @property {boolean} [itemStorageEnabled=false] - Whether storage is enabled for storing items from sources
+ * @property {string} logoGlyphPath - Name (e.g. "Dropbox")
  * @property {string} name - Name (e.g. "Dropbox")
  * @property {string} [passportStrategy] - Strategy for Passport module (e.g. "passport-dropbox-oauth2")
  * @property {string} [itemPutUrlTemplate=https://{$host}{$path}?access_token={$accessToken}] - String template used to generate URLs for PUT requests for items to storage
@@ -20,7 +22,9 @@ var validateParams = require('app/lib/validateParams');
 module.exports = modelFactory.new('Storage', {
   clientId: String,
   clientSecret: String,
-  host: { type: String, required: true },
+  host: String,
+  itemStorageEnabled: { type: Boolean, default: false },
+  logoGlyphPath: String,
   name: { type: String, required: true },
   passportStrategy: String,
   itemPutUrlTemplate: {

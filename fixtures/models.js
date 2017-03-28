@@ -351,6 +351,8 @@ module.exports = {
         clientId: 'storageClientId',
         clientSecret: 'storageClientSecret',
         host: 'storagehost.example.com',
+        itemStorageEnabled: true,
+        logoGlyphPath: '/images/logos/dropbox-glyph.svg',
         itemPutUrlTemplate: 'https://${host}/test-path${path}?foo=bar&access_token=${accessToken}',
         name: 'storageName',
         passportStrategy: 'passport-mocked'
@@ -359,7 +361,9 @@ module.exports = {
     schemaProperties: {
       clientId: String,
       clientSecret: String,
-      host: { type: String, required: true },
+      host: String,
+      itemStorageEnabled: { type: Boolean, default: false },
+      logoGlyphPath: String,
       name: { type: String, required: true },
       passportStrategy: String,
       itemPutUrlTemplate: String

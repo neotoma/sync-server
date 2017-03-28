@@ -1,6 +1,6 @@
 require('dotenvs')('test');
 var assertions = require('app/lib/assertions');
-var jsonapi = require('app/lib/jsonapi');
+var jsonapi = require('app/lib/jsonapi')();
 
 describe('jsonapi', () => {
   assertions.object.hasProperties('jsonapi', jsonapi, [

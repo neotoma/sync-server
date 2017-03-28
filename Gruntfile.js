@@ -120,15 +120,15 @@ module.exports = function(grunt) {
   ]);
 
   grunt.registerTask('deploy-certs', 'Deploy certificates to host directory', [
-    `deploy:${process.env.SYNC_SERVER_DEPLOY_CERTS_DIR}:.certs`
+    `deploy:${process.env.SYNC_SERVER_DEPLOY_HOST_DIR}:${process.env.SYNC_SERVER_DEPLOY_CERTS_DIR}:.certs`
   ]);
 
   grunt.registerTask('deploy-env', 'Deploy environment configuration to host directory', [
-    'deploy:.env-deploy:.env'
+    `deploy:${process.env.SYNC_SERVER_DEPLOY_HOST_DIR}:.env-deploy:.env`
   ]);
 
   grunt.registerTask('deploy-data', 'Deploy data to host directory', [
-    'deploy:data-deploy:data'
+    'deploy:${process.env.SYNC_SERVER_DEPLOY_HOST_DIR}:data-deploy:data'
   ]);
 
   grunt.registerTask('deploy-dependencies', 'Deploy environment config files and certificate files', [
@@ -137,9 +137,9 @@ module.exports = function(grunt) {
   ]);
 
   grunt.registerTask('deploy-app', 'Deploy app to host directory', [
-    'deploy:Gruntfile.js',
-    'deploy:package.json',
-    'deploy:app:app:--delete',
+    'deploy:${process.env.SYNC_SERVER_DEPLOY_HOST_DIR}:Gruntfile.js',
+    'deploy:${process.env.SYNC_SERVER_DEPLOY_HOST_DIR}:package.json',
+    'deploy:${process.env.SYNC_SERVER_DEPLOY_HOST_DIR}:app:app:--delete',
     'force:sshexec:npmInstall'
   ]);
 

@@ -1,3 +1,5 @@
-module.exports = function(app, socket) {
-  return require('./status')(app, socket);
+var status = require('app/socketEvents/status');
+
+module.exports = function(server, socket) {
+  return status(server, socket);
 };

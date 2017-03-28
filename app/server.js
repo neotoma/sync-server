@@ -4,17 +4,19 @@
  */
 
 require('dotenvs')();
-var app = require('./index');
+var app = require('app');
+var debug = require('app/lib/debug')('syncServer:server');
 var fs = require('fs');
 var https = require('https');
-var logger = require('./lib/logger');
-var passportSocketIO = require('./lib/passportSocketIO');
-var socketEvents = require('./socketEvents');
+var logger = require('app/lib/logger');
+var passportSocketIO = require('app/lib/passportSocketIO');
+var path = require('path');
+var socketEvents = require('app/socketEvents');
 var socketIO = require('socket.io');
 
-var keyPath = process.env.SYNC_SERVER_CERTS_DIR + '/key';
-var certPath = process.env.SYNC_SERVER_CERTS_DIR + '/crt';
-var caPath = process.env.SYNC_SERVER_CERTS_DIR + '/ca';
+var caPath = path.resolve(process.env.SYNC_SERVER_CERTS_DIR, 'ca');
+var certPath = path.resolve(process.env.SYNC_SERVER_CERTS_DIR, 'crt');
+var keyPath = path.resolve(process.env.SYNC_SERVER_CERTS_DIR, 'key');
 
 if (!fs.existsSync(caPath)) {
   throw new Error('App server failed to find SSL intermediate CA certificate file');
@@ -32,19 +34,21 @@ var server = https.createServer({
   ca: fs.readFileSync(caPath, 'utf8'),
   cert: fs.readFileSync(certPath, 'utf8'),
   key: fs.readFileSync(keyPath, 'utf8')
-}, app).listen(app.port);
-
-logger.info('App server started listening for HTTPS requests', { port: app.port });
+}, app).listen(app.port, function() {
+  logger.info('App server started listening for HTTPS requests', { port: app.port });
+});
 
 server.io = socketIO(server);
 
 server.io.on('connection', function(socket) {
-  logger.trace('App server opened WebSocket connection');
+  debug('opened socket.io connection');
 
-  var listeners = socketEvents(app, socket);
+  var listeners = socketEvents(server, socket);
+
+  debug('listeners count: %s', Object.keys(listeners).length);
 
   socket.on('disconnect', function() {
-    logger.trace('App server closed WebSocket connection');
+    debug('closed socket.io connection');
 
     Object.keys(listeners).forEach(function(key) {
       app.removeListener(key, listeners[key]);
@@ -52,6 +56,6 @@ server.io.on('connection', function(socket) {
   });
 });
 
-server.io.set('authorization', passportSocketIO);
+server.io.use(passportSocketIO);
 
 logger.info('App server started listening for WebSocket connections');

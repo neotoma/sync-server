@@ -3,6 +3,7 @@
  * @module
  */
 
+var app = require('app');
 var async = require('async');
 var debug = require('app/lib/debug')('syncServer:job');
 var itemController = require('app/controllers/item');
@@ -66,13 +67,13 @@ module.exports = modelFactory.new('Job', {
       case 'storeAllItemsForUserStorageSource':
 
         debug('running job "storeAllItemsForUserStorageSource": user %s, source %s, storage %s', job.user.id, job.source.id, job.storage.id);
-        itemController.storeAllForUserStorageSource(job.user, job.source, job.storage, undefined, done);
+        itemController.storeAllForUserStorageSource(job.user, job.source, job.storage, done);
         break;
 
       case 'storeAllItemsForUserStorageSourceContentType':
 
         debug('running job "storeAllItemsForUserStorageSourceContentType"');
-        itemController.storeAllForUserStorageSourceContentType(job.user, job.source, job.storage, job.contentType, undefined, done);
+        itemController.storeAllForUserStorageSourceContentType(job.user, job.source, job.storage, job.contentType, done);
         break;
 
       default:

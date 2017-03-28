@@ -19,6 +19,7 @@
     "format-json": "^1.0.3",
     "fs": "0.0.2",
     "grunt": "~1.0.1",
+    "grunt-cli": "^1.2.0",
     "grunt-contrib-clean": "^1.0.0",
     "grunt-contrib-symlink": "^1.0.0",
     "grunt-contrib-watch": "^1.0.0",
@@ -71,9 +72,17 @@
   "name": "sync-server",
   "repository": "https://github.com/neotoma/sync-server",
   "scripts": {
-    "test": "mocha --recursive tests",
+    "deploy-all": "grunt deploy-all",
+    "deploy-app": "grunt deploy-app",
+    "deploy-certs": "grunt deploy-certs",
+    "deploy-data": "grunt deploy-data",
+    "deploy-dependencies": "grunt deploy-dependencies",
+    "deploy-env": "grunt deploy-env",
     "dev": "grunt dev",
-    "postinstall": "grunt symlink:modules"
+    "jsdoc-dev": "grunt jsdoc-dev",
+    "jsdoc-rebuild": "grunt jsdoc-rebuild",
+    "postinstall": "grunt symlink:modules",
+    "test": "mocha --recursive tests"
   },
   "version": "1.0.1"
 }

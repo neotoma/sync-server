@@ -71,7 +71,7 @@ module.exports = function(user, source, storage, contentType, done) {
     }, done);
   };
 
-  var setupStorageNock = (userStorageAuth, done) => {
+  var setupStorageNock = (userStorageAuth, done) => {x
     nock.putItems(source, contentType, storage, userStorageAuth, done);
   };
 

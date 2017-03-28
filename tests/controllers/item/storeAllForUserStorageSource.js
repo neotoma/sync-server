@@ -1,4 +1,5 @@
 require('dotenvs')('test');
+
 var app = require('app');
 var assertions = require('app/lib/assertions');
 var controller = require('app/controllers/item');
@@ -13,45 +14,33 @@ describe('itemController.storeAllForUserStorageSource method', function() {
   beforeEach(resetAppSpy);
   
   assertions.function.callbacks.error(controller.storeAllForUserStorageSource, [{
-    when: 'no source parameter provided',
-    params: [wh.one('user'), undefined, wh.one('storage'), app],
-    error: 'Parameter source undefined or null'
-  }, {
     when: 'no user parameter provided',
-    params: [undefined, wh.one('source'), wh.one('storage'), app],
+    params: [undefined, wh.one('source'), wh.one('storage')],
     error: 'Parameter user undefined or null'
   }, {
     when: 'user parameter has no id property',
-    params: [3, wh.one('source'), wh.one('storage'), app],
+    params: [3, wh.one('source'), wh.one('storage')],
     error: 'Parameter user has no id property'
   }, {
     when: 'no source parameter provided',
-    params: [wh.one('user'), undefined, wh.one('storage'), app],
+    params: [wh.one('user'), undefined, wh.one('storage')],
     error: 'Parameter source undefined or null'
   }, {
     when: 'source parameter has no id property',
-    params: [wh.one('user'), 3, wh.one('storage'), app],
+    params: [wh.one('user'), 3, wh.one('storage')],
     error: 'Parameter source has no id property'
   }, {
     when: 'no storage parameter provided',
-    params: [wh.one('user'), wh.one('source'), undefined, app],
+    params: [wh.one('user'), wh.one('source'), undefined],
     error: 'Parameter storage undefined or null'
   }, {
     when: 'storage parameter has no id property',
-    params: [wh.one('user'), wh.one('source'), 3, app],
+    params: [wh.one('user'), wh.one('source'), 3],
     error: 'Parameter storage has no id property'
-  }, {
-    when: 'app has no emit method property',
-    params: [wh.one('user'), wh.one('source'), wh.one('storage'), 3],
-    error: 'Parameter app has no emit property'
-  }, {
-    when: 'emit property of app is not function',
-    params: [wh.one('user'), wh.one('source'), wh.one('storage'), { emit: 3 }],
-    error: 'Property emit of parameter app is not function'
   }]);
 
   var after = function(done) {
-    verifyStoredItems(this.params[1], undefined, this.params[3], undefined, done);
+    verifyStoredItems(this.params[1], undefined, undefined, done);
   };
 
   var before = function(done) {
@@ -61,18 +50,11 @@ describe('itemController.storeAllForUserStorageSource method', function() {
   var timeout = 100000;
   
   assertions.function.callbacks.noError(controller.storeAllForUserStorageSource, [{
-    context: controller,
-    timeout: timeout,
-    when: 'no app parameter provided',
-    params: [wh.one('user'), wh.one('source'), wh.one('storage'), undefined],
+    after: after,
     before: before,
-    after: after
-  }, {
     context: controller,
+    params: [wh.one('user'), wh.one('source'), wh.one('storage')],
     timeout: timeout,
-    when: 'app parameter provided',
-    params: [wh.one('user'), wh.one('source'), wh.one('storage'), app],
-    before: before,
-    after: after
+    when: 'valid parameters provided'
   }]);
 });

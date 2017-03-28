@@ -1,9 +1,10 @@
 var async = require('async');
-var jsonapi = require('app/lib/jsonapi');
 var UserSourceAuth = require('app/models/userSourceAuth');
 var UserStorageAuth = require('app/models/userStorageAuth');
 
 module.exports = function(app) {
+  var jsonapi = require('app/lib/jsonapi')(app);
+
   jsonapi.routeResource(app, 'get', '/sessions', undefined, function(req, res) {
     var data;
     var included = [];
@@ -44,10 +45,12 @@ module.exports = function(app) {
     var populateUsers = function(done) {
       if (req.user) {
         data[0].relationships = {
-          users: [{
-            id: req.user.id,
-            type: 'users'
-          }]
+          users: {
+            data: [{
+              id: req.user.id,
+              type: 'users'
+            }]
+          }
         };
 
         included.push(userObject);

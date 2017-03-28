@@ -129,31 +129,31 @@ module.exports = function(app, Model, document) {
 
   app.get(path.resolve('/', Model.modelType(), document.id, 'auth-callback'), function(req, res) {
     debug.start('auth-callback');
-    passport.authenticate(strategy.name, function(error, user) {
-      debug('authenticate-callback error: %s', error ? error.message : 'n/a');
+    
+    var authenticate = function(done) {
+      passport.authenticate(strategy.name, (error, user) => {
+        done(error, user);
+      })(req, res);
+    };
 
+    var logIn = function(user, done) {
+      req.logIn(user, done);
+    };
+
+    async.waterfall([authenticate, logIn], (error) => {
       if (error) {
-        log('error', 'Auth router failed to authenticate user on callback with Passport', { error: error.message });
+        debug.error('auth-callback error: %s', error.message);
         return res.sendStatus(500);
       }
 
-      req.logIn(user, function(error) {
-        if (error) { 
-          log('error', 'Auth router failed to create session after authentication', { error: error.message });
-          return res.sendStatus(500);
-        } else {
-          log('milestone', 'Auth router created session after authentication', { user: user.id });
-        }
+      if (req.session.authRedirectURL) {
+        var authRedirectURL = req.session.authRedirectURL;
+        delete req.session.authRedirectURL;
 
-        if (req.session.authRedirectURL) {
-          var authRedirectURL = req.session.authRedirectURL;
-          delete req.session.authRedirectURL;
-
-          res.redirect(authRedirectURL);
-        } else {
-          res.redirect('/sessions');
-        }
-      });
-    })(req, res);
+        res.redirect(authRedirectURL);
+      } else {
+        res.redirect('/sessions');
+      }
+    });
   });
 };

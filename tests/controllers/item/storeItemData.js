@@ -15,15 +15,15 @@ describe('itemController.storeItemData method', function() {
 
   assertions.function.callbacks.error(controller.storeItemData, [{
     when: 'no item parameter provided',
-    params: [undefined, wh.jsonData(), app],
+    params: [undefined, wh.jsonData()],
     error: 'Parameter item undefined or null'
   }, {
     when: 'no data parameter provided',
-    params: [wh.one('item'), undefined, app],
+    params: [wh.one('item'), undefined],
     error: 'Parameter data undefined or null'
   }, {
     when: 'item parameter has no user property',
-    params: [wh.one('item'), wh.jsonData(), app],
+    params: [wh.one('item'), wh.jsonData()],
     error: 'Parameter item has no user property',
     before: function(done) {
       this.params[0] = wh.one('item', {
@@ -34,7 +34,7 @@ describe('itemController.storeItemData method', function() {
     }
   }, {
     when: 'item parameter has no storage property',
-    params: [wh.one('item'), wh.jsonData(), app],
+    params: [wh.one('item'), wh.jsonData()],
     error: 'Parameter item has no storage property',
     before: function(done) {
       this.params[0] = wh.one('item', {
@@ -45,7 +45,7 @@ describe('itemController.storeItemData method', function() {
     }
   }, {
     when: 'item parameter has no save property',
-    params: [wh.one('item'), wh.jsonData(), app],
+    params: [wh.one('item'), wh.jsonData()],
     error: 'Parameter item has no save property',
     before: function(done) {
       this.params[0] = wh.mockProperties('item');
@@ -55,8 +55,8 @@ describe('itemController.storeItemData method', function() {
 
   assertions.function.callbacks.noError(controller.storeItemData, [{
     context: controller,
-    when: 'provided item with json data and app',
-    params: [wh.one('item'), wh.jsonData(), app],
+    when: 'provided item with json data',
+    params: [wh.one('item'), wh.jsonData()],
     before: function(done) {
       var storage, userStorageAuth;
 

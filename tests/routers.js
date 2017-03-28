@@ -4,6 +4,8 @@
  */
 
 require('dotenvs')('test');
+
+var _ = require('lodash');
 var app = require('app');
 var assertions = require('app/lib/assertions');
 var async = require('async');
@@ -21,71 +23,70 @@ Object.keys(fixtures).forEach((id) => {
   var modelType = modelFixture.type;
   var properties = modelFixture.mockProperties();
 
-  describe(`${modelName} /${modelType}`, function() {
+  describe(`${modelName} /${_.kebabCase(modelType)}`, function() {
     beforeEach((done) => {
-      debug('beforeEach model %s', id);
       async.series([mongoose.removeAllCollections, createPopulatedProperties(modelFixture, properties)], done);
     });
 
     methods.forEach((method) => {
-      if (modelFixture.jsonapi && modelFixture.jsonapi[method]) {
-        var methodProperties = modelFixture.jsonapi[method].queryConditions ? Object.assign({}, properties, modelFixture.jsonapi[method].queryConditions) : properties;
-        
-        var tests = [{
-          when: 'request body missing data',
-          status: 400,
-          requestBody: {},
-          error: new Error('Data value not provided top-level in body of request')
-        }, {
-          when: 'request body missing data.attributes',
-          status: 400,
-          requestBody: { data: {} },
-          error: new Error('Attributes value not provided within data value of request')
-        }, {
-          when: 'request body missing data.type',
-          status: 400,
-          requestBody: { data: {} },
-          error: new Error('Type value not provided within data value of request')
-        }];
+      if (!modelFixture.jsonapi || !modelFixture.jsonapi[method]) { return; }
+      
+      var methodProperties = modelFixture.jsonapi[method].queryConditions ? Object.assign({}, properties, modelFixture.jsonapi[method].queryConditions) : properties;
+      
+      var tests = [{
+        when: 'request body missing data',
+        status: 400,
+        requestBody: {},
+        error: new Error('Data value not provided top-level in body of request')
+      }, {
+        when: 'request body missing data.attributes',
+        status: 400,
+        requestBody: { data: {} },
+        error: new Error('Attributes value not provided within data value of request')
+      }, {
+        when: 'request body missing data.type',
+        status: 400,
+        requestBody: { data: {} },
+        error: new Error('Type value not provided within data value of request')
+      }];
 
-        if (modelFixture.schemaProperties) {
-          Object.keys(modelFixture.schemaProperties).forEach((schemaPropertyName) => {
-            var schemaProperty = modelFixture.schemaProperties[schemaPropertyName];
+      if (modelFixture.schemaProperties) {
+        Object.keys(modelFixture.schemaProperties).forEach((schemaPropertyName) => {
+          var schemaProperty = modelFixture.schemaProperties[schemaPropertyName];
 
-            if (schemaProperty.required) {
-              tests.push({
-                when: `request body missing data.attributes.${schemaPropertyName}`,
-                status: 400,
-                requestBody: {
-                  data: {
-                    type: Model.modelType(),
-                    attributes: {}
-                  }
-                },
-                error: new Error(`Path \`${schemaPropertyName}\` is required.`)
-              });
-            }
-          });
-        }
-
-        tests.push({
-          when: 'request body contains valid attributes',
-          status: (method === 'post' ? 201 : 200),
-          requestBody: {
-            data: {
-              type: Model.modelType(),
-              attributes: methodProperties
-            }
+          if (schemaProperty.required) {
+            tests.push({
+              when: `request body missing data.attributes.${schemaPropertyName}`,
+              status: 400,
+              requestBody: {
+                data: {
+                  type: Model.modelType(),
+                  attributes: {}
+                }
+              },
+              error: new Error(`Path \`${schemaPropertyName}\` is required.`)
+            });
           }
         });
+      }
 
-        if (modelFixture.jsonapi[method] !== 'public' && modelFixture.jsonapi[method].allowed !== 'public') {
-          return;
+      tests.push({
+        when: 'request body contains valid attributes',
+        status: (method === 'post' ? 201 : 200),
+        requestBody: {
+          data: {
+            type: Model.modelType(),
+            attributes: methodProperties
+          }
         }
+      });
 
-        if (['patch', 'post'].indexOf(method) > -1) {
-          assertions.route(app, Model, method, tests);
-        }
+      if (modelFixture.jsonapi[method] !== 'public' && modelFixture.jsonapi[method].allowed !== 'public') {
+        return;
+      }
+
+      if (['patch', 'post'].indexOf(method) > -1) {
+        assertions.route(app, Model, method, tests);
       }
 
       if (id === 'contactVerificationRequest') {

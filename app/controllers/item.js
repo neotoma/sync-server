@@ -16,6 +16,7 @@
  */
 
 var _ = require('lodash');
+var app = require('app');
 var async = require('async');
 var debug = require('app/lib/debug')('syncServer:itemController');
 var Item = require('app/models/item');
@@ -316,10 +317,9 @@ module.exports.storagePath = function(item, data, done) {
  * @param {User} user - User for which to retrieve items from source and store them in storage.
  * @param {Source} source - Source from which to retrieve items.
  * @param {Storage} storage - Storage within which to store items.
- * @param {Object} [app] – App object on which to emit item storage events.
  * @param {callback} done
  */
-module.exports.storeAllForUserStorageSource = function(user, source, storage, app, done) {
+module.exports.storeAllForUserStorageSource = function(user, source, storage, done) {
   var log = logger.scopedLog();
 
   var validate = function(done) {
@@ -329,8 +329,6 @@ module.exports.storeAllForUserStorageSource = function(user, source, storage, ap
       name: 'source', variable: source, required: true, requiredProperties: ['id']
     }, {
       name: 'storage', variable: storage, required: true, requiredProperties: ['id']
-    }, {
-      name: 'app', variable: app, requiredProperties: [{ name: 'emit', type: 'function' }]
     }], done);
   };
 
@@ -347,7 +345,7 @@ module.exports.storeAllForUserStorageSource = function(user, source, storage, ap
   };
 
   var storeAllForUserStorageSourceContentType = function(contentType, done) {
-    module.exports.storeAllForUserStorageSourceContentType(user, source, storage, contentType, app, done);
+    module.exports.storeAllForUserStorageSourceContentType(user, source, storage, contentType, done);
   };
 
   var storeAllItems = function(done) {
@@ -374,10 +372,9 @@ module.exports.storeAllForUserStorageSource = function(user, source, storage, ap
  * @param {Source} source - Source from which to retrieve items.
  * @param {Storage} storage - Storage within which to store items.
  * @param {ContentType} contentType - ContentType of which to retrieve items.
- * @param {Object} [app] – App object on which to emit item storage events.
  * @param {callback} done
  */
-module.exports.storeAllForUserStorageSourceContentType = function(user, source, storage, contentType, app, done) {
+module.exports.storeAllForUserStorageSourceContentType = function(user, source, storage, contentType, done) {
   var log = logger.scopedLog();
 
   var validate = function(done) {
@@ -389,8 +386,6 @@ module.exports.storeAllForUserStorageSourceContentType = function(user, source, 
       name: 'storage', variable: storage, required: true, requiredProperties: ['id']
     }, {
       name: 'contentType', variable: contentType, required: true, requiredProperties: ['id']
-    }, {
-      name: 'app', variable: app, requiredProperties: [{ name: 'emit', type: 'function' }]
     }], done);
   };
 
@@ -415,7 +410,7 @@ module.exports.storeAllForUserStorageSourceContentType = function(user, source, 
         }
       } else {
         if (pagination) {
-          module.exports.storeItemsPage(user, source, storage, contentType, pagination, app, myself);
+          module.exports.storeItemsPage(user, source, storage, contentType, pagination, myself);
         } else if (done) {
           done();
         }
@@ -447,10 +442,9 @@ module.exports.storeAllForUserStorageSourceContentType = function(user, source, 
  * @param {Storage} storage - Storage within which to store items.
  * @param {ContentType} contentType - ContentType of which to retrieve items.
  * @param {Object} pagination – Object containing pagination information.
- * @param {Object} [app] – App object on which to emit item storage events.
  * @param {callback} done
  */
-module.exports.storeItemsPage = function(user, source, storage, contentType, pagination, app, done) {
+module.exports.storeItemsPage = function(user, source, storage, contentType, pagination, done) {
   var log = logger.scopedLog();
   var ids, page, userSourceAuth, status;
 
@@ -465,8 +459,6 @@ module.exports.storeItemsPage = function(user, source, storage, contentType, pag
       name: 'contentType', variable: contentType, required: true, requiredProperties: ['id']
     }, {
       name: 'pagination', variable: pagination, required: true
-    }, {
-      name: 'app', variable: app, requiredProperties: [{ name: 'emit', type: 'function' }]
     }], done);
   };
 
@@ -555,7 +547,7 @@ module.exports.storeItemsPage = function(user, source, storage, contentType, pag
   var storeItemsData = function(itemPairs, done) {
     async.eachSeries(itemPairs, function(itemPair, done) {
       if (!itemPair.item.storageVerifiedAt) {
-        module.exports.storeItemData(itemPair.item, itemPair.data, app, done);
+        module.exports.storeItemData(itemPair.item, itemPair.data, done);
       } else {
         done();
       }
@@ -658,10 +650,9 @@ module.exports.persistItemDataObject = function(itemDataObject, relationships, d
  * Update storageBytes and storagePath if storage succeeds.
  * @param {Item} item - Item object.
  * @param {Object} data - Raw item data from source.
- * @param {Object} app – App object on which to emit item storage events (optional).
  * @param {callback} done
  */
-module.exports.storeItemData = function(item, data, app, done) {
+module.exports.storeItemData = function(item, data, done) {
   var log = logger.scopedLog();
 
   var validate = function(done) {
@@ -724,6 +715,9 @@ module.exports.storeItemData = function(item, data, app, done) {
   var notifyApp = function(done) {
     if (app && typeof app.emit === 'function') {
       app.emit('storedItemData', item);
+      debug('app notified of storedItemData');
+    } else {
+      debug('app NOT notified of storedItemData');
     }
 
     done();

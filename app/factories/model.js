@@ -19,7 +19,6 @@ module.exports = {
    * @returns {Object} Mongoose model
    */
   new: function(name, properties, statics, methods, schemaMods) {
-
     // Add default definition to properties with references and load reference schemas
     Object.keys(properties).forEach(function(key) {
       var modifiedProperty = (property) => {

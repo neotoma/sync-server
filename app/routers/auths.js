@@ -12,6 +12,7 @@ module.exports = function(app, Model) {
   Model.find({
     clientId: { $ne: null },
     clientSecret: { $ne: null },
+    itemStorageEnabled: true,
     passportStrategy: { $ne: null }
   }, (error, documents) => {
     documents.forEach((document) => {

@@ -1,10 +1,11 @@
+var app = require('app');
 var assert = require('assert');
 var async = require('async');
 var debug = require('debug')('syncServer:test:verifyStoredItems');
 var Item = require('app/models/item');
 var wh = require('app/lib/warehouse');
 
-module.exports = function(source, contentType, app, totalPages, done) {
+module.exports = function(source, contentType, totalPages, done) {
   debug('verifyStoredItems totalPages: %s', totalPages);
 
   var contentTypes = contentType ? [contentType] : source.contentTypes;

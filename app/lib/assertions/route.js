@@ -26,14 +26,14 @@ var responseDocumentHasError = function(responseDocument, error) {
 module.exports = function(app, Model, method, tests) {
   tests.forEach((test) => {
     var description = _.toUpper(method) + ' requests to ' + Model.modelName;
-    var Test = supertest(app)[method]('/' + Model.modelType());
+    var Test = supertest(app)[method]('/' + _.kebabCase(Model.modelType()));
 
     if (test.requestBody) {
       Test.send(test.requestBody);
     }
 
     if (test.status) {
-      description += ' respond with status ' + test.status;
+      description += ' responds with status ' + test.status;
       Test.expect(test.status);
     }
 

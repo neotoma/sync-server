@@ -2,7 +2,7 @@ var cookieParser = require('cookie-parser');
 var passportSocketIO = require('passport.socketio');
 var sessionConfig = require('app/config/session');
 
-passportSocketIO.authorize({
+module.exports = passportSocketIO.authorize({
   key: sessionConfig.key,
   secret: sessionConfig.secret,
   store: sessionConfig.store,
