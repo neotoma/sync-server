@@ -84,6 +84,6 @@
   },
   "version": "1.0.1",
   "devDependencies": {
-    "grunt-deploy-files": "file:/Users/markhendrickson/repos/grunt-deploy-files"
+    "grunt-deploy-files": "1.0.5"
   }
 }
