@@ -3,7 +3,7 @@
  * @module
  */
 
-require('dotenvs')();
+var env = require('dotenvs')(null, true);
 var loadGruntTasks = require('load-grunt-tasks');
 
 module.exports = function(grunt) {
@@ -12,6 +12,37 @@ module.exports = function(grunt) {
   grunt.initConfig({
     clean: {
       jsdoc: 'docs'
+    },
+    'deploy-files': {
+      options: {
+        destDir: env.SYNC_SERVER_DEPLOY_HOST_DIR,
+        destHost: env.SYNC_SERVER_DEPLOY_HOST,
+        destUser: env.SYNC_SERVER_DEPLOY_HOST_USER,
+        srcDir: __dirname
+      },
+      app: {
+        args: '--delete',
+        src: 'app',
+        systemdService: env.SYNC_SERVER_DEPLOY_SYSTEMD_SERVICE
+      },
+      certs: {
+        src: env.SYNC_SERVER_DEPLOY_CERTS_DIR,
+        dest: '.certs'
+      },
+      data: {
+        src: 'data-deploy',
+        dest: 'data'
+      },
+      env: {
+        src: '.env-deploy',
+        dest: '.env'
+      },
+      gruntfile: {
+        src: 'Gruntfile.js'
+      },
+      package: {
+        src: 'package.json'
+      }
     },
     eslint: {
       options: {
@@ -41,14 +72,6 @@ module.exports = function(grunt) {
         script: 'app/server.js'
       }
     },
-    rsync: {
-      deploy: {
-        options: {
-          host: process.env.SYNC_SERVER_DEPLOY_HOST_USERNAME + '@' + process.env.SYNC_SERVER_DEPLOY_HOST,
-          recursive: true
-        }
-      }
-    },
     symlink: {
       modules: {
         files: [{
@@ -61,22 +84,13 @@ module.exports = function(grunt) {
     },
     sshexec: {
       options: {
-        agent: process.env.SSH_AUTH_SOCK,
-        host: process.env.SYNC_SERVER_DEPLOY_HOST,
-        username: process.env.SYNC_SERVER_DEPLOY_HOST_USERNAME,
+        agent: env.SSH_AUTH_SOCK,
+        host: env.SYNC_SERVER_DEPLOY_HOST,
+        username: env.SYNC_SERVER_DEPLOY_HOST_USER,
         port: 22
       },
-      npmInstall: {
-        command: 'cd ' + process.env.SYNC_SERVER_DEPLOY_HOST_DIR + ' && npm install'
-      },
-      foreverRestart: {
-        command: 'cd ' + process.env.SYNC_SERVER_DEPLOY_HOST_DIR + ' && forever restart server.js || forever start server.js'
-      },
-      systemdRestart: {
-        command: 'sudo systemctl restart syncserver || sudo systemctl start syncserver'
-      },
       repopulateCollections: {
-        command: 'cd ' + process.env.SYNC_SERVER_DEPLOY_HOST_DIR + ' && grunt repopulate-collections'
+        command: 'cd ' + env.SYNC_SERVER_DEPLOY_HOST_DIR + ' && grunt repopulate-collections'
       }
     },
     watch: {
@@ -97,65 +111,42 @@ module.exports = function(grunt) {
   loadGruntTasks(grunt);
   grunt.task.loadTasks('app/lib/tasks');
 
-  grunt.registerTask('jsdoc-rebuild', 'Delete and regenerate docs', [
+  grunt.registerTask('dev', 'Run app locally and reload upon changes.', [
+    'nodemon:dev'
+  ]);
+
+  grunt.registerTask('dev-jsdoc', 'Regenerate JSDoc documentation upon changes.', [
+    'rebuild-jsdoc',
+    'watch:jsdoc'
+  ]);
+
+  grunt.registerTask('deploy', 'Deploy all dependencies, app files and data to host directory.', [
+    'deploy-dependencies',
+    'deploy-app',
+    'deploy-files:data'
+  ]);
+
+  grunt.registerTask('deploy-dependencies', 'Deploy environment config and certificate files to host directory.', [
+    'deploy-files:certs',
+    'deploy-files:env'
+  ]);
+
+  grunt.registerTask('deploy-app', 'Deploy app files to host directory.', [
+    'deploy-files:gruntfile',
+    'deploy-files:package',
+    'deploy-files:app'
+  ]);
+
+  grunt.registerTask('rebuild-jsdoc', 'Delete and regenerate JSDoc documentation.', [
     'clean:jsdoc',
     'jsdoc:build'
   ]);
 
-  grunt.registerTask('jsdoc-dev', 'Regenerate docs upon changes', [
-    'jsdoc-rebuild',
-    'watch:jsdoc'
-  ]);
-
-  grunt.registerTask('dev', 'Run app locally and reload upon changes', [
-    'jsdoc-rebuild',
-    'nodemon:dev'
-  ]);
-
-  grunt.registerTask('deploy-all', 'Run tests and deploy all files', [
-    'test',
-    'deploy-dependencies',
-    'deploy-app',
-    'deploy-data'
-  ]);
-
-  grunt.registerTask('deploy-certs', 'Deploy certificates to host directory', [
-    `deploy:${process.env.SYNC_SERVER_DEPLOY_HOST_DIR}:${process.env.SYNC_SERVER_DEPLOY_CERTS_DIR}:.certs`
-  ]);
-
-  grunt.registerTask('deploy-env', 'Deploy environment configuration to host directory', [
-    `deploy:${process.env.SYNC_SERVER_DEPLOY_HOST_DIR}:.env-deploy:.env`
-  ]);
-
-  grunt.registerTask('deploy-data', 'Deploy data to host directory', [
-    'deploy:${process.env.SYNC_SERVER_DEPLOY_HOST_DIR}:data-deploy:data'
-  ]);
-
-  grunt.registerTask('deploy-dependencies', 'Deploy environment config files and certificate files', [
-    'deploy-certs',
-    'deploy-env'
-  ]);
-
-  grunt.registerTask('deploy-app', 'Deploy app to host directory', [
-    'deploy:${process.env.SYNC_SERVER_DEPLOY_HOST_DIR}:Gruntfile.js',
-    'deploy:${process.env.SYNC_SERVER_DEPLOY_HOST_DIR}:package.json',
-    'deploy:${process.env.SYNC_SERVER_DEPLOY_HOST_DIR}:app:app:--delete',
-    'force:sshexec:npmInstall'
-  ]);
-
-  grunt.registerTask('restart-forever', 'Start/restart app remotely with forever', [
-    'sshexec:foreverRestart'
-  ]);
-
-  grunt.registerTask('restart-systemd', 'Start/restart app remotely with systemd', [
-    'sshexec:systemdRestart'
-  ]);
-
-  grunt.registerTask('remote-repopulate-collections', 'Remove database collections and repopulate them with resourceObjects stored in files', [
+  grunt.registerTask('remote-repopulate-collections', 'Remove database collections and repopulate them with resourceObjects stored in files.', [
     'sshexec:repopulateCollections'
   ]);
 
-  grunt.registerTask('test', 'Test code', [
+  grunt.registerTask('test', 'Run tests against app.', [
     'eslint',
     'mochaTest:tests'
   ]);

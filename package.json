@@ -9,7 +9,7 @@
     "cookie-parser": "^1.4.3",
     "cors": "^2.8.1",
     "debug": "^2.6.0",
-    "dotenvs": "^1.0.0",
+    "dotenvs": "1.0.2",
     "emoji-strip": "^1.0.0",
     "es6-template-strings": "^2.0.1",
     "eslint": "^3.17.1",
@@ -29,8 +29,6 @@
     "grunt-mocha-test": "^0.13.2",
     "grunt-nodemon": "~0.4.2",
     "grunt-npm-install": "^0.3.1",
-    "grunt-rsync": "^2.0.1",
-    "grunt-ssh": "^0.12.1",
     "jsdoc": "^3.4.3",
     "load-grunt-tasks": "^3.1.0",
     "lodash": "^4.17.4",
@@ -72,17 +70,20 @@
   "name": "sync-server",
   "repository": "https://github.com/neotoma/sync-server",
   "scripts": {
-    "deploy-all": "grunt deploy-all",
+    "deploy": "grunt deploy",
     "deploy-app": "grunt deploy-app",
-    "deploy-certs": "grunt deploy-certs",
-    "deploy-data": "grunt deploy-data",
+    "deploy-certs": "grunt deploy-files:certs",
+    "deploy-data": "grunt deploy-files:data",
     "deploy-dependencies": "grunt deploy-dependencies",
-    "deploy-env": "grunt deploy-env",
+    "deploy-env": "grunt deploy-files:env",
     "dev": "grunt dev",
-    "jsdoc-dev": "grunt jsdoc-dev",
-    "jsdoc-rebuild": "grunt jsdoc-rebuild",
+    "dev-jsdoc": "grunt dev-jsdoc",
+    "rebuild-jsdoc": "grunt rebuild-jsdoc",
     "postinstall": "grunt symlink:modules",
     "test": "grunt test"
   },
-  "version": "1.0.1"
+  "version": "1.0.1",
+  "devDependencies": {
+    "grunt-deploy-files": "file:/Users/markhendrickson/repos/grunt-deploy-files"
+  }
 }

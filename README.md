@@ -22,6 +22,7 @@ The code requires several environment variables to run or deploy the app. The fo
 - `SYNC_SERVER_DEPLOY_CERTS_DIR`: Local system path to a directory with the SSL certificate files `key`, `crt` and `ca` needed by the app to serve HTTPs requests *remotely on the deployment server* (e.g. `/var/www/sync-server/.certs-deploy`; required to deploy app). This directory will be copied to `.certs` within the base directory of the app on the deployment server so the environment variable `SYNC_SERVER_CERTS_DIR` must be set to `.certs` in the deployment environment unless this directory is later moved.
 - `SYNC_SERVER_DEPLOY_HOST`: Host address for the remote deployment server (e.g. `example.com`; required to deploy app)
 - `SYNC_SERVER_DEPLOY_HOST_DIR`: Remote system path to app directory on deployment server (e.g. `/var/www/sync-server`; required to deploy app)
+- `SYNC_SERVER_DEPLOY_SYSTEMD_SERVICE`: Name of systemd service on host that should be restarted or started upon app deployment (e.g. `syncserver`; optional to deploy app)
 - `SSH_AUTH_SOCK`: Socket used by system for SSH agent forwarding (required to deploy app)
 - `SYNC_SERVER_MONGODB_DATABASE`: Name of a [MongoDB](http://www.mongodb.org/) database (e.g. `sync_server`)
 - `SYNC_SERVER_MONGODB_HOST`: Host address for a MongoDB service (e.g. `127.0.0.1`; required to run app)
@@ -56,7 +57,3 @@ The following commands can be executed to help with development and deployment:
 - `npm run deploy-all`: Runs all tests locally, deploys environment and certificate file dependencies, deploys the app remotely, and runs `npm install` remotely to ensure the installation of dependencies
 - `npm run deploy-dependencies`: Deploys environment and certificate file dependencies.
 - `npm run deploy-app`: Deploys the app remotely and runs `npm install` remotely to ensure the installation of dependencies
-
-If you add `restart-forever` to any of the deployment scripts (e.g. `grunt deploy-all restart-forever`), [forever](https://github.com/foreverjs/forever) will be used to start or restart the app remotely post-deployment. Ensure that Node with NPM and forever are installed remotely before appending this script.
-
-If you add `restart-systemd` to any of the deployment scripts (e.g. `grunt deploy-all restart-systemd`), [systemd](https://www.digitalocean.com/community/tutorials/systemd-essentials-working-with-services-units-and-the-journal) will be used to start or restart the app remotely post-deployment. Ensure that Node and systemd with a service for the app called `syncserver` are installed remotely before running this script.
