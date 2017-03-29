@@ -9,7 +9,7 @@
     "cookie-parser": "^1.4.3",
     "cors": "^2.8.1",
     "debug": "^2.6.0",
-    "dotenvs": "1.0.4",
+    "dotenvs": "1.0.5",
     "emoji-strip": "^1.0.0",
     "es6-template-strings": "^2.0.1",
     "eslint": "^3.17.1",
