@@ -7,6 +7,9 @@ var colors = require('colors/safe');
 var Debug = require('debug');
 
 module.exports = function(name) {
+  // Ensure env variable is loaded even if debug module was previously loaded with other value
+  Debug.enable(process.env.DEBUG);
+
   var debug = Debug(name);
 
   debug.style = function(styles, args) {
