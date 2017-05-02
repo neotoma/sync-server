@@ -80,6 +80,7 @@
     "dev-jsdoc": "grunt dev-jsdoc",
     "rebuild-jsdoc": "grunt rebuild-jsdoc",
     "postinstall": "grunt symlink:modules",
+    "repopulate-collections": "grunt repopulate-collections",
     "test": "grunt test"
   },
   "version": "1.0.1",

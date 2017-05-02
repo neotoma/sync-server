@@ -430,7 +430,6 @@ module.exports = function(app) {
 
     /**
      * Establish middleware that generates routes conformant to the JSON API specification for app and Mongoose models
-     * @param {Object} app - Express app
      */
     routeModelResources: function() {
       /**
