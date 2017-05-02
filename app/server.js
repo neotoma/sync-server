@@ -3,7 +3,7 @@
  * @module
  */
 
-require('dotenvs')();
+require('park-ranger')();
 var app = require('app');
 var debug = require('app/lib/debug')('syncServer:server');
 var fs = require('fs');

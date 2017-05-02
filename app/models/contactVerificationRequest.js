@@ -75,6 +75,7 @@ module.exports = ContactVerificationRequest = modelFactory.new('ContactVerificat
   verified: { type: Boolean, default: false }
 }, {
   jsonapi: {
+    filteredProperties: ['code'],
     get: 'admin',
     patch: {
       allowed: 'public',

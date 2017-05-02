@@ -3,7 +3,7 @@
  * @module
  */
 
-var env = require('dotenvs')(null, true);
+var ranger = require('park-ranger')(true);
 var loadGruntTasks = require('load-grunt-tasks');
 
 module.exports = function(grunt) {
@@ -15,18 +15,18 @@ module.exports = function(grunt) {
     },
     'deploy-files': {
       options: {
-        destDir: env.SYNC_SERVER_DEPLOY_HOST_DIR,
-        destHost: env.SYNC_SERVER_DEPLOY_HOST,
-        destUser: env.SYNC_SERVER_DEPLOY_HOST_USER,
+        destDir: ranger.env.SYNC_SERVER_DEPLOY_HOST_DIR,
+        destHost: ranger.env.SYNC_SERVER_DEPLOY_HOST,
+        destUser: ranger.env.SYNC_SERVER_DEPLOY_HOST_USER,
         srcDir: __dirname
       },
       app: {
         args: '--delete',
         src: 'app',
-        systemdService: env.SYNC_SERVER_DEPLOY_SYSTEMD_SERVICE
+        systemdService: ranger.env.SYNC_SERVER_DEPLOY_SYSTEMD_SERVICE
       },
       certs: {
-        src: env.SYNC_SERVER_DEPLOY_CERTS_DIR,
+        src: ranger.env.SYNC_SERVER_DEPLOY_CERTS_DIR,
         dest: '.certs'
       },
       data: {
@@ -54,6 +54,11 @@ module.exports = function(grunt) {
         '!docs/**/*.js',
         '!node_modules/**/*.js'
       ]
+    },
+    env: {
+      test: {
+        ENV_NAME: 'test'
+      }
     },
     jsdoc: {
       build: {
@@ -84,13 +89,13 @@ module.exports = function(grunt) {
     },
     sshexec: {
       options: {
-        agent: env.SSH_AUTH_SOCK,
-        host: env.SYNC_SERVER_DEPLOY_HOST,
-        username: env.SYNC_SERVER_DEPLOY_HOST_USER,
+        agent: ranger.env.SSH_AUTH_SOCK,
+        host: ranger.env.SYNC_SERVER_DEPLOY_HOST,
+        username: ranger.env.SYNC_SERVER_DEPLOY_HOST_USER,
         port: 22
       },
       repopulateCollections: {
-        command: 'cd ' + env.SYNC_SERVER_DEPLOY_HOST_DIR + ' && grunt repopulate-collections'
+        command: 'cd ' + ranger.env.SYNC_SERVER_DEPLOY_HOST_DIR + ' && grunt repopulate-collections'
       }
     },
     watch: {
@@ -147,6 +152,7 @@ module.exports = function(grunt) {
   ]);
 
   grunt.registerTask('test', 'Run tests against app.', [
+    'env:test',
     'eslint',
     'mochaTest:tests'
   ]);

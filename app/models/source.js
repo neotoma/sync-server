@@ -66,7 +66,7 @@ module.exports = modelFactory.new('Source', {
 }, {
   jsonapi: {
     delete: 'admin',
-    filterProperties: ['clientId', 'clientSecret'],
+    filteredProperties: ['clientId', 'clientSecret'],
     get: 'public',
     patch: 'admin',
     post: 'admin'

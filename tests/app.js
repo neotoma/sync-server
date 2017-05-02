@@ -3,7 +3,7 @@
  * @module
  */
 
-require('dotenvs')('test');
+require('park-ranger')();
 var app = require('app');
 var assert = require('assert');
 

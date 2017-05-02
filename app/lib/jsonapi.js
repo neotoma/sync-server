@@ -523,8 +523,8 @@ module.exports = function(app) {
             return _.kebabCase(key);
           });
 
-          if (Model.jsonapi.filterProperties) {
-            Model.jsonapi.filterProperties.forEach((name) => {
+          if (Model.jsonapi.filteredProperties) {
+            Model.jsonapi.filteredProperties.forEach((name) => {
               delete attributes[name];
             });
           }

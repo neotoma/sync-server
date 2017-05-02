@@ -1,4 +1,4 @@
-require('dotenvs')('test');
+require('park-ranger')();
 
 var app = require('app');
 var assertions = require('app/lib/assertions');

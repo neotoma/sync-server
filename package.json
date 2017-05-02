@@ -9,7 +9,6 @@
     "cookie-parser": "^1.4.3",
     "cors": "^2.8.1",
     "debug": "^2.6.0",
-    "dotenvs": "1.0.5",
     "emoji-strip": "^1.0.0",
     "es6-template-strings": "^2.0.1",
     "eslint": "^3.17.1",
@@ -45,6 +44,7 @@
     "nodemailer": "^2.6.4",
     "nodemailer-sendgrid-transport": "^0.2.0",
     "nodemailer-stub-transport": "^1.1.0",
+    "park-ranger": "1.0.10",
     "passport": "~0.3.2",
     "passport-dropbox-oauth2": "~1.1.0",
     "passport-facebook": "^2.1.1",
@@ -85,6 +85,7 @@
   },
   "version": "1.0.1",
   "devDependencies": {
-    "grunt-deploy-files": "1.0.5"
+    "grunt-deploy-files": "1.0.5",
+    "grunt-env": "^0.4.4"
   }
 }

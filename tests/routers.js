@@ -3,7 +3,7 @@
  * @module
  */
 
-require('dotenvs')('test');
+require('park-ranger')();
 
 var _ = require('lodash');
 var app = require('app');
@@ -109,6 +109,8 @@ Object.keys(fixtures).forEach((id) => {
     it(`public requests to ${modelName} routes restricted to user respond with status 403`);
     it(`user requests to ${modelName} routes restricted to user respond with status 2xx`);
     it(`admin requests to ${modelName} routes restricted to user respond with status 2xx`);
+
+    it(`responses to requests for ${modelName} do not contain filteredProperties`);
     
     it(`POST requests to ${modelName} respond with status 400 when request body contains invalid attribute`);
     it(`PATCH requests to ${modelName} respond with status 400 when request body contains invalid attribute`);

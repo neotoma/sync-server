@@ -1,4 +1,4 @@
-require('dotenvs')('test');
+require('park-ranger')();
 var _ = require('lodash');
 var assertions = require('app/lib/assertions');
 var controller = require('app/controllers/item');
