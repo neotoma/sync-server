@@ -3,7 +3,7 @@
  * @module
  */
 
-var ranger = require('park-ranger')(true);
+var ranger = require('park-ranger')();
 var loadGruntTasks = require('load-grunt-tasks');
 
 module.exports = function(grunt) {
@@ -12,37 +12,6 @@ module.exports = function(grunt) {
   grunt.initConfig({
     clean: {
       jsdoc: 'docs'
-    },
-    'deploy-files': {
-      options: {
-        destDir: ranger.env.SYNC_SERVER_DEPLOY_HOST_DIR,
-        destHost: ranger.env.SYNC_SERVER_DEPLOY_HOST,
-        destUser: ranger.env.SYNC_SERVER_DEPLOY_HOST_USER,
-        srcDir: __dirname
-      },
-      app: {
-        args: '--delete',
-        src: 'app',
-        systemdService: ranger.env.SYNC_SERVER_DEPLOY_SYSTEMD_SERVICE
-      },
-      certs: {
-        src: ranger.env.SYNC_SERVER_DEPLOY_CERTS_DIR,
-        dest: '.certs'
-      },
-      data: {
-        src: 'data-deploy',
-        dest: 'data'
-      },
-      env: {
-        src: '.env-deploy',
-        dest: '.env'
-      },
-      gruntfile: {
-        src: 'Gruntfile.js'
-      },
-      package: {
-        src: 'package.json'
-      }
     },
     eslint: {
       options: {
@@ -123,23 +92,6 @@ module.exports = function(grunt) {
   grunt.registerTask('dev-jsdoc', 'Regenerate JSDoc documentation upon changes.', [
     'rebuild-jsdoc',
     'watch:jsdoc'
-  ]);
-
-  grunt.registerTask('deploy', 'Deploy all dependencies, app files and data to host directory.', [
-    'deploy-dependencies',
-    'deploy-app',
-    'deploy-files:data'
-  ]);
-
-  grunt.registerTask('deploy-dependencies', 'Deploy environment config and certificate files to host directory.', [
-    'deploy-files:certs',
-    'deploy-files:env'
-  ]);
-
-  grunt.registerTask('deploy-app', 'Deploy app files to host directory.', [
-    'deploy-files:gruntfile',
-    'deploy-files:package',
-    'deploy-files:app'
   ]);
 
   grunt.registerTask('rebuild-jsdoc', 'Delete and regenerate JSDoc documentation.', [

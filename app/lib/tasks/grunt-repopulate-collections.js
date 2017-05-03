@@ -17,7 +17,7 @@ module.exports = function(grunt) {
    * @param {string} [args] – rsync arguments
    */
   grunt.registerTask('repopulate-collections', 'Remove database collections and repopulate them with resourceObjects stored in files', function() {  
-    var ranger = require('park-ranger')();
+    require('park-ranger')();
     var debug = require('app/lib/debug')('syncServer:loadData');
     var models = require('app/models');
     var mongoose = require('app/lib/mongoose');

@@ -44,7 +44,7 @@
     "nodemailer": "^2.6.4",
     "nodemailer-sendgrid-transport": "^0.2.0",
     "nodemailer-stub-transport": "^1.1.0",
-    "park-ranger": "1.0.10",
+    "park-ranger": "1.0.11",
     "passport": "~0.3.2",
     "passport-dropbox-oauth2": "~1.1.0",
     "passport-facebook": "^2.1.1",
@@ -70,22 +70,20 @@
   "name": "sync-server",
   "repository": "https://github.com/neotoma/sync-server",
   "scripts": {
-    "deploy": "grunt deploy",
-    "deploy-app": "grunt deploy-app",
-    "deploy-certs": "grunt deploy-files:certs",
-    "deploy-data": "grunt deploy-files:data",
-    "deploy-dependencies": "grunt deploy-dependencies",
-    "deploy-env": "grunt deploy-files:env",
     "dev": "grunt dev",
     "dev-jsdoc": "grunt dev-jsdoc",
     "rebuild-jsdoc": "grunt rebuild-jsdoc",
     "postinstall": "grunt symlink:modules",
     "repopulate-collections": "grunt repopulate-collections",
-    "test": "grunt test"
+    "test": "grunt test",
+    "deploy-all": "grunt hoist-deploy-all",
+    "deploy-app": "grunt hoist-deploy-app",
+    "deploy-dependencies": "grunt hoist-deploy-dependencies"
   },
   "version": "1.0.1",
   "devDependencies": {
     "grunt-deploy-files": "1.0.5",
-    "grunt-env": "^0.4.4"
+    "grunt-env": "^0.4.4",
+    "grunt-hoist": "1.0.3"
   }
 }

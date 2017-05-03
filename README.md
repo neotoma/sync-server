@@ -9,9 +9,9 @@ This repository contains the source code for an app that synchronizes data from 
 
 See also documentation for [the JavaScript source code](http://neotoma.github.io/sync-server/) or [the Neotoma project](https://github.com/neotoma/documentation).
 
-## Setting up the environment
+## Setup
 
-The code requires several environment variables to run or deploy the app. The following environment variables can be declared by adding a file named `.env` (in [INI format](https://en.wikipedia.org/wiki/INI_file)) to the base directory, assuming they're not declared elsewhere in the system already. Such a file will be ignored by Git.
+SSL certificates and the following environment variables are managed by [Park Ranger](https://github.com/markmhx/park-ranger):
 
 - `SYNC_SERVER_DIR`: Local path to app base directory (e.g. `/var/www/sync-server'; required to run tasks)
 - `SYNC_SERVER_HOST`: Host address for the app (e.g. `127.0.0.1`; required to run app)
@@ -38,11 +38,11 @@ The code requires several environment variables to run or deploy the app. The fo
 - `SYNC_SERVER_SENDGRID_API_KEY`: API key for SendGrid account for delivering email (optional to run app)
 - `SYNC_SERVER_MAILER_RECIPIENT_EMAIL`: Email address to which to restrict all email delivery for testing purposes (optional to run app)
 
-Note that you can create directories called `.certs` and `.certs-deploy` within the base directory to satisfy the `SYNC_SERVER_CERTS_DIR` and `SYNC_SERVER_DEPLOY_CERTS_DIR` variables and they will be ignored by Git.
+Tests will use Park Ranger to establish environment variables available for the "test" environment after loading those for whatever environment initially indicated upon execution. 
 
-If you intend to deploy the server to another system using scripts within the "Developing and deploying the server" section below, you can also create a `.env-deploy` file in the base directory, one that will be ignored by Git and used upon deployment to create an `.env` file remotely, thereby setting environment variables on the deployment server.
+Be sure to set any of the above variables to a different value within `.env-test` if you don't want the tests to use the variables available for the indicated environment. 
 
-Environment variables intended for running tests should be added to an `.env-test` file in the base directory. It will be ignored by Git as well.
+For example, set a different `SYNC_SERVER_MONGODB_DATABASE` to prevent your development database from getting reset every time you run tests, and `SYNC_SERVER_SENDGRID_API_KEY` to "null" to prevent email delivery.
 
 ## Running the server
 
@@ -50,10 +50,7 @@ Once the environment is ready per above, and [Node.js](http://nodejs.org/) with 
 
 ## Developing and deploying the server
 
-The following commands can be executed to help with development and deployment:
+Deployment scripts are available through [Hoist](https://github.com/markmhx/grunt-hoist). The following are also supported:
 
 - `npm run dev`: Runs the app and automatically reloads it when code changes are made during development
 - `npm run test`: Runs all tests locally
-- `npm run deploy-all`: Runs all tests locally, deploys environment and certificate file dependencies, deploys the app remotely, and runs `npm install` remotely to ensure the installation of dependencies
-- `npm run deploy-dependencies`: Deploys environment and certificate file dependencies.
-- `npm run deploy-app`: Deploys the app remotely and runs `npm install` remotely to ensure the installation of dependencies
