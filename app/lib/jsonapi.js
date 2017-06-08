@@ -142,6 +142,17 @@ module.exports = {
   },
 
   /**
+   * Returns given object with keys converted to camel case
+   * @param {Object} object - Object
+   * @return {Object} Object with camel case keys
+   */
+  camelCasedKeys: function(object) {
+    return _.mapKeys(object, (value, key) => {
+      return _.camelCase(key);
+    });
+  },
+
+  /**
    * Callbacks a model's query conditions given request user status
    * @param {Object} req - Express request object
    * @param {Object} model - Mongoose model
@@ -329,7 +340,7 @@ module.exports = {
   },
 
   /**
-   * Routes POST requests to resource for individual resource objects for app and Model
+   * Routes PATCH requests to resource for individual resource objects for app and Model
    * @param {Object} app - Express app
    * @param {Object} Model - Mongoose model
    */
@@ -344,7 +355,7 @@ module.exports = {
       };
 
       var findOneAndUpdate = (conditions, done) => {
-        Model.findOneAndUpdate(conditions, req.body.data.attributes, { new: true }, done);
+        Model.findOneAndUpdate(conditions, this.camelCasedKeys(req.body.data.attributes), { new: true }, done);
       };
 
       var addRelationships = (document, done) => {
@@ -424,7 +435,7 @@ module.exports = {
         debug('POST createDocument');
 
         try {
-          var document = new Model(req.body.data.attributes);
+          var document = new Model(this.camelCasedKeys(req.body.data.attributes));
         } catch (error) {
           return done(error);
         }
