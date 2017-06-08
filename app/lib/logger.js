@@ -42,10 +42,9 @@ module.exports.scopedLog = function(defaultMeta) {
 
 /**
  * Establishes logging of all requests for app
- * @param {Object} app - Express app
  */
-module.exports.req = function(app) {
-  app.use((req, res, next) => {
+module.exports.logRequests = function() {
+  require('app').use((req, res, next) => {
     this.trace('App received request', { 
       ip: req.ip,
       method: req.method,

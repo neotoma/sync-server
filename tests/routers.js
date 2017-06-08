@@ -6,7 +6,6 @@
 require('park-ranger')();
 
 var _ = require('lodash');
-var app = require('app');
 var assertions = require('app/lib/assertions');
 var async = require('async');
 var createPopulatedProperties = require('app/lib/createPopulatedProperties');
@@ -59,7 +58,7 @@ Object.keys(fixtures).forEach((id) => {
               status: 400,
               requestBody: {
                 data: {
-                  type: Model.modelType(),
+                  type: _.kebabCase(Model.modelType()),
                   attributes: {}
                 }
               },
@@ -74,7 +73,7 @@ Object.keys(fixtures).forEach((id) => {
         status: (method === 'post' ? 201 : 200),
         requestBody: {
           data: {
-            type: Model.modelType(),
+            type: _.kebabCase(Model.modelType()),
             attributes: methodProperties
           }
         }
@@ -85,7 +84,7 @@ Object.keys(fixtures).forEach((id) => {
       }
 
       if (['patch', 'post'].indexOf(method) > -1) {
-        assertions.route(app, Model, method, tests);
+        assertions.route(Model, method, tests);
       }
 
       if (id === 'contactVerificationRequest') {

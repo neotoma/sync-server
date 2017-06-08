@@ -235,7 +235,9 @@ module.exports = {
       },
       source: { ref: 'Source' },
       storage: { ref: 'Storage' },
-      user: { ref: 'User' }
+      user: { ref: 'User' },
+      totalItemsAvailable: Number,
+      totalItemsStored: Number
     }
   },
   notificationRequest: {
@@ -304,36 +306,6 @@ module.exports = {
       itemsGetUrlTemplate: String,
       itemDataObjectsFromPagePathTemplate: { type: String, default: 'data' },
       totalItemsAvailableFromPagePathTemplate: String
-    }
-  },
-  status: {
-    name: 'Status',
-    type: 'statuses',
-    jsonapi: {
-      get: 'user'
-    },
-    mockProperties: () => {
-      return { 
-        _id: ObjectId(),
-        user: ObjectId(),
-        storage: ObjectId(),
-        source: ObjectId(),
-        contentType: ObjectId(),
-        totalItemsAvailable: 12345,
-        totalItemsStored: 10001,
-        totalItemsPending: 2345,
-        lastStoredItem: ObjectId()
-      };
-    }, 
-    schemaProperties: {
-      contentType: { ref: 'ContentType', required: true },
-      lastStoredItem: { ref: 'Item' },
-      storage: { ref: 'Storage', required: true },
-      source: { ref: 'Source', required: true },
-      user: { ref: 'User', required: true },
-      totalItemsAvailable: Number,
-      totalItemsPending: Number,
-      totalItemsStored: Number
     }
   },
   storage: {

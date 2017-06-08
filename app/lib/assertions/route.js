@@ -4,6 +4,7 @@
  */
 
 var _ = require('lodash');
+var app = require('app');
 var assert = require('assert');
 var supertest = require('supertest');
 
@@ -23,7 +24,7 @@ var responseDocumentHasError = function(responseDocument, error) {
   return hasError;
 };
 
-module.exports = function(app, Model, method, tests) {
+module.exports = function(Model, method, tests) {
   tests.forEach((test) => {
     var description = _.toUpper(method) + ' requests to ' + Model.modelName;
     var Test = supertest(app)[method]('/' + _.kebabCase(Model.modelType()));

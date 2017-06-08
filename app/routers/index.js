@@ -1,8 +1,8 @@
-module.exports = function(app) {
-  require('./cors')(app, process.env.SYNC_SERVER_WEB_HOST);
-  require('app/lib/logger').req(app);
-  require('app/lib/jsonapi')(app).routeModelResources();
-  require('./sessions')(app);
-  require('./auths')(app, require('app/models/source'));
-  require('./auths')(app, require('app/models/storage'));
+module.exports = function() {
+  require('./cors')(process.env.SYNC_SERVER_WEB_HOST);
+  require('app/lib/logger').logRequests();
+  require('app/lib/jsonapi').routeModelResources();
+  require('./sessions').routeResources();
+  require('./auths')(require('app/models/source'));
+  require('./auths')(require('app/models/storage'));
 };

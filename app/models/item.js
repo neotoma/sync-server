@@ -17,6 +17,7 @@ var convertToFilename = function(content) {
  * Represents atomic unit of content available from source for storage
  * @class Item
  * @property {module:models/contentType~ContentType} contentType - ContentType represented by item
+ * @property {string} description - Description of item data
  * @property {module:models/source~Source} source - Source from which item was pulled
  * @property {string} sourceItem - Identifier for item at source
  * @property {module:models/storage~Storage} storage - Storage to which item data was copied
@@ -28,7 +29,9 @@ var convertToFilename = function(content) {
  */
 module.exports = modelFactory.new('Item', {
   contentType: { ref: 'ContentType', required: true },
+  description: String,
   source: { ref: 'Source', required: true },
+  sourceCreatedAt: Date,
   sourceItem: { type: String, required: true },
   storage: { ref: 'Storage', required: true },
   storageAttemptedAt: Date,
@@ -40,6 +43,7 @@ module.exports = modelFactory.new('Item', {
   user: { ref: 'User', required: true }
 }, {
   jsonapi: {
+    sort: '-storageVerifiedAt',
     get: {
       allowed: 'user',
       queryConditions: queryConditions.userMatchesRequester

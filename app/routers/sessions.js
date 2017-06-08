@@ -1,90 +1,92 @@
+var app = require('app');
 var async = require('async');
+var jsonapi = require('app/lib/jsonapi');
 var UserSourceAuth = require('app/models/userSourceAuth');
 var UserStorageAuth = require('app/models/userStorageAuth');
 
-module.exports = function(app) {
-  var jsonapi = require('app/lib/jsonapi')(app);
+module.exports = {
+  routeResources() {
+    jsonapi.routeResource(app, 'get', '/sessions', undefined, function(req, res) {
+      var data;
+      var included = [];
+      var userObject;
 
-  jsonapi.routeResource(app, 'get', '/sessions', undefined, function(req, res) {
-    var data;
-    var included = [];
-    var userObject;
+      var populateSessions = function(done) {
+        data = [{
+          id: req.session.id,
+          type: 'sessions'
+        }];
 
-    var populateSessions = function(done) {
-      data = [{
-        id: req.session.id,
-        type: 'sessions'
-      }];
+        done();
+      };
 
-      done();
-    };
-
-    var initUserObject = function(done) {
-      if (!req.user) { return done(); }
-
-      userObject = res.resourceObjectFromDocument(req.user);
-      done();
-    };
-
-    var populateObjectsForUser = function(model) {
-      return function(done) {
+      var initUserObject = function(done) {
         if (!req.user) { return done(); }
 
-        model.find({
-          user: req.user.id
-        }, function(error, documents) {
-          async.each(documents, function(document, done) {
-            included.push(res.resourceObjectFromDocument(document));
-            res.addRelationshipToResourceObject(userObject, document, model.modelType());
-            done();
-          }, done);
-        });
+        userObject = jsonapi.resourceObjectFromDocument(req.user);
+        done();
       };
-    };
 
-    var populateUsers = function(done) {
-      if (req.user) {
-        data[0].relationships = {
-          users: {
-            data: [{
-              id: req.user.id,
-              type: 'users'
-            }]
-          }
+      var populateObjectsForUser = function(model) {
+        return function(done) {
+          if (!req.user) { return done(); }
+
+          model.find({
+            user: req.user.id
+          }, function(error, documents) {
+            async.each(documents, function(document, done) {
+              included.push(jsonapi.resourceObjectFromDocument(document));
+              res.addRelationshipToResourceObject(userObject, document, model.modelType());
+              done();
+            }, done);
+          });
         };
+      };
 
-        included.push(userObject);
-      }
+      var populateUsers = function(done) {
+        if (req.user) {
+          data[0].relationships = {
+            users: {
+              data: [{
+                id: req.user.id,
+                type: 'users'
+              }]
+            }
+          };
 
-      done();
-    };
+          included.push(userObject);
+        }
 
-    async.series([
-      populateSessions,
-      initUserObject,
-      populateObjectsForUser(UserStorageAuth),
-      populateObjectsForUser(UserSourceAuth),
-      populateUsers
-    ], function(error) {
-      if (error) {
-        res.sendError(error);
-      } else {
-        res.sendData(data, included);
-      }
-    });
-  });
+        done();
+      };
 
-  jsonapi.routeResource(app, 'delete', '/sessions/:id', { validateRequestUrl: false }, function(req, res) {
-    if (req.params.id === req.session.id) {
-      req.session.destroy(function(error) {
+      async.series([
+        populateSessions,
+        initUserObject,
+        populateObjectsForUser(UserStorageAuth),
+        populateObjectsForUser(UserSourceAuth),
+        populateUsers
+      ], function(error) {
         if (error) {
           res.sendError(error);
         } else {
-          res.sendStatus(204);
+          res.sendData(data, included);
         }
       });
-    } else {
-      res.sendNotFound();
-    }
-  });
+    });
+
+    jsonapi.routeResource(app, 'delete', '/sessions/:id', { validateRequestUrl: false }, function(req, res) {
+      if (req.params.id === req.session.id) {
+        req.session.destroy(function(error) {
+          if (error) {
+            res.sendError(error);
+          } else {
+            res.sendStatus(204);
+          }
+        });
+      } else {
+        res.sendNotFound();
+      }
+    });
+  }
 };

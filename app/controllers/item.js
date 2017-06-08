@@ -20,15 +20,65 @@ var app = require('app');
 var async = require('async');
 var debug = require('app/lib/debug')('syncServer:itemController');
 var Item = require('app/models/item');
+var Job = require('app/models/job');
+var kue = require('kue');
 var logger = require('app/lib/logger');
 var mime = require('app/lib/mime');
 var request = require('app/lib/request');
-var Status = require('app/models/status');
 var Url = require('url');
 var urlRegex = require('app/lib/urlRegex');
 var UserSourceAuth = require('app/models/userSourceAuth');
 var UserStorageAuth = require('app/models/userStorageAuth');
 var validateParams = require('app/lib/validateParams');
+
+var queue = kue.createQueue();
+
+queue.process('storeItemData', function(queueJob, done) {
+  debug('process queueJob %s', queueJob.id);
+
+  var getItem = (done) => {
+    Item.findById(queueJob.data.itemId, (error, item) => {
+      if (error) {
+        done(error);
+      } else if (!item) {
+        done(new Error('Item with queueJob.data.itemId not found'));
+      } else {
+        done(undefined, item);
+      }
+    });
+  };
+
+  var getJob = (item, done) => {
+    Job.findById(queueJob.data.jobId, (error, job) => {
+      if (error) {
+        done(error);
+      } else if (!job) {
+        done(new Error('Job with queueJob.data.jobId not found'));
+      } else {
+        done(undefined, item, job);
+      }
+    });
+  };
+
+  var storeItemData = (item, job, done) => {
+    debug.start('queueJob storeItemData', item.id, job.id);
+    module.exports.storeItemData(item, queueJob.data.data, job, done);
+  };
+
+  async.waterfall([getItem, getJob, storeItemData], (error) => {
+    if (error) {
+      debug.error('failed to process queueJob %s: %s', queueJob.id, error.message);
+    } else {
+      debug.success('processed queueJob %s', queueJob.id);
+    }
+
+    done(error);
+  });
+});
+
+queue.on('error', (error) => {
+  debug.error('queueJob failed:', error.message);
+});
 
 /**
  * Callback resource found at URL.
@@ -317,9 +367,10 @@ module.exports.storagePath = function(item, data, done) {
  * @param {User} user - User for which to retrieve items from source and store them in storage.
  * @param {Source} source - Source from which to retrieve items.
  * @param {Storage} storage - Storage within which to store items.
+ * @param {Job} [job] - Job for which to store items.
  * @param {callback} done
  */
-module.exports.storeAllForUserStorageSource = function(user, source, storage, done) {
+module.exports.storeAllForUserStorageSource = function(user, source, storage, job, done) {
   var log = logger.scopedLog();
 
   var validate = function(done) {
@@ -345,7 +396,7 @@ module.exports.storeAllForUserStorageSource = function(user, source, storage, do
   };
 
   var storeAllForUserStorageSourceContentType = function(contentType, done) {
-    module.exports.storeAllForUserStorageSourceContentType(user, source, storage, contentType, done);
+    module.exports.storeAllForUserStorageSourceContentType(user, source, storage, contentType, job, done);
   };
 
   var storeAllItems = function(done) {
@@ -372,9 +423,10 @@ module.exports.storeAllForUserStorageSource = function(user, source, storage, do
  * @param {Source} source - Source from which to retrieve items.
  * @param {Storage} storage - Storage within which to store items.
  * @param {ContentType} contentType - ContentType of which to retrieve items.
+ * @param {Job} [job] - Job for which to store items.
  * @param {callback} done
  */
-module.exports.storeAllForUserStorageSourceContentType = function(user, source, storage, contentType, done) {
+module.exports.storeAllForUserStorageSourceContentType = function(user, source, storage, contentType, job, done) {
   var log = logger.scopedLog();
 
   var validate = function(done) {
@@ -410,7 +462,7 @@ module.exports.storeAllForUserStorageSourceContentType = function(user, source, 
         }
       } else {
         if (pagination) {
-          module.exports.storeItemsPage(user, source, storage, contentType, pagination, myself);
+          module.exports.storeItemsPage(user, source, storage, contentType, pagination, job, myself);
         } else if (done) {
           done();
         }
@@ -442,11 +494,12 @@ module.exports.storeAllForUserStorageSourceContentType = function(user, source, 
  * @param {Storage} storage - Storage within which to store items.
  * @param {ContentType} contentType - ContentType of which to retrieve items.
  * @param {Object} pagination – Object containing pagination information.
+ * @param {Job} [job] - Job for which to store items.
  * @param {callback} done
  */
-module.exports.storeItemsPage = function(user, source, storage, contentType, pagination, done) {
+module.exports.storeItemsPage = function(user, source, storage, contentType, pagination, job, done) {
   var log = logger.scopedLog();
-  var ids, page, userSourceAuth, status;
+  var ids, page, userSourceAuth;
 
   var validate = function(done) {
     validateParams([{
@@ -474,13 +527,6 @@ module.exports.storeItemsPage = function(user, source, storage, contentType, pag
 
     log = logger.scopedLog(Object.assign({}, pagination, ids));
     done();
-  };
-
-  var findOrCreateStatus = function(done) {
-    Status.findOrCreate(ids, function(error, foundOrCreatedStatus) {
-      status = foundOrCreatedStatus;
-      done(error);
-    });
   };
 
   var findUserSourceAuth = function(done) {
@@ -512,9 +558,8 @@ module.exports.storeItemsPage = function(user, source, storage, contentType, pag
     var itemDataObjects = module.exports.itemDataObjectsFromPage(page, source, contentType);
     var totalItemsAvailable = module.exports.totalItemsAvailableFromPage(page, source, contentType);
 
-    if (totalItemsAvailable && pagination.offset === 0) {
-      status.totalItemsAvailable = totalItemsAvailable;
-      status.save();
+    if (job && totalItemsAvailable && pagination.offset === 0) {
+      job.updateTotalItemsAvailable(totalItemsAvailable);
     }
 
     if (!itemDataObjects || !itemDataObjects.length) {
@@ -545,12 +590,25 @@ module.exports.storeItemsPage = function(user, source, storage, contentType, pag
   };
 
   var storeItemsData = function(itemPairs, done) {
-    async.eachSeries(itemPairs, function(itemPair, done) {
-      if (!itemPair.item.storageVerifiedAt) {
-        module.exports.storeItemData(itemPair.item, itemPair.data, done);
-      } else {
-        done();
+    async.each(itemPairs, function(itemPair, done) {
+      var jobAttributes = {
+        itemId: itemPair.item.id,
+        data: itemPair.data
+      };
+
+      if (job) {
+        jobAttributes.jobId = job.id;
       }
+
+      var queueJob = queue.create('storeItemData', jobAttributes).save((error) => {
+        if (error) {
+          debug.error('queueJob %s failed to queue: %s', queueJob.id, error.message);
+        } else {
+          debug.success('queueJob %s queued for item %s', queueJob.id, itemPair.item.id);
+        }
+      });
+
+      done();
     }, done);
   };
 
@@ -561,7 +619,6 @@ module.exports.storeItemsPage = function(user, source, storage, contentType, pag
   async.waterfall([
     validate,
     setupLog,
-    findOrCreateStatus,
     findUserSourceAuth,
     getItemsPageResource,
     getItemDataObjects,
@@ -627,11 +684,71 @@ module.exports.persistItemDataObject = function(itemDataObject, relationships, d
     });
   };
 
+  var saveSourceCreatedAt = function(item, done) {
+    var createdAt = itemDataObject.createdAt ? itemDataObject.createdAt * 1000 : null;
+    createdAt = !createdAt && itemDataObject.created_time ? itemDataObject.created_time : createdAt;
+
+    if (createdAt) {
+      item.sourceCreatedAt = new Date(createdAt);
+      item.save((error) => {
+        done(error, item);
+      });
+    } else {
+      done(undefined, item);
+    }
+  };
+
+  var saveDescription = function(item, done) {
+    if (itemDataObject) {
+      var parts = [];
+
+      if (itemDataObject.venue && itemDataObject.venue.name) {
+        parts.push(itemDataObject.venue.name);
+      } else if (itemDataObject.firstName || itemDataObject.lastName) {
+        if (itemDataObject.firstName) {
+          parts.push(itemDataObject.firstName);
+        }
+
+        if (itemDataObject.lastName) {
+          parts.push(itemDataObject.lastName);
+        }
+      } else if (itemDataObject.text) {
+        parts.push(itemDataObject.text);
+      } else if (itemDataObject.message) {
+        parts.push(itemDataObject.message);
+      }
+
+      item.description = parts.join(' ');
+      item.save((error) => {
+        done(error, item);
+      });
+    } else {
+      done(undefined, item);
+    }
+  };
+
+  var determinePath = function(item, done) {
+    module.exports.storagePath(item, itemDataObject, function(error, path) {
+      done(error, path, item);
+    });
+  };
+
+  var savePath = function(path, item, done) {
+    item.storagePath = path;
+    item.save((error) => {
+      done(error, item);
+    });
+  };
+
   async.waterfall([
     validate,
     compileConditions,
     setupLog,
-    persistItemDataObject
+    persistItemDataObject,
+    saveSourceCreatedAt,
+    saveDescription,
+    determinePath,
+    savePath
   ], function(error, item) {
     if (error) {
       log('error', 'Item controller failed to persist item data object', { error: error });
@@ -650,9 +767,10 @@ module.exports.persistItemDataObject = function(itemDataObject, relationships, d
  * Update storageBytes and storagePath if storage succeeds.
  * @param {Item} item - Item object.
  * @param {Object} data - Raw item data from source.
+ * @param {Job} [job] - Job for which to store items.
  * @param {callback} done
  */
-module.exports.storeItemData = function(item, data, done) {
+module.exports.storeItemData = function(item, data, job, done) {
   var log = logger.scopedLog();
 
   var validate = function(done) {
@@ -669,22 +787,15 @@ module.exports.storeItemData = function(item, data, done) {
     done();
   };
 
-  var determinePath = function(done) {
-    module.exports.storagePath(item, data, function(error, path) {
-      debug.success('storeItemData:determinePath: %s', path);
-      done(error, path);
-    });
-  };
-
-  var updateStorageAttemptedAt = function(path, done) {
+  var updateStorageAttemptedAt = function(done) {
     item.storageAttemptedAt = Date.now();
     item.save(function(error) {
-      done(error, path);
+      done(error);
     });
   };
 
-  var storeFile = function(path, done) {
-    module.exports.storeFile(item.user, item.storage, path, data, (error, storeFileResult) => {
+  var storeFile = function(done) {
+    module.exports.storeFile(item.user, item.storage, item.storagePath, data, (error, storeFileResult) => {
       if (error) {
         debug.error('storeFile item %s, error %o, storeFileResult %o', item.id, error, storeFileResult);
         item.storageError = error.message;
@@ -712,9 +823,17 @@ module.exports.storeItemData = function(item, data, done) {
     });
   };
 
+  var updateJob = function(done) {
+    if (job) {
+      job.incrementTotalItemsStored();
+    }
+
+    done();
+  };
+
   var notifyApp = function(done) {
     if (app && typeof app.emit === 'function') {
-      app.emit('storedItemData', item);
+      app.emit('storedItemData', item, job);
       debug('app notified of storedItemData');
     } else {
       debug('app NOT notified of storedItemData');
@@ -726,10 +845,10 @@ module.exports.storeItemData = function(item, data, done) {
   async.waterfall([
     validate,
     setupLog,
-    determinePath,
     updateStorageAttemptedAt,
     storeFile,
     updateStorageProperties,
+    updateJob,
     notifyApp
   ], function(error) {
     if (error) {

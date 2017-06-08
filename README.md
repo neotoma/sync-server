@@ -13,7 +13,7 @@ See also documentation for [the JavaScript source code](http://neotoma.github.io
 
 SSL certificates and the following environment variables are managed by [Park Ranger](https://github.com/markmhx/park-ranger):
 
-- `SYNC_SERVER_DIR`: Local path to app base directory (e.g. `/var/www/sync-server'; required to run tasks)
+- `SYNC_SERVER_DIR`: Local path to app base directory (e.g. `/var/www/sync-server`; required to run tasks)
 - `SYNC_SERVER_HOST`: Host address for the app (e.g. `127.0.0.1`; required to run app)
 - `SYNC_SERVER_PORT`: Port through which to run the app (e.g. `1234`; required to run app)
 - `SYNC_SERVER_SESSION_SECRET`: Secret, non-obvious string used to prevent session tampering (e.g. `oc]7kwM)R*UX3&` but *generate your own*; required to run app)

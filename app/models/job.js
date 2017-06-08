@@ -5,7 +5,6 @@
 
 var async = require('async');
 var debug = require('app/lib/debug')('syncServer:job');
-var itemController = require('app/controllers/item');
 var logger = require('app/lib/logger');
 var modelFactory = require('app/factories/model');
 var queryConditions = require('./queryConditions');
@@ -33,7 +32,9 @@ module.exports = modelFactory.new('Job', {
   },
   source: { ref: 'Source' },
   storage: { ref: 'Storage' },
-  user: { ref: 'User' }
+  user: { ref: 'User' },
+  totalItemsAvailable: Number,
+  totalItemsStored: Number
 }, {
   jsonapi: {
     get: {
@@ -49,8 +50,24 @@ module.exports = modelFactory.new('Job', {
       queryConditions: queryConditions.userMatchesRequester
     }
   }
-}, undefined, function(schema) {
+}, {
+  incrementTotalItemsStored() {
+    if (this.totalItemsStored) {
+      this.totalItemsStored++;
+    } else {
+      this.totalItemsStored = 1;
+    }
+
+    this.save();
+  },
+
+  updateTotalItemsAvailable(total) {
+    this.totalItemsAvailable = total;
+    this.save();
+  }
+}, function(schema) {
   schema.post('save', function() {
+    var itemController = require('app/controllers/item');
     var job = this;
 
     if (!job.wasNew) {
@@ -66,13 +83,13 @@ module.exports = modelFactory.new('Job', {
       case 'storeAllItemsForUserStorageSource':
 
         debug('running job "storeAllItemsForUserStorageSource": user %s, source %s, storage %s', job.user.id, job.source.id, job.storage.id);
-        itemController.storeAllForUserStorageSource(job.user, job.source, job.storage, done);
+        itemController.storeAllForUserStorageSource(job.user, job.source, job.storage, job, done);
         break;
 
       case 'storeAllItemsForUserStorageSourceContentType':
 
         debug('running job "storeAllItemsForUserStorageSourceContentType"');
-        itemController.storeAllForUserStorageSourceContentType(job.user, job.source, job.storage, job.contentType, done);
+        itemController.storeAllForUserStorageSourceContentType(job.user, job.source, job.storage, job.contentType, job, done);
         break;
 
       default:

@@ -1,5 +1,3 @@
-var status = require('app/socketEvents/status');
-
 module.exports = function(server, socket) {
-  return status(server, socket);
+  return require('app/socketEvents/storedItemData')(server, socket);
 };

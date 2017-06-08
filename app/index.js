@@ -57,4 +57,4 @@ app.requireAuthentication = function(req, res, next) {
 
 module.exports = app;
 
-routers(app);
+routers();

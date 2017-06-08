@@ -71,12 +71,6 @@ module.exports = function(app, Model, document) {
         });
       } else {
         var message;
-        
-        if (!profile.displayName) {
-          message = 'Failed to find user name within profile data';
-          log('error', 'Auth router ' + _.lowerFirst(message));
-          return done(new Error(message));
-        }
 
         if (!profile.emails || profile.emails.length < 1 || !profile.emails[0].value) {
           message = 'Failed to find user email within profile data';

@@ -1,8 +1,9 @@
+var app = require('app');
 var auth = require('./auth');
 var logger = require('app/lib/logger');
 var validateParams = require('app/lib/validateParams');
 
-module.exports = function(app, Model) {
+module.exports = function(Model) {
   validateParams([{
     name: 'app', variable: app, required: true, requiredProperties: ['host'],
   }, {
