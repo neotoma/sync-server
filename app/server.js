@@ -6,34 +6,46 @@
 var ranger = require('park-ranger')();
 var app = require('app');
 var debug = require('app/lib/debug')('syncServer:server');
+var http = require('http');
 var https = require('https');
-var logger = require('app/lib/logger');
 var passportSocketIO = require('app/lib/passportSocketIO');
 var socketEvents = require('app/socketEvents');
 var socketIO = require('socket.io');
 
-var server = https.createServer(ranger.cert, app).listen(app.port, function() {
-  logger.info('App server started listening for HTTPS requests', { port: app.port });
+var httpsServer = https.createServer(ranger.cert, app).listen(process.env.SYNC_SERVER_HTTPS_PORT, () => {
+  debug('App server started listening for HTTPS requests', { port: process.env.SYNC_SERVER_HTTPS_PORT });
 });
 
-server.io = socketIO(server);
+var httpServer = http.createServer(app).listen(process.env.SYNC_SERVER_HTTP_PORT, () => {
+  debug('App server started listening for HTTP requests', { port: process.env.SYNC_SERVER_HTTP_PORT });
+});
 
-server.io.on('connection', function(socket) {
-  debug('opened socket.io connection');
+var servers = {
+  'https': httpsServer, 
+  'http': httpServer
+};
 
-  var listeners = socketEvents(server, socket);
+Object.keys(servers).forEach((key) => {
+  var server = servers[key];
+  server.io = socketIO(server);
 
-  debug('listeners count: %s', Object.keys(listeners).length);
+  server.io.on('connection', (socket) => {
+    debug('opened socket.io connection for %s', key);
 
-  socket.on('disconnect', function() {
-    debug('closed socket.io connection');
+    var listeners = socketEvents(server, socket);
 
-    Object.keys(listeners).forEach(function(key) {
-      app.removeListener(key, listeners[key]);
+    debug('listeners count for %s: %s', key, Object.keys(listeners).length);
+
+    socket.on('disconnect', () => {
+      debug('closed socket.io connection for %s', key);
+
+      Object.keys(listeners).forEach(function(key) {
+        app.removeListener(key, listeners[key]);
+      });
     });
   });
+
+  server.io.use(passportSocketIO);
+
+  debug('App server started listening for WebSocket connections for %s', key);
 });
-
-server.io.use(passportSocketIO);
-
-logger.info('App server started listening for WebSocket connections');

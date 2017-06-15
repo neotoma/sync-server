@@ -679,7 +679,7 @@ module.exports.persistItemDataObject = function(itemDataObject, relationships, d
       if (error) {
         done(error);
       } else {
-        done(error, item);
+        done(undefined, item);
       }
     });
   };
@@ -761,7 +761,7 @@ module.exports.persistItemDataObject = function(itemDataObject, relationships, d
 };
 
 /**
- * Store data contained in property of Item in storage.
+ * Store data for Item in storage.
  * Update attemptedAt, failedAt and verifiedAt timestamps as appropriate during process.
  * Update storageError if storage fails.
  * Update storageBytes and storagePath if storage succeeds.

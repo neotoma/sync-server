@@ -26,6 +26,7 @@ module.exports = modelFactory.new('Storage', {
   itemStorageEnabled: { type: Boolean, default: false },
   logoGlyphPath: String,
   name: { type: String, required: true },
+  slug: String,
   passportStrategy: String,
   itemPutUrlTemplate: {
     type: String,

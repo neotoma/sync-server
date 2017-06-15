@@ -15,7 +15,8 @@ SSL certificates and the following environment variables are managed by [Park Ra
 
 - `SYNC_SERVER_DIR`: Local path to app base directory (e.g. `/var/www/sync-server`; required to run tasks)
 - `SYNC_SERVER_HOST`: Host address for the app (e.g. `127.0.0.1`; required to run app)
-- `SYNC_SERVER_PORT`: Port through which to run the app (e.g. `1234`; required to run app)
+- `SYNC_SERVER_HTTPS_PORT`: Port through which to run the app with HTTPS (e.g. `1234`; required to run app)
+- `SYNC_SERVER_HTTP_PORT`: Port through which to run the app with HTTP (e.g. `1235`; required to run app)
 - `SYNC_SERVER_SESSION_SECRET`: Secret, non-obvious string used to prevent session tampering (e.g. `oc]7kwM)R*UX3&` but *generate your own*; required to run app)
 - `SYNC_SERVER_DEPLOY_HOST_USERNAME`: User name with which to SSH into remote deployment server (e.g. `root`; required to deploy app)
 - `SYNC_SERVER_WEB_HOST`: Host address for the web client intended to communicate with the app exclusively via cross-origin HTTP requests; used to set HTTP access control (CORS) (e.g. `http://example.com:9019`; optional)

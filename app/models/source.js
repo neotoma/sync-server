@@ -54,14 +54,15 @@ module.exports = modelFactory.new('Source', {
   clientId: String,
   clientSecret: String,
   contentTypes: [{ ref: 'ContentType' }],
+  itemDataObjectsFromPagePathTemplate: { type: String, default: 'data' },
+  itemsGetUrlTemplate: { type: String, default: 'https://${host}/${contentTypePluralCamelName}?access_token=${accessToken}&limit=${limit}&offset=${offset}' },
   itemStorageEnabled: { type: Boolean, default: false },
   host: String,
   itemsLimit: { type: Number, default: 25 },
   logoGlyphPath: String,
   name: { type: String, required: true },
   passportStrategy: String,
-  itemsGetUrlTemplate: { type: String, default: 'https://${host}/${contentTypePluralCamelName}?access_token=${accessToken}&limit=${limit}&offset=${offset}' },
-  itemDataObjectsFromPagePathTemplate: { type: String, default: 'data' },
+  slug: String,
   totalItemsAvailableFromPagePathTemplate: String
 }, {
   jsonapi: {

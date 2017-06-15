@@ -31,13 +31,11 @@ if (!process.env.SYNC_SERVER_HOST) {
   throw new Error('App failed to find host variable from environment');
 }
 
-app.host = 'https://' + process.env.SYNC_SERVER_HOST + ':' + process.env.SYNC_SERVER_PORT;
-
-if (!process.env.SYNC_SERVER_PORT) {
-  throw new Error('App failed to find port variable from environment');
+if (!process.env.SYNC_SERVER_HTTPS_PORT) {
+  throw new Error('App failed to find HTTPS port variable from environment');
 }
 
-app.port = process.env.SYNC_SERVER_PORT;
+app.host = 'https://' + process.env.SYNC_SERVER_HOST + ':' + process.env.SYNC_SERVER_HTTPS_PORT;
 
 app.requireAdminAuthentication = function(req, res, next) {
   if (!req.user || !req.user.id || !req.user.admin) {

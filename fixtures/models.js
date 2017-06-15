@@ -305,6 +305,7 @@ module.exports = {
       passportStrategy: String,
       itemsGetUrlTemplate: String,
       itemDataObjectsFromPagePathTemplate: { type: String, default: 'data' },
+      slug: String,
       totalItemsAvailableFromPagePathTemplate: String
     }
   },
@@ -338,7 +339,8 @@ module.exports = {
       logoGlyphPath: String,
       name: { type: String, required: true },
       passportStrategy: String,
-      itemPutUrlTemplate: String
+      itemPutUrlTemplate: String,
+      slug: String
     }
   },
   user: {

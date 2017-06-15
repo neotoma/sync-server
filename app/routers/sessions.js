@@ -36,7 +36,7 @@ module.exports = {
           }, function(error, documents) {
             async.each(documents, function(document, done) {
               included.push(jsonapi.resourceObjectFromDocument(document));
-              res.addRelationshipToResourceObject(userObject, document, model.modelType());
+              jsonapi.addRelationshipToResourceObject(userObject, document, model.modelType());
               done();
             }, done);
           });
@@ -68,9 +68,9 @@ module.exports = {
         populateUsers
       ], function(error) {
         if (error) {
-          res.sendError(error);
+          jsonapi.sendError(res, error);
         } else {
-          res.sendData(data, included);
+          jsonapi.sendData(res, data, included);
         }
       });
     });
@@ -79,13 +79,13 @@ module.exports = {
       if (req.params.id === req.session.id) {
         req.session.destroy(function(error) {
           if (error) {
-            res.sendError(error);
+            jsonapi.sendError(res, error);
           } else {
             res.sendStatus(204);
           }
         });
       } else {
-        res.sendNotFound();
+        jsonapi.sendNotFound(res);
       }
     });
   }
