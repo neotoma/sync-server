@@ -38,8 +38,7 @@ var reqPassportDocument = function(req, res, next) {
   if (ObjectId.isValid(req.params.id)) {
     query._id = ObjectId(req.params.id);
   } else {
-    debug(_.capitalize(req.params.id));
-    query.name = _.capitalize(req.params.id);
+    query.slug = req.params.id;
   }
 
   Model.findOne(query, (error, document) => {
@@ -155,9 +154,8 @@ app.get('/:type/:id/auth', reqPassportDocument, function(req, res, next) {
     req.session.authRedirectURL = req.query.redirectURL;
   } else {
     delete req.session.authRedirectURL;
-  
   }
-  passport.use(req.strategy);
+
   passport.authenticate(req.strategy.name, { scope: req.document.authScope })(req, res, next);
 });
 
