@@ -219,7 +219,7 @@ jsonapi.routeModelDeleteObjectResource = function(app, Model) {
       Model.findOne(conditions, done);
     };
 
-    async.waterfall([getConditions, findOne], function(error, document) {
+    async.waterfall([getConditions, findOne], (error, document) => {
       if (error) {
         this.sendError(res, error);
       } else if (!document) {
