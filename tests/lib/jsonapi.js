@@ -17,8 +17,7 @@ describe('jsonapi', () => {
     'routeResource',
     'saveRelationshipsToDocument',
     'validateQueryData',
-    'validateRequestBody',
-    'validateRequestUrl'
+    'validateRequestBody'
   ]);
 
   var method = 'get';
