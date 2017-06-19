@@ -14,7 +14,11 @@ module.exports = function(objectName, object, properties) {
 
     for (var property in properties) {
       if (property === '_id') {
-        assert.deepEqual(ObjectId(returnedObject['id']), properties['_id']);
+        if (ObjectId.isValid(returnedObject['id'])) {
+          assert.deepEqual(ObjectId(returnedObject['id']), properties['_id']);
+        } else {
+          assert.deepEqual(returnedObject['id'], properties['_id']);
+        }
       } else if (properties[property]) {
         try {
           debug('property', property);

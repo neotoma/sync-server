@@ -775,14 +775,6 @@ jsonapi.routeResource = function(app, method, path, middleware, done) {
     }
   };
 
-  var validateRequestUrl = (req, res, next) => {
-    if (!middleware || middleware.validateRequestUrl !== false) {
-      this.validateRequestUrl(req, res, next);
-    } else {
-      next();
-    }
-  };
-
   var validateRequestBody = (req, res, next) => {
     if (middleware && middleware.validateRequestBody && typeof middleware.validateRequestBody === 'function') {
       middleware.validateRequestBody(req, res, next);
@@ -793,7 +785,7 @@ jsonapi.routeResource = function(app, method, path, middleware, done) {
     }
   };
 
-  app[method](path, requireAuthentication, requireAdminAuthentication, validateRequestUrl, validateRequestBody, done);
+  app[method](path, requireAuthentication, requireAdminAuthentication, validateRequestBody, done);
 };
 
 /**
@@ -993,17 +985,6 @@ jsonapi.validateRequestBody = function(model) {
       next();
     }
   };
-};
-
-/**
- * Validates request URL against Mongoose needs
- */
-jsonapi.validateRequestUrl = function(req, res, next) {
-  if (req.params.id && !req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
-    this.sendError(res, new Error('Resource ID indicated with invalid format in URL'), 400);
-  } else {
-    next();
-  }
 };
 
 module.exports = jsonapi;

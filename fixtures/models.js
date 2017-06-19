@@ -5,6 +5,23 @@
 var ObjectId = require('mongoose').Types.ObjectId;
 
 module.exports = {
+  attribute: {
+    name: 'Attribute',
+    type: 'attributes',
+    jsonapi: {
+      get: 'public'
+    },
+    mockProperties: () => {
+      return { 
+        _id: 'attributeId',
+        value: 'attributeValue'
+      };
+    },
+    schemaProperties: {
+      _id: { type: String, required: true },
+      value: { type: String, required: true }
+    }
+  },
   contactVerification: {
     name: 'ContactVerification',
     type: 'contactVerifications',

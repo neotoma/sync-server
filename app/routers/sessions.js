@@ -75,7 +75,7 @@ module.exports = {
       });
     });
 
-    jsonapi.routeResource(app, 'delete', '/sessions/:id', { validateRequestUrl: false }, function(req, res) {
+    jsonapi.routeResource(app, 'delete', '/sessions/:id', undefined, function(req, res) {
       if (req.params.id === req.session.id) {
         req.session.destroy(function(error) {
           if (error) {
