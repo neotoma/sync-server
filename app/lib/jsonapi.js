@@ -287,6 +287,10 @@ jsonapi.routeModelGetObjectsResource = function(app, Model) {
         return done(new Error('Valid for relationship filter invalid'));
       }
 
+      if (filter.attributes) {
+        conditions = Object.assign(conditions, filter.attributes);
+      }
+
       this.compiledQueryConditions(req, conditions, Model, 'get', done);
     };
 
@@ -928,8 +932,8 @@ jsonapi.validateQueryData = function(req, data, model, method, done) {
       } catch (error) {
         isEqualObjectId = false;
       }
-      
-      if (conditions[key] !== data.attributes[key] && !isEqualObjectId) {
+
+      if ((Array.isArray(conditions[key]) && conditions[key].indexOf(data.attributes[key]) === -1) || (!Array.isArray(conditions[key]) && conditions[key] !== data.attributes[key] && !isEqualObjectId)) {
         errors.push(new Error(`Value for attribute ${key} invalid`));
       }
     });

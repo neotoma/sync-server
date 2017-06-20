@@ -21,6 +21,7 @@ var ObjectId = require('mongoose').Types.ObjectId;
  * @property {Object[]} [createNotificationRequests] - Array of properties for notification requests to create related to user upon verification
  * @property {event} createNotificationRequests[].event - Event for new notification request
  * @property {boolean} [createUser=false] - Whether to create a user upon verification if one doesn't already exist with matching contact info
+ * @property {string} [session] - Session that created contactVerificationRequest
  * @property {string} method - Method used to send request to contact (e.g. "email")
  * @property {boolean} [verified=false] - Whether document has been verified 
  */
@@ -72,11 +73,17 @@ module.exports = ContactVerificationRequest = modelFactory.new('ContactVerificat
       message: '"{VALUE}" is not a supported method value'
     }
   },
+  session: String,
   verified: { type: Boolean, default: false }
 }, {
   jsonapi: {
     filteredProperties: ['code'],
-    get: 'admin',
+    get: {
+      allowed: 'public',
+      queryConditions: function(req, done) {
+        done(undefined, { session: req.session.id });
+      }
+    },
     patch: {
       allowed: 'public',
       queryConditions: function(req, done) {
@@ -106,7 +113,7 @@ module.exports = ContactVerificationRequest = modelFactory.new('ContactVerificat
     post: {
       allowed: 'public',
       queryConditions: {
-        code: undefined
+        code: [undefined, null]
       },
 
       /**

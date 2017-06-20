@@ -124,6 +124,7 @@ module.exports = {
         }],
         createUser: true,
         method: 'email',
+        session: 'contactVerificationRequestSession',
         verified: false
       };
     },
@@ -160,6 +161,7 @@ module.exports = {
           invalidValue: 'tofu'
         }
       },
+      session: String,
       verified: { type: Boolean, default: false }
     }
   },
