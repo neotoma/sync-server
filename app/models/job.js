@@ -62,7 +62,7 @@ module.exports = modelFactory.new('Job', {
   },
 
   updateTotalItemsAvailable(total) {
-    this.totalItemsAvailable = total;
+    this.totalItemsAvailable = this.totalItemsAvailable ? total + this.totalItemsAvailable : total;
     this.save();
   }
 }, function(schema) {
