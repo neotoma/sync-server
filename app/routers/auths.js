@@ -100,12 +100,8 @@ var reqPassportDocument = function(req, res, next) {
             done(error, userAuth, user);
           });
         } else {
-          var message;
-
           if (!profile.emails || profile.emails.length < 1 || !profile.emails[0].value) {
-            message = 'Failed to find user email within profile data';
-            log('error', 'Auth router ' + _.lowerFirst(message));
-            return done(new Error(message));
+            return done(new Error('Failed to find user email within profile data'));
           }
 
           User.findOrCreate({
@@ -118,10 +114,6 @@ var reqPassportDocument = function(req, res, next) {
       };
 
       var updateUserAuthUser = (userAuth, user, done) => {
-        if (userAuth.user === user.id) {
-          return done(undefined, user);
-        }
-
         userAuth.user = user.id;
 
         userAuth.save((error) => {
@@ -135,6 +127,12 @@ var reqPassportDocument = function(req, res, next) {
         findOrCreateUser,
         updateUserAuthUser
       ], (error, user) => {
+        if (error) {
+          log('error', 'Authentication router failed to authenticate user', {
+            message: error.message
+          });
+        }
+
         done(error, user);
       });
     });
