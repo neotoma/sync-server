@@ -715,9 +715,6 @@ jsonapi.routeModelResources = function() {
 
   app.use(function(req, res, next) {
     res.set('Content-Type', 'application/vnd.api+json');
-
-    
-
     next();
   });
 

@@ -22,7 +22,7 @@ app.use(expressSession({
   secret: sessionConfig.secret,
   store: sessionConfig.store,
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: true
 }));
 app.use(passport.initialize());
 app.use(passport.session());
