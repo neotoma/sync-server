@@ -71,7 +71,8 @@ var reqPassportDocument = function(req, res, next) {
       consumerKey: document.clientId,
       consumerSecret: document.clientSecret,
       callbackURL: app.host + path.resolve('/', Model.modelType(), document.slug, 'auth-callback'),
-      passReqToCallback: true
+      passReqToCallback: true,
+      profileFields: ['id', 'displayName', 'emails']
     }, function(req, accessToken, refreshToken, profile, done) {
       var findOrCreateUserAuth = (done) => {
         var conditions = {};

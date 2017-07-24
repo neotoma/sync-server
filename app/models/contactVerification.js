@@ -6,10 +6,10 @@
 var async = require('async');
 var ContactVerificationRequest = require('./contactVerificationRequest');
 var debug = require('debug')('syncServer:contactVerification');
-var logger = require('../lib/logger');
-var modelFactory = require('../factories/model');
-var NotificationRequest = require('./notificationRequest');
-var User = require('./user');
+var logger = require('app/lib/logger');
+var modelFactory = require('app/factories/model');
+var NotificationRequest = require('app/models/notificationRequest');
+var User = require('app/models/user');
 
 /**
  * Represents verification of contact information
