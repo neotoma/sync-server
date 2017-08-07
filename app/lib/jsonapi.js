@@ -12,6 +12,10 @@ var logger = require('app/lib/logger');
 var models = require('app/models');
 var ObjectId = require('mongoose').Types.ObjectId;
 var validateParams = require('./validateParams');
+var tools = require('app/lib/utils/debuggingTools');
+const util = require('util');
+
+
 
 var jsonapi = {};
 
@@ -29,6 +33,9 @@ jsonapi.resourceObjectFromDocument = function(document) {
   var Model = models[document.modelId()];
 
   var attributes = document.toObject();
+  debug("attributes ",util.inspect(attributes));
+
+
   delete attributes.id;
 
   var relationships = {};
@@ -86,7 +93,8 @@ jsonapi.resourceObjectFromDocument = function(document) {
     return _.kebabCase(key);
   });
 
-  return {
+
+    return {
     id: document.id,
     type: document.modelType(),
     attributes: attributes,
@@ -140,6 +148,7 @@ jsonapi.allowed = function(model, method) {
  */
 jsonapi.compiledQueryConditions = function myself(req, conditions, model, method, done) {
   this.modelQueryConditions(req, model, method, (error, modelConditions) => {
+    debug("jsonapi.compiledQueryConditions : ",modelConditions,conditions);
     done(error, Object.assign({}, modelConditions, conditions));
   });
 };
@@ -411,7 +420,10 @@ jsonapi.routeModelPatchObjectResource = function(app, Model) {
  * @param {Object} app - Express app
  * @param {Object} Model - Mongoose model
  */
+
 jsonapi.routeModelPostObjectResource = function(app, Model) {
+debug ("routeModelPostObjectResource -- Model = ",Model.collection.collectionName);
+
   this.routeModelResource(app, Model, 'post', '/'+ _.kebabCase(Model.modelType()), (req, res) => {
     /**
      * Validates all available attributes (TODO: and relationships)
@@ -471,8 +483,11 @@ jsonapi.routeModelPostObjectResource = function(app, Model) {
      * Executes any available post-POST routine available for Model
      */
     var executePostRoutine = (document, done) => {
-      if (Model.jsonapi.post && Model.jsonapi.post.post) {
-        Model.jsonapi.post.post(req, res, document, function(error) {
+        debug("executePostRoutine... ",Model.collection.collectionName);
+
+        if (Model.jsonapi.post && Model.jsonapi.post.post) {
+
+          Model.jsonapi.post.post(req, res, document, function(error) {
           done(error, document);
         });
       } else {
@@ -510,6 +525,7 @@ jsonapi.routeModelPostObjectResource = function(app, Model) {
  * @param {function} done - Express route callback expecting req and res as parameters
  */
 jsonapi.routeModelResource = function(app, model, method, path, done) {
+  debug("jsonapi.routeModelResource -- method = %s, path = %s",method, path);
   if (!model.jsonapi || !model.jsonapi[method]) { return; }
 
   var validateRequestBody = false;
@@ -735,11 +751,13 @@ jsonapi.routeModelResources = function() {
     });
   });
 
+// default response
   app.get('/', (req, res) => {
     this.sendResponseDocument(res);
   });
 
   // Route requests for each model with Mongoose compatability and jsonapi configuration
+    // that is: set up the routes for specific paths
   Object.keys(models).forEach((key) => {
     var model = models[key];
     
@@ -762,6 +780,7 @@ jsonapi.routeModelResources = function() {
  * @param {function} done - Express route callback expecting req and res as parameters
  */
 jsonapi.routeResource = function(app, method, path, middleware, done) {
+  //debug("jsonapi.routeResource: ",app, method, path, middleware, done);
   var requireAuthentication = (req, res, next) => {
     if (middleware && middleware.requireAuthentication) {
       app.requireAuthentication(req, res, next);
