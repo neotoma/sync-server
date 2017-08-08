@@ -72,16 +72,16 @@ module.exports = ContactVerificationRequest = modelFactory.new('ContactVerificat
       },
       message: '"{VALUE}" is not a supported method value'
     }
-  },
-  session: String,
-  verified: { type: Boolean, default: false }
+  }
 }, {
   jsonapi: {
-    filteredProperties: ['code'],
     get: {
       allowed: 'public',
       queryConditions: function(req, done) {
-        done(undefined, { session: req.session.id });
+        done(undefined, { 
+          code: req.query.code,
+          _id: req.query.id
+        });
       }
     },
     patch: {
