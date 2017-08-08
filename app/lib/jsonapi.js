@@ -77,6 +77,8 @@ jsonapi.resourceObjectFromDocument = function(document) {
   if (Model.jsonapi.filteredProperties) {
     Model.jsonapi.filteredProperties.forEach((name) => {
       delete attributes[name];
+      delete attributes[_.kebabCase(name)];
+      delete attributes[_.camelCase(name)];
     });
   }
 
@@ -322,7 +324,7 @@ jsonapi.routeModelGetObjectsResource = function(app, Model) {
     async.waterfall([compileConditions, executeQuery], function(error, documents) {
       if (error) {
         logger.error('Resource router failed to query for objects', { model: Model.modelName, error: error.message });
-        this.sendError(res, error, 400);
+        jsonapi.sendError(res, error, 400);
       } else {
         jsonapi.sendDocuments(res, documents);
       }
@@ -488,10 +490,10 @@ jsonapi.routeModelPostObjectResource = function(app, Model) {
     ], (error, document) => {
       if (error) {
         if (error.errors) {
-          return this.sendError(res, error, 400);
+          return jsonapi.sendError(res, error, 400);
         }
 
-        return this.sendError(res, error);
+        return jsonapi.sendError(res, error);
       }
 
       jsonapi.sendDocument(res, document, 201);
@@ -858,7 +860,8 @@ jsonapi.saveRelationshipsToDocument = function(document, relationships, done) {
               ref = Model.schema.tree[relationshipName].ref;
             }
 
-            if (models[_.lowerFirst(ref)].modelType() !== resourceObject.type) {
+            if (models[_.lowerFirst(ref)].modelType() !== _.camelCase(resourceObject.type)) {
+              debug('mismatched types: %s %s', models[_.lowerFirst(ref)].modelType(), resourceObject.type);
               errors.push(new Error(`Relationship resource identifier object type "${resourceObject.type}" is not valid`));
             }
 

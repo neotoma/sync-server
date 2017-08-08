@@ -89,12 +89,14 @@ module.exports = {
           _id: ObjectId(),
           code: code
         },
+        session: 'contactVerificationCode',
         user: ObjectId()
       };
     },
     schemaProperties: {
       contactVerificationRequestCode: { type: String, required: true },
       contactVerificationRequest: { ref: 'ContactVerificationRequest', required: true },
+      session: String,
       user: { ref: 'User' }
     }
   },
@@ -123,9 +125,7 @@ module.exports = {
           event: 'contactVerificationRequestTest'
         }],
         createUser: true,
-        method: 'email',
-        session: 'contactVerificationRequestSession',
-        verified: false
+        method: 'email'
       };
     },
     schemaProperties: {
@@ -160,9 +160,7 @@ module.exports = {
           validValue: 'email',
           invalidValue: 'tofu'
         }
-      },
-      session: String,
-      verified: { type: Boolean, default: false }
+      }
     }
   },
   contentType: {
