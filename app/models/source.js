@@ -26,10 +26,12 @@ var methods = Object.assign({
     },
 
     itemsGetUrl: function(itemsGetUrlTemplate,$properties) {
+
         if ($properties.next) {
             return $properties.next;
         }
             console.log("URL to submit == %s", templateCompiler(itemsGetUrlTemplate, $properties))
+
         return templateCompiler(itemsGetUrlTemplate, $properties);
     },
 

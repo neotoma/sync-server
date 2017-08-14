@@ -41,7 +41,7 @@ var tools = require('app/lib/utils/debuggingTools');
 const STORE_ITEM_DATA = 'storeItemData';
 
 queue.process(STORE_ITEM_DATA, function(queueJob, done) {
-    debug('process queueJob %s', queueJob.id);
+    console.log('process queueJob %s', queueJob.id);
 
     var getItem = (done) => {
         Item.findById(queueJob.data.itemId, (error, item) => {
@@ -234,6 +234,9 @@ module.exports.itemsGetUrl = function(source, sourceContentType, userSourceAuth,
     }, {
         name: 'pagination', variable: pagination
     }]);
+
+
+    debug("getItemURL, source.authScope = %s",source.authScope);
 
     return source.itemsGetUrl( sourceContentType.itemsGetUrlTemplate, {
         sourceToken: userSourceAuth.sourceToken,
@@ -685,7 +688,7 @@ module.exports.persistItemDataObject = function(itemDataObject, relationships, d
         validateParams([{
             name: 'itemDataObject', variable: itemDataObject, required: true, requiredProperties: ['id']
         }, {
-            name: 'relationships', variable: relationships, required: true, requiredProperties: ['user', 'storage', 'source', 'contentType']
+            name: 'relationships', variable: relationships, required: true, requiredProperties: ['user', 'storage', 'source', 'sourceContentType']
         }], done);
     };
 
@@ -696,7 +699,7 @@ module.exports.persistItemDataObject = function(itemDataObject, relationships, d
             user: relationships.user.id,
             storage: relationships.storage.id,
             source: relationships.source.id,
-            contentType: relationships.contentType.id,
+            contentType: relationships.sourceContentType.contentType.id,
             sourceItem: itemDataObject.id,
         };
         done();
@@ -786,7 +789,7 @@ module.exports.persistItemDataObject = function(itemDataObject, relationships, d
         if (error) {
             log('error', 'Item controller failed to persist item data object', { error: error });
         } else {
-            debug.success('persistItemDataObject');
+            debug.success('persistItemDataObject', item);
         }
 
         done(error, item);
