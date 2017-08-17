@@ -19,20 +19,20 @@ var queryConditions = require('./queryConditions');
  * @property {module:models/user~User} [user] - User for which this job should be executed
  */
 module.exports = modelFactory.new('Job', {
-  contentType: { ref: 'ContentType' },
+  contentType: {ref: 'ContentType'},
   name: {
     type: String,
     required: true,
     validate: {
-      validator: function(value) {
+      validator: function (value) {
         return (['storeAllItemsForUserStorageSource', 'storeAllItemsForUserStorageSourceContentType'].indexOf(value) > -1);
       },
       message: '"{VALUE}" is not a supported name value'
     }
   },
-  source: { ref: 'Source' },
-  storage: { ref: 'Storage' },
-  user: { ref: 'User' },
+  source: {ref: 'Source'},
+  storage: {ref: 'Storage'},
+  user: {ref: 'User'},
   totalItemsAvailable: Number,
   totalItemsStored: Number
 }, {
@@ -65,8 +65,8 @@ module.exports = modelFactory.new('Job', {
     this.totalItemsAvailable = this.totalItemsAvailable ? total + this.totalItemsAvailable : total;
     this.save();
   }
-}, function(schema) {
-  schema.post('save', function() {
+}, function (schema) {
+  schema.post('save', function () {
     var itemController = require('app/controllers/item');
     var job = this;
 
@@ -74,11 +74,11 @@ module.exports = modelFactory.new('Job', {
       return;
     }
 
-    var populate = function(done) {
+    var populate = function (done) {
       job.populate('contentType source storage user', done);
     };
 
-    var runJob = function(done) {
+    var runJob = function (done) {
       switch (job.name) {
       case 'storeAllItemsForUserStorageSource':
         debug('running job "storeAllItemsForUserStorageSource": user %s, source %s, storage %s', job.user.id, job.source.id, job.storage.id);
@@ -96,7 +96,7 @@ module.exports = modelFactory.new('Job', {
     };
 
     async.series([populate, runJob], (error) => {
-      var log = logger.scopedLog({ jobId: job.id });
+      var log = logger.scopedLog({jobId: job.id});
 
       if (error) {
         debug.error('# job failed: %s', error.message);

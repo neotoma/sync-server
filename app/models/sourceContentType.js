@@ -15,14 +15,14 @@ var nameMethods = require('./methods/name');
  * @property {module:models/contentType~ContentType} contentType for this sourceContentType
  */
 module.exports = modelFactory.new('SourceContentType', {
-    source: { ref: 'Source',required: true },
-    contentType: { ref: 'ContentType',required: true },
-    itemsGetUrlTemplate:{ type:String, default: "https://${sourceHost}/${contentTypePluralCamelName}?access_token=${sourceToken}&limit=${sourceItemsLimit}&offset=${offset}"}
+  source: { ref: 'Source',required: true },
+  contentType: { ref: 'ContentType',required: true },
+  itemsGetUrlTemplate:{ type:String, default: 'https://${sourceHost}/${contentTypePluralCamelName}?access_token=${sourceToken}&limit=${sourceItemsLimit}&offset=${offset}'}
 
 }, {
-    jsonapi: {
-        get: 'public',
-        post: 'public',
-        del: 'public'
-    }
+  jsonapi: {
+    get: 'public',
+    post: 'public',
+    del: 'public'
+  }
 }, nameMethods);

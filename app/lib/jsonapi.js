@@ -12,9 +12,7 @@ var logger = require('app/lib/logger');
 var models = require('app/models');
 var ObjectId = require('mongoose').Types.ObjectId;
 var validateParams = require('./validateParams');
-var tools = require('app/lib/utils/debuggingTools');
 const util = require('util');
-
 
 
 var jsonapi = {};
@@ -25,7 +23,7 @@ var jsonapi = {};
  * @param {Object} document - Mongoose document
  * @returns {Object} object - JSON API resource object
  */
-jsonapi.resourceObjectFromDocument = function(document) {
+jsonapi.resourceObjectFromDocument = function (document) {
   if (!document) {
     throw new Error('No document provided');
   }
@@ -33,21 +31,21 @@ jsonapi.resourceObjectFromDocument = function(document) {
   var Model = models[document.modelId()];
 
   var attributes = document.toObject();
-  debug("attributes ",util.inspect(attributes));
+  debug('attributes ', util.inspect(attributes));
 
 
   delete attributes.id;
 
   var relationships = {};
 
-  Object.keys(attributes).forEach(function(key) {
-    var addRelationship = function(property) {
+  Object.keys(attributes).forEach(function (key) {
+    var addRelationship = function (property) {
       if (property && property.id && property.modelType) {
         if (!relationships[key] || !relationships[key].data) {
           if (Array.isArray(document[key])) {
-            relationships[key] = { data: [] };
+            relationships[key] = {data: []};
           } else {
-            relationships[key] = { data: {} };
+            relationships[key] = {data: {}};
           }
         }
 
@@ -94,7 +92,7 @@ jsonapi.resourceObjectFromDocument = function(document) {
   });
 
 
-    return {
+  return {
     id: document.id,
     type: document.modelType(),
     attributes: attributes,
@@ -102,7 +100,7 @@ jsonapi.resourceObjectFromDocument = function(document) {
   };
 };
 
-jsonapi.responseDocument = function(data, included, errors) {
+jsonapi.responseDocument = function (data, included, errors) {
   var doc = {};
 
   if (data) {
@@ -128,7 +126,7 @@ jsonapi.responseDocument = function(data, included, errors) {
  * @param {string} method - HTTP method
  * @returns {string} allowed value (e.g. "public", "user", or "admin)
  */
-jsonapi.allowed = function(model, method) {
+jsonapi.allowed = function (model, method) {
   if (typeof model.jsonapi[method] === 'string') {
     return model.jsonapi[method];
   } else if (typeof model.jsonapi[method] === 'object') {
@@ -148,7 +146,7 @@ jsonapi.allowed = function(model, method) {
  */
 jsonapi.compiledQueryConditions = function myself(req, conditions, model, method, done) {
   this.modelQueryConditions(req, model, method, (error, modelConditions) => {
-    debug("jsonapi.compiledQueryConditions : ",modelConditions,conditions);
+    debug('jsonapi.compiledQueryConditions : ', modelConditions, conditions);
     done(error, Object.assign({}, modelConditions, conditions));
   });
 };
@@ -160,7 +158,7 @@ jsonapi.compiledQueryConditions = function myself(req, conditions, model, method
  * @param {string} method - HTTP method (optional)
  * @param {callback} done
  */
-jsonapi.modelQueryConditions = function(req, model, method, done) {
+jsonapi.modelQueryConditions = function (req, model, method, done) {
   validateParams([{
     name: 'req', variable: req, required: true
   }, {
@@ -197,7 +195,7 @@ jsonapi.modelQueryConditions = function(req, model, method, done) {
  * @param {Object} relationships - Request relationships
  * @return {Object} Normalized relationships
  */
-jsonapi.normalizeRelationships = function(relationships) {
+jsonapi.normalizeRelationships = function (relationships) {
   relationships = Object.assign({}, relationships);
 
   // Remove any relationships with empty data properties
@@ -220,10 +218,10 @@ jsonapi.normalizeRelationships = function(relationships) {
  * @param {Object} app - Express app
  * @param {Object} Model - Mongoose model
  */
-jsonapi.routeModelDeleteObjectResource = function(app, Model) {
+jsonapi.routeModelDeleteObjectResource = function (app, Model) {
   this.routeModelResource(app, Model, 'delete', '/' + _.kebabCase(Model.modelType()) + '/:id', (req, res) => {
     var getConditions = (done) => {
-      this.compiledQueryConditions(req, { _id: req.params.id }, Model, 'delete', done);
+      this.compiledQueryConditions(req, {_id: req.params.id}, Model, 'delete', done);
     };
 
     var findOne = (conditions, done) => {
@@ -236,7 +234,7 @@ jsonapi.routeModelDeleteObjectResource = function(app, Model) {
       } else if (!document) {
         this.sendNotFound(res);
       } else {
-        document.remove(function(error) {
+        document.remove(function (error) {
           if (error) {
             res.status(500).send();
           } else {
@@ -253,10 +251,10 @@ jsonapi.routeModelDeleteObjectResource = function(app, Model) {
  * @param {Object} app - Express app
  * @param {model} model - Mongoose model
  */
-jsonapi.routeModelGetObjectResource = function(app, Model) {
+jsonapi.routeModelGetObjectResource = function (app, Model) {
   this.routeModelResource(app, Model, 'get', '/' + _.kebabCase(Model.modelType()) + '/:id', (req, res) => {
     var getConditions = (done) => {
-      this.compiledQueryConditions(req, { _id: req.params.id }, Model, 'get', done);
+      this.compiledQueryConditions(req, {_id: req.params.id}, Model, 'get', done);
     };
 
     var findOne = (conditions, done) => {
@@ -266,7 +264,10 @@ jsonapi.routeModelGetObjectResource = function(app, Model) {
 
     async.waterfall([getConditions, findOne], (error, document) => {
       if (error) {
-        logger.error('Resource router failed to query for object', { model: Model.modelName, error: error.message });
+        logger.error('Resource router failed to query for object', {
+          model: Model.modelName,
+          error: error.message
+        });
         this.sendError(res);
       } else if (!document) {
         this.sendNotFound(res);
@@ -282,12 +283,12 @@ jsonapi.routeModelGetObjectResource = function(app, Model) {
  * @param {Object} app - Express app
  * @param {model} model - Mongoose model
  */
-jsonapi.routeModelGetObjectsResource = function(app, Model) {
+jsonapi.routeModelGetObjectsResource = function (app, Model) {
   this.routeModelResource(app, Model, 'get', '/' + _.kebabCase(Model.modelType()), (req, res) => {
     var compileConditions = (done) => {
       var conditions = {};
       var filter = req.query.filter ? req.query.filter : {};
-      
+
       try {
         if (filter.relationships) {
           Object.keys(filter.relationships).forEach((modelName) => {
@@ -318,7 +319,7 @@ jsonapi.routeModelGetObjectsResource = function(app, Model) {
         if (Model.jsonapi.sort) {
           query.sort(Model.jsonapi.sort);
         } else {
-          query.sort({ createdAt: -1 });
+          query.sort({createdAt: -1});
         }
       }
 
@@ -330,9 +331,12 @@ jsonapi.routeModelGetObjectsResource = function(app, Model) {
       query.exec(done);
     };
 
-    async.waterfall([compileConditions, executeQuery], function(error, documents) {
+    async.waterfall([compileConditions, executeQuery], function (error, documents) {
       if (error) {
-        logger.error('Resource router failed to query for objects', { model: Model.modelName, error: error.message });
+        logger.error('Resource router failed to query for objects', {
+          model: Model.modelName,
+          error: error.message
+        });
         jsonapi.sendError(res, error, 400);
       } else {
         jsonapi.sendDocuments(res, documents);
@@ -346,18 +350,18 @@ jsonapi.routeModelGetObjectsResource = function(app, Model) {
  * @param {Object} app - Express app
  * @param {Object} Model - Mongoose model
  */
-jsonapi.routeModelPatchObjectResource = function(app, Model) {
+jsonapi.routeModelPatchObjectResource = function (app, Model) {
   this.routeModelResource(app, Model, 'patch', '/' + _.kebabCase(Model.modelType()) + '/:id', (req, res) => {
     var validate = (done) => {
       this.validateQueryData(req, req.body.data, Model, 'patch', done);
     };
 
     var getConditions = (done) => {
-      this.compiledQueryConditions(req, { _id: req.params.id }, Model, 'patch', done);
+      this.compiledQueryConditions(req, {_id: req.params.id}, Model, 'patch', done);
     };
 
     var findOneAndUpdate = (conditions, done) => {
-      Model.findOneAndUpdate(conditions, _.camelCasedKeys(req.body.data.attributes), { new: true }, done);
+      Model.findOneAndUpdate(conditions, _.camelCasedKeys(req.body.data.attributes), {new: true}, done);
     };
 
     var addRelationships = (document, done) => {
@@ -369,7 +373,7 @@ jsonapi.routeModelPatchObjectResource = function(app, Model) {
         return done(undefined, document);
       }
 
-      this.saveRelationshipsToDocument(document, this.normalizeRelationships(req.body.data.relationships), function(error) {
+      this.saveRelationshipsToDocument(document, this.normalizeRelationships(req.body.data.relationships), function (error) {
         done(error, document);
       });
     };
@@ -382,7 +386,7 @@ jsonapi.routeModelPatchObjectResource = function(app, Model) {
 
     var executePostRoutine = (document, done) => {
       if (Model.jsonapi.patch && Model.jsonapi.patch.post) {
-        Model.jsonapi.patch.post(req, res, document, function(error, req, res, document) {
+        Model.jsonapi.patch.post(req, res, document, function (error, req, res, document) {
           done(error, document);
         });
       } else {
@@ -421,10 +425,10 @@ jsonapi.routeModelPatchObjectResource = function(app, Model) {
  * @param {Object} Model - Mongoose model
  */
 
-jsonapi.routeModelPostObjectResource = function(app, Model) {
-debug ("routeModelPostObjectResource -- Model = ",Model.collection.collectionName);
+jsonapi.routeModelPostObjectResource = function (app, Model) {
+  debug('routeModelPostObjectResource -- Model = ', Model.collection.collectionName);
 
-  this.routeModelResource(app, Model, 'post', '/'+ _.kebabCase(Model.modelType()), (req, res) => {
+  this.routeModelResource(app, Model, 'post', '/' + _.kebabCase(Model.modelType()), (req, res) => {
     /**
      * Validates all available attributes (TODO: and relationships)
      */
@@ -456,7 +460,7 @@ debug ("routeModelPostObjectResource -- Model = ",Model.collection.collectionNam
         return done(undefined, document);
       }
 
-      this.saveRelationshipsToDocument(document, this.normalizeRelationships(req.body.data.relationships), function(error) {
+      this.saveRelationshipsToDocument(document, this.normalizeRelationships(req.body.data.relationships), function (error) {
         done(error, document);
       });
     };
@@ -483,11 +487,11 @@ debug ("routeModelPostObjectResource -- Model = ",Model.collection.collectionNam
      * Executes any available post-POST routine available for Model
      */
     var executePostRoutine = (document, done) => {
-        debug("executePostRoutine... ",Model.collection.collectionName);
+      debug('executePostRoutine... ', Model.collection.collectionName);
 
-        if (Model.jsonapi.post && Model.jsonapi.post.post) {
+      if (Model.jsonapi.post && Model.jsonapi.post.post) {
 
-          Model.jsonapi.post.post(req, res, document, function(error) {
+        Model.jsonapi.post.post(req, res, document, function (error) {
           done(error, document);
         });
       } else {
@@ -524,9 +528,11 @@ debug ("routeModelPostObjectResource -- Model = ",Model.collection.collectionNam
  * @param {string} path - Path to resource
  * @param {function} done - Express route callback expecting req and res as parameters
  */
-jsonapi.routeModelResource = function(app, model, method, path, done) {
-  debug("jsonapi.routeModelResource -- method = %s, path = %s",method, path);
-  if (!model.jsonapi || !model.jsonapi[method]) { return; }
+jsonapi.routeModelResource = function (app, model, method, path, done) {
+  debug('jsonapi.routeModelResource -- method = %s, path = %s', method, path);
+  if (!model.jsonapi || !model.jsonapi[method]) {
+    return;
+  }
 
   var validateRequestBody = false;
 
@@ -548,7 +554,7 @@ jsonapi.routeModelResource = function(app, model, method, path, done) {
  * @param {Object} document - Mongoose document
  * @returns {Object} object - JSON API relationship object
  */
-jsonapi.resourceIdentifierObjectFromDocument = function(document) {
+jsonapi.resourceIdentifierObjectFromDocument = function (document) {
   if (!document) {
     throw new Error('No document provided');
   }
@@ -566,7 +572,7 @@ jsonapi.resourceIdentifierObjectFromDocument = function(document) {
  * @param {string} name - Name of relationship (e.g. "author")
  * @param {string} [type=to-many] - Type of relationship (either "to-many" or "to-one")
  */
-jsonapi.addRelationshipToResourceObject = function(object, document, name, type) {
+jsonapi.addRelationshipToResourceObject = function (object, document, name, type) {
   validateParams([{
     name: 'object', variable: object, required: true, requiredType: 'object'
   }, {
@@ -610,7 +616,7 @@ jsonapi.addRelationshipToResourceObject = function(object, document, name, type)
  * @param {Object} errors - Errors (optional)
  * @param {number} [status=200] - HTTP status code
  */
-jsonapi.sendResponseDocument = function(res, data, included, errors, status) {
+jsonapi.sendResponseDocument = function (res, data, included, errors, status) {
   if (!status) {
     status = 200;
   }
@@ -624,7 +630,7 @@ jsonapi.sendResponseDocument = function(res, data, included, errors, status) {
  * @param {Object} data – Principal data
  * @param {Object} included – Included resources (optional)
  */
-jsonapi.sendData = function(res, data, included) {
+jsonapi.sendData = function (res, data, included) {
   if (!data) {
     throw new Error('No data parameter provided');
   }
@@ -638,7 +644,7 @@ jsonapi.sendData = function(res, data, included) {
  * @param {Object} document - Model document
  * @param {number} status - HTTP status code
  */
-jsonapi.sendDocument = function(res, document, status) {
+jsonapi.sendDocument = function (res, document, status) {
   this.sendResponseDocument(res, jsonapi.resourceObjectFromDocument(document), null, null, status);
 };
 
@@ -647,7 +653,7 @@ jsonapi.sendDocument = function(res, document, status) {
  * @param {Object} res – Express response object
  * @param {Object} documents - Array of model documents
  */
-jsonapi.sendDocuments = function(res, documents) {
+jsonapi.sendDocuments = function (res, documents) {
   var objects = documents.map((document) => {
     return jsonapi.resourceObjectFromDocument(document);
   });
@@ -659,7 +665,7 @@ jsonapi.sendDocuments = function(res, documents) {
  * Sends response document with 404 status code
  * @param {Object} res – Express response object
  */
-jsonapi.sendNotFound = function(res) {
+jsonapi.sendNotFound = function (res) {
   this.sendResponseDocument(res, null, null, null, 404);
 };
 
@@ -669,7 +675,7 @@ jsonapi.sendNotFound = function(res) {
  * @param {Error} error - Error object (optional) with optional errors property
  * @param {number} [status=500] - HTTP status code
  */
-jsonapi.sendError = function(res, error, status) {
+jsonapi.sendError = function (res, error, status) {
   if (error) {
     var errors = error.errors;
 
@@ -678,13 +684,13 @@ jsonapi.sendError = function(res, error, status) {
     }
 
     // Convert object of errors to array if needed
-    if(typeof errors === 'object' && !Array.isArray(errors)) {
-      errors = Object.keys(errors).map(function(key) {
+    if (typeof errors === 'object' && !Array.isArray(errors)) {
+      errors = Object.keys(errors).map(function (key) {
         return errors[key];
       });
     }
 
-    errors = errors.map(function(error) {
+    errors = errors.map(function (error) {
       return {
         title: error.message
       };
@@ -701,13 +707,13 @@ jsonapi.sendError = function(res, error, status) {
 /**
  * Establish middleware that generates routes conformant to the JSON API specification for app and Mongoose models
  */
-jsonapi.routeModelResources = function() {
+jsonapi.routeModelResources = function () {
   /**
    * Negotiate the Content-Type and Accept request headers
    * @see {@link http://jsonapi.org/format/#content-negotiation-servers}
    */
-  app.use(function(req, res, next) {
-    var isModifiedContentType = function(contentType) {
+  app.use(function (req, res, next) {
+    var isModifiedContentType = function (contentType) {
       return (/application\/vnd\.api\+json/.test(contentType) && contentType !== 'application/vnd.api+json');
     };
 
@@ -718,7 +724,7 @@ jsonapi.routeModelResources = function() {
 
     if (req.get('Accept')) {
       var badAccept = false;
-      req.get('Accept').split(';').forEach(function(accept) {
+      req.get('Accept').split(';').forEach(function (accept) {
         badAccept = (isModifiedContentType(accept));
       });
 
@@ -731,7 +737,7 @@ jsonapi.routeModelResources = function() {
     next();
   });
 
-  app.use(function(req, res, next) {
+  app.use(function (req, res, next) {
     res.set('Content-Type', 'application/vnd.api+json');
     next();
   });
@@ -740,7 +746,7 @@ jsonapi.routeModelResources = function() {
    * Establish body-parser middleware with JSON API error handling
    */
   app.use((req, res, next) => {
-    var json = bodyParser.json({ type: ['application/vnd.api+json', 'application/json'] });
+    var json = bodyParser.json({type: ['application/vnd.api+json', 'application/json']});
 
     json(req, res, (error) => {
       if (error) {
@@ -757,10 +763,10 @@ jsonapi.routeModelResources = function() {
   });
 
   // Route requests for each model with Mongoose compatability and jsonapi configuration
-    // that is: set up the routes for specific paths
+  // that is: set up the routes for specific paths
   Object.keys(models).forEach((key) => {
     var model = models[key];
-    
+
     if (model.modelName && model.jsonapi) {
       this.routeModelGetObjectsResource(app, model);
       this.routeModelGetObjectResource(app, model);
@@ -779,7 +785,7 @@ jsonapi.routeModelResources = function() {
  * @param {Object} middleware - Dictionary of middleware boolean or function values to use for route
  * @param {function} done - Express route callback expecting req and res as parameters
  */
-jsonapi.routeResource = function(app, method, path, middleware, done) {
+jsonapi.routeResource = function (app, method, path, middleware, done) {
   //debug("jsonapi.routeResource: ",app, method, path, middleware, done);
   var requireAuthentication = (req, res, next) => {
     if (middleware && middleware.requireAuthentication) {
@@ -816,8 +822,8 @@ jsonapi.routeResource = function(app, method, path, middleware, done) {
  * @param {Object} document - Key-value object of relationships
  * @param {callback} done
  */
-jsonapi.saveRelationshipsToDocument = function(document, relationships, done) {
-  var validate = function(done) {
+jsonapi.saveRelationshipsToDocument = function (document, relationships, done) {
+  var validate = function (done) {
     validateParams([{
       name: 'document', variable: document, required: true, requiredType: ['object', 'constructor']
     }, {
@@ -827,11 +833,11 @@ jsonapi.saveRelationshipsToDocument = function(document, relationships, done) {
     }], done);
   };
 
-  var saveRelationshipsToDocument = function(done) {
+  var saveRelationshipsToDocument = function (done) {
     var Model = models[document.modelId()];
-    
-    async.forEachOf(relationships, function(relationship, relationshipName, done) {
-      var validateRelationship = function(done) {
+
+    async.forEachOf(relationships, function (relationship, relationshipName, done) {
+      var validateRelationship = function (done) {
         var errors = [];
 
         if (!Model.schema.tree[relationshipName]) {
@@ -858,9 +864,9 @@ jsonapi.saveRelationshipsToDocument = function(document, relationships, done) {
         done(error);
       };
 
-      var addRelationshipToDocument = function(done) {
-        var validateAndAddResourceIdentifierObjectRelationship = function(resourceObject, done) {
-          var validateResourceIdentifierObject = function(done) {
+      var addRelationshipToDocument = function (done) {
+        var validateAndAddResourceIdentifierObjectRelationship = function (resourceObject, done) {
+          var validateResourceIdentifierObject = function (done) {
             var errors = [];
 
             if (!resourceObject.id) {
@@ -896,7 +902,7 @@ jsonapi.saveRelationshipsToDocument = function(document, relationships, done) {
             done(error);
           };
 
-          var addResourceIdentifierToDocument = function(done) {
+          var addResourceIdentifierToDocument = function (done) {
             if (Array.isArray(Model.schema.tree[relationshipName]) && document[relationshipName].indexOf(resourceObject.id) === -1) {
               document[relationshipName].push(resourceObject.id);
             } else if (!Array.isArray(Model.schema.tree[relationshipName])) {
@@ -906,7 +912,7 @@ jsonapi.saveRelationshipsToDocument = function(document, relationships, done) {
             done();
           };
 
-          async.series([validateResourceIdentifierObject, addResourceIdentifierToDocument], function(error) {
+          async.series([validateResourceIdentifierObject, addResourceIdentifierToDocument], function (error) {
             done(error, document);
           });
         };
@@ -922,7 +928,7 @@ jsonapi.saveRelationshipsToDocument = function(document, relationships, done) {
     }, done);
   };
 
-  async.series([validate, saveRelationshipsToDocument], function(error) {
+  async.series([validate, saveRelationshipsToDocument], function (error) {
     done(error, document);
   });
 };
@@ -935,7 +941,7 @@ jsonapi.saveRelationshipsToDocument = function(document, relationships, done) {
  * @param {string} method - HTTP method (optional)
  * @param {function} done - Error-first callback function expecting no other parameters
  */
-jsonapi.validateQueryData = function(req, data, model, method, done) {
+jsonapi.validateQueryData = function (req, data, model, method, done) {
   var getConditions = (done) => {
     this.modelQueryConditions(req, model, method, done);
   };
@@ -943,9 +949,9 @@ jsonapi.validateQueryData = function(req, data, model, method, done) {
   var validateQueryData = (conditions, done) => {
     var errors = [];
 
-    Object.keys(conditions).forEach(function(key) {
+    Object.keys(conditions).forEach(function (key) {
       var isEqualObjectId;
-      
+
       try {
         isEqualObjectId = ObjectId(_.get(data, `relationships.${key}.data.id`)).equals(conditions[key]);
       } catch (error) {
@@ -974,7 +980,7 @@ jsonapi.validateQueryData = function(req, data, model, method, done) {
  * Returns Express route middleware that validates request body against JSON API specification and URL for optional model
  * @param {Object} model - Mongoose model (optional)
  */
-jsonapi.validateRequestBody = function(model) {
+jsonapi.validateRequestBody = function (model) {
   return (req, res, next) => {
     var errors = [];
 

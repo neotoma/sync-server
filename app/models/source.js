@@ -8,47 +8,45 @@ var nameMethods = require('./methods/name');
 // a way to interporlate strings to get a final URL
 var templateCompiler = require('es6-template-strings');
 var SourceContentType = require('app/models/sourceContentType');
-var debug= require('debug');
 
 var methods = Object.assign({
-    itemDataObjectsFromPagePath: function(contentType) {
-        return templateCompiler(this.itemDataObjectsFromPagePathTemplate, {
-            contentTypePluralCamelName: contentType ? contentType.pluralCamelName() : undefined,
-            contentTypePluralLowercaseName: contentType ? contentType.pluralLowercaseName() : undefined
-        });
-    },
+  itemDataObjectsFromPagePath: function (contentType) {
+    return templateCompiler(this.itemDataObjectsFromPagePathTemplate, {
+      contentTypePluralCamelName: contentType ? contentType.pluralCamelName() : undefined,
+      contentTypePluralLowercaseName: contentType ? contentType.pluralLowercaseName() : undefined
+    });
+  },
 
-    totalItemsAvailableFromPagePath: function(contentType) {
-        return templateCompiler(this.totalItemsAvailableFromPagePathTemplate, {
-            contentTypePluralCamelName: contentType ? contentType.pluralCamelName() : undefined,
-            contentTypePluralLowercaseName: contentType ? contentType.pluralLowercaseName() : undefined
-        });
-    },
+  totalItemsAvailableFromPagePath: function (contentType) {
+    return templateCompiler(this.totalItemsAvailableFromPagePathTemplate, {
+      contentTypePluralCamelName: contentType ? contentType.pluralCamelName() : undefined,
+      contentTypePluralLowercaseName: contentType ? contentType.pluralLowercaseName() : undefined
+    });
+  },
 
-    itemsGetUrl: function(itemsGetUrlTemplate,$properties) {
+  itemsGetUrl: function (itemsGetUrlTemplate, $properties) {
 
-        if ($properties.next) {
-            return $properties.next;
-        }
-            console.log("URL to submit == %s", templateCompiler(itemsGetUrlTemplate, $properties))
-
-        return templateCompiler(itemsGetUrlTemplate, $properties);
-    },
-
-    /**
-     * @param done {Function} A callback that will be passed a the error (Error) and optionally the sourceContentTypes results
-     */
-    getSourceContentTypesForSource: function( done){
-        SourceContentType.find({source:this.id}, function(err,sourceContentTypes){
-            if (err) {
-                return done(err);
-            } else {
-
-                done(err,sourceContentTypes);
-            }
-        });
-
+    if ($properties.next) {
+      return $properties.next;
     }
+
+    return templateCompiler(itemsGetUrlTemplate, $properties);
+  },
+
+  /**
+   * @param done {Function} A callback that will be passed a the error (Error) and optionally the sourceContentTypes results
+   */
+  getSourceContentTypesForSource: function (done) {
+    SourceContentType.find({source: this.id}, function (err, sourceContentTypes) {
+      if (err) {
+        return done(err);
+      } else {
+
+        done(err, sourceContentTypes);
+      }
+    });
+
+  }
 }, nameMethods);
 
 /**
@@ -57,7 +55,6 @@ var methods = Object.assign({
  * @property {number} apiVersion - Version of API to use for pulling items from source
  * @property {string=} clientId - OAuth 2.0 client ID
  * @property {string=} clientSecret - OAuth 2.0 client secret
- * @property {module:models/contentType~ContentType[]} contentTypes - ContentTypes supported by source
  * @property {boolean} [itemStorageEnabled=false] - Whether source is enabled for storing items in storage
  * @property {string} [host] - Host URL for source (e.g. "api.foursquare.com")
  * @property {number} [itemsLimit=25] - Maximum number of items to pull from source in a single page request
@@ -69,30 +66,27 @@ var methods = Object.assign({
  * @property {string} [totalItemsAvailableFromPagePathTemplate=response.${contentTypePluralCamelName}.count] - String template used to generate object paths to value representing total items available for contentType within pages returned from source
  */
 module.exports = modelFactory.new('Source', {
-    apiVersion: String,
-    authScope: Array,
-    clientId: String,
-    clientSecret: String,
- //   contentTypes: [{ ref: 'ContentType' }],
-    itemDataObjectsFromPagePathTemplate: { type: String, default: 'data' },
-    // this is where you specifiy what you want from source
- //   itemsGetUrlTemplate: { type: String, default: 'https://${host}/${contentTypePluralCamelName}?access_token=${accessToken}&limit=${limit}&offset=${offset}' },
+  apiVersion: String,
+  authScope: Array,
+  clientId: String,
+  clientSecret: String,
+  itemDataObjectsFromPagePathTemplate: {type: String, default: 'data'},
 
 
-    itemStorageEnabled: { type: Boolean, default: false },
-    host: String,
-    itemsLimit: { type: Number, default: 25 },
-    logoGlyphPath: String,
-    name: { type: String, required: true },
-    passportStrategy: String,
-    slug: String,
-    totalItemsAvailableFromPagePathTemplate: String
+  itemStorageEnabled: {type: Boolean, default: false},
+  host: String,
+  itemsLimit: {type: Number, default: 25},
+  logoGlyphPath: String,
+  name: {type: String, required: true},
+  passportStrategy: String,
+  slug: String,
+  totalItemsAvailableFromPagePathTemplate: String
 }, {
-    jsonapi: {
-        delete: 'admin',
-        filteredProperties: ['clientId', 'clientSecret'],
-        get: 'public',
-        patch: 'admin',
-        post: 'admin'
-    }
+  jsonapi: {
+    delete: 'admin',
+    filteredProperties: ['clientId', 'clientSecret'],
+    get: 'public',
+    patch: 'admin',
+    post: 'admin'
+  }
 }, methods);
