@@ -37,7 +37,7 @@ var queue = kue.createQueue();
 
 const STORE_ITEM_DATA = 'storeItemData';
 
-queue.process(STORE_ITEM_DATA, function (queueJob, done) {
+queue.process(STORE_ITEM_DATA, function(queueJob, done) {
   debug('process queueJob %s', queueJob.id);
 
   var getItem = (done) => {
@@ -90,13 +90,13 @@ queue.on('error', (error) => {
  * @param {string} url - URL of resource with extension that corresponds to a supported media type.
  * @param {module:controllers/item~resourceCallback} done
  */
-module.exports.getResource = function (url, done) {
+module.exports.getResource = function(url, done) {
   var log = logger.scopedLog();
 
-  var validate = function (done) {
+  var validate = function(done) {
     validateParams([{
       name: 'url', variable: url, required: true, requiredType: 'string', regex: urlRegex
-    }], function (error) {
+    }], function(error) {
       if (!error && module.exports.hasSupportedMediaType(url) === false) {
         error = new Error('Parameter url indicates unsupported media type');
       }
@@ -105,7 +105,7 @@ module.exports.getResource = function (url, done) {
     });
   };
 
-  var setupLog = function (done) {
+  var setupLog = function(done) {
     debug.start('getResource %s', url);
 
     log = logger.scopedLog({
@@ -115,7 +115,7 @@ module.exports.getResource = function (url, done) {
     done();
   };
 
-  var getResource = function (done) {
+  var getResource = function(done) {
     var mediaType = mime.lookup(url);
     mediaType = mediaType ? mediaType : 'application/json';
 
@@ -124,7 +124,7 @@ module.exports.getResource = function (url, done) {
       headers: {
         'Content-Type': mediaType
       }
-    }, function (error, res, body) {
+    }, function(error, res, body) {
       if (error) {
         return done(error);
       } else if (request.statusCodeError(res.statusCode)) {
@@ -157,7 +157,7 @@ module.exports.getResource = function (url, done) {
     validate,
     setupLog,
     getResource
-  ], function (error, resource) {
+  ], function(error, resource) {
     if (error) {
       log('error', 'Item controller failed to get resource', {error: error});
     }
@@ -171,7 +171,7 @@ module.exports.getResource = function (url, done) {
  * @param {string} url - URL
  * @returns {boolean|undefined} Whether media type supported by controller operations
  */
-module.exports.hasSupportedMediaType = function (url) {
+module.exports.hasSupportedMediaType = function(url) {
   validateParams([{
     name: 'url', variable: url, required: true, requiredType: 'string'
   }]);
@@ -195,7 +195,7 @@ module.exports.hasSupportedMediaType = function (url) {
  * @param {ContentType} contentType
  * @returns {Object[]} ItemDataObjects
  */
-module.exports.itemDataObjectsFromPage = function (page, source, contentType) {
+module.exports.itemDataObjectsFromPage = function(page, source, contentType) {
   validateParams([{
     name: 'page', variable: page, required: true, requiredType: 'object'
   }, {
@@ -221,7 +221,7 @@ module.exports.itemDataObjectsFromPage = function (page, source, contentType) {
  * @param {Object} pagination - Pagination used to make request.
  * @returns {string} URL for making a GET request
  */
-module.exports.itemsGetUrl = function (source, sourceContentType, userSourceAuth, pagination) {
+module.exports.itemsGetUrl = function(source, sourceContentType, userSourceAuth, pagination) {
   validateParams([{
     name: 'source', variable: source, required: true, requiredProperties: ['host']
   }, {
@@ -261,7 +261,7 @@ module.exports.itemsGetUrl = function (source, sourceContentType, userSourceAuth
  * @param {Object} contentType - ContentType of items.
  * @returns {number} Total number of items available.
  */
-module.exports.totalItemsAvailableFromPage = function (page, source, contentType) {
+module.exports.totalItemsAvailableFromPage = function(page, source, contentType) {
   validateParams([{
     name: 'page', variable: page, required: true, requiredType: 'object'
   }, {
@@ -285,7 +285,7 @@ module.exports.totalItemsAvailableFromPage = function (page, source, contentType
  * @param {Object} page - Items page.
  * @returns {error} Error
  */
-module.exports.itemsPageError = function (page) {
+module.exports.itemsPageError = function(page) {
   validateParams([{
     name: 'page', variable: page, required: true, requiredType: 'object'
   }]);
@@ -313,7 +313,7 @@ module.exports.itemsPageError = function (page) {
  * @param {Object} contentType - ContentType of current items page.
  * @returns {Object} Pagination for next items page.
  */
-module.exports.itemsPageNextPagination = function (page, pagination, contentType) {
+module.exports.itemsPageNextPagination = function(page, pagination, contentType) {
   validateParams([{
     name: 'page', variable: page, required: true, requiredType: 'object'
   }, {
@@ -355,14 +355,14 @@ module.exports.itemsPageNextPagination = function (page, pagination, contentType
  * @param {Object} data - Raw item data from source.
  * @param {function} done - Error-first callback function expecting file system path as second parameter.
  */
-module.exports.storagePath = function (item, data, done) {
-  var validate = function (done) {
+module.exports.storagePath = function(item, data, done) {
+  var validate = function(done) {
     validateParams([{
       name: 'item', variable: item, required: true, requiredProperties: ['id', 'contentType']
     }], done);
   };
 
-  var storagePath = function (done) {
+  var storagePath = function(done) {
     var path = '/' + item.source.kebabName() + '/' + item.contentType.pluralKebabName() + '/' + item.slug(data) + '.json';
     debug.success('storagePath: %s', path);
     done(undefined, path);
@@ -381,10 +381,10 @@ module.exports.storagePath = function (item, data, done) {
  * @param {Job} [job] - Job for which to store items.
  * @param {callback} done
  */
-module.exports.storeAllForUserStorageSource = function (user, source, storage, job, done) {
+module.exports.storeAllForUserStorageSource = function(user, source, storage, job, done) {
   var log = logger.scopedLog();
 
-  var validate = function (done) {
+  var validate = function(done) {
     validateParams([{
       name: 'user', variable: user, required: true, requiredProperties: ['id']
     }, {
@@ -394,7 +394,7 @@ module.exports.storeAllForUserStorageSource = function (user, source, storage, j
     }], done);
   };
 
-  var setupLog = function (done) {
+  var setupLog = function(done) {
     debug.start('storeAllForUserStorageSource');
 
     log = logger.scopedLog({
@@ -406,14 +406,14 @@ module.exports.storeAllForUserStorageSource = function (user, source, storage, j
     done();
   };
 
-  var storeAllForUserStorageSourceContentType = function (sourceContentType, done) {
+  var storeAllForUserStorageSourceContentType = function(sourceContentType, done) {
     module.exports.storeAllForUserStorageSourceContentType(user, source, storage, sourceContentType, job, done);
   };
 
 
-  let getSourceContentTypesFunction = function (done) {
+  let getSourceContentTypesFunction = function(done) {
 
-    source.getSourceContentTypesForSource(function (err, sourceContentTypes) {
+    source.getSourceContentTypesForSource(function(err, sourceContentTypes) {
       if (err) {
         return done(err);
       } else {
@@ -422,13 +422,13 @@ module.exports.storeAllForUserStorageSource = function (user, source, storage, j
     });
   };
 
-  var storeAllItems = function (sourceContentTypes, done) {
+  var storeAllItems = function(sourceContentTypes, done) {
     debug.start('storeAllItems (sourceContentTypes: %s)', sourceContentTypes.length);
     async.eachSeries(sourceContentTypes, storeAllForUserStorageSourceContentType, done);
   };
 
 
-  async.waterfall([validate, setupLog, getSourceContentTypesFunction, storeAllItems], function (error) {
+  async.waterfall([validate, setupLog, getSourceContentTypesFunction, storeAllItems], function(error) {
     if (error) {
       log('error', 'Item controller failed to store all items', {error: error.message});
     } else {
@@ -450,11 +450,11 @@ module.exports.storeAllForUserStorageSource = function (user, source, storage, j
  * @param {Job} [job] - Job for which to store items.
  * @param {callback} done
  */
-module.exports.storeAllForUserStorageSourceContentType = function (user, source, storage, sourceContentType, job, done) {
+module.exports.storeAllForUserStorageSourceContentType = function(user, source, storage, sourceContentType, job, done) {
   debug('storeAllForUserStorageSourceContentType, source = %s, storage = %s, sourceContentType = %s', source, storage, sourceContentType);
   var log = logger.scopedLog();
 
-  var validate = function (done) {
+  var validate = function(done) {
     validateParams([{
       name: 'user', variable: user, required: true, requiredProperties: ['id']
     }, {
@@ -466,7 +466,7 @@ module.exports.storeAllForUserStorageSourceContentType = function (user, source,
     }], done);
   };
 
-  var setupLog = function (done) {
+  var setupLog = function(done) {
     debug.start('storeAllForUserStorageSourceContentType');
 
     log = logger.scopedLog({
@@ -479,7 +479,7 @@ module.exports.storeAllForUserStorageSourceContentType = function (user, source,
     done();
   };
 
-  var storeAllItems = function (done) {
+  var storeAllItems = function(done) {
     var storeAllItemPages = function myself(error, pagination) {
       if (error) {
         if (done) {
@@ -497,7 +497,7 @@ module.exports.storeAllForUserStorageSourceContentType = function (user, source,
     storeAllItemPages(null, {offset: 0});
   };
 
-  async.series([validate, setupLog, storeAllItems], function (error) {
+  async.series([validate, setupLog, storeAllItems], function(error) {
     if (error) {
       debug.error('storeAllForUserStorageSourceContentType (message: %s)', error.message);
       log('error', 'Item controller failed to store all items', {error: error});
@@ -522,12 +522,12 @@ module.exports.storeAllForUserStorageSourceContentType = function (user, source,
  * @param {Job} [job] - Job for which to store items.
  * @param {callback} done
  */
-module.exports.storeItemsPage = function (user, source, storage, sourceContentType, pagination, job, done) {
+module.exports.storeItemsPage = function(user, source, storage, sourceContentType, pagination, job, done) {
 
   var log = logger.scopedLog();
   var ids, page, userSourceAuth;
 
-  var validate = function (done) {
+  var validate = function(done) {
     validateParams([{
       name: 'user', variable: user, required: true, requiredProperties: ['id']
     }, {
@@ -541,7 +541,7 @@ module.exports.storeItemsPage = function (user, source, storage, sourceContentTy
     }], done);
   };
 
-  var setupLog = function (done) {
+  var setupLog = function(done) {
     debug.start('## storeItemsPage (sourceContentType: %s, pagination: %o)', sourceContentType.id, pagination);
 
     ids = {
@@ -555,11 +555,11 @@ module.exports.storeItemsPage = function (user, source, storage, sourceContentTy
     done();
   };
 
-  var findUserSourceAuth = function (done) {
+  var findUserSourceAuth = function(done) {
     UserSourceAuth.findOne({
       user: user.id,
       source: source.id
-    }, function (error, foundUserSourceAuth) {
+    }, function(error, foundUserSourceAuth) {
       if (!foundUserSourceAuth && !error) {
         error = new Error('Failed to find userSourceAuth');
       }
@@ -572,11 +572,11 @@ module.exports.storeItemsPage = function (user, source, storage, sourceContentTy
   // get the page of date from URL
   // whcih will be converted INTO items
 
-  var getItemsPageResource = function (done) {
+  var getItemsPageResource = function(done) {
     module.exports.getResource(module.exports.itemsGetUrl(source, sourceContentType, userSourceAuth, pagination), done);
   };
 
-  var getItemDataObjects = function (resource, done) {
+  var getItemDataObjects = function(resource, done) {
     page = resource;
     var error = module.exports.itemsPageError(page);
 
@@ -598,9 +598,9 @@ module.exports.storeItemsPage = function (user, source, storage, sourceContentTy
     done(undefined, itemDataObjects);
   };
 
-  var persistItemDataObjects = function (itemDataObjects, done) {
+  var persistItemDataObjects = function(itemDataObjects, done) {
     var count = 0;
-    async.mapSeries(itemDataObjects, function (itemDataObject, done) {
+    async.mapSeries(itemDataObjects, function(itemDataObject, done) {
       count++;
       debug('persistItemDataObject #%s', count);
 
@@ -619,8 +619,8 @@ module.exports.storeItemsPage = function (user, source, storage, sourceContentTy
     }, done);
   };
 
-  var storeItemsData = function (itemPairs, done) {
-    async.each(itemPairs, function (itemPair, done) {
+  var storeItemsData = function(itemPairs, done) {
+    async.each(itemPairs, function(itemPair, done) {
       var jobAttributes = {
         itemId: itemPair.item.id,
         data: itemPair.data
@@ -643,7 +643,7 @@ module.exports.storeItemsPage = function (user, source, storage, sourceContentTy
     }, done);
   };
 
-  var determineNextPagination = function (done) {
+  var determineNextPagination = function(done) {
     done(undefined, module.exports.itemsPageNextPagination(page, pagination, sourceContentType.contentType));
   };
 
@@ -656,7 +656,7 @@ module.exports.storeItemsPage = function (user, source, storage, sourceContentTy
     persistItemDataObjects,
     storeItemsData,
     determineNextPagination
-  ], function (error, nextPagination) {
+  ], function(error, nextPagination) {
     if (error) {
       log('error', 'Item controller failed to store page of items', {error: error.message});
     } else {
@@ -677,11 +677,11 @@ module.exports.storeItemsPage = function (user, source, storage, sourceContentTy
  */
 
 // this creates the Item _about_ the data we're about to store, and saves this MongoDBx
-module.exports.persistItemDataObject = function (itemDataObject, relationships, done) {
+module.exports.persistItemDataObject = function(itemDataObject, relationships, done) {
   var conditions;
   var log = logger.scopedLog();
 
-  var validate = function (done) {
+  var validate = function(done) {
     validateParams([{
       name: 'itemDataObject', variable: itemDataObject, required: true, requiredProperties: ['id']
     }, {
@@ -692,7 +692,7 @@ module.exports.persistItemDataObject = function (itemDataObject, relationships, 
     }], done);
   };
 
-  var compileConditions = function (done) {
+  var compileConditions = function(done) {
     debug.start('persistItemDataObject');
 
     conditions = {
@@ -705,13 +705,13 @@ module.exports.persistItemDataObject = function (itemDataObject, relationships, 
     done();
   };
 
-  var setupLog = function (done) {
+  var setupLog = function(done) {
     log = logger.scopedLog(conditions);
     done();
   };
 
-  var persistItemDataObject = function (done) {
-    Item.findOrCreate(conditions, function (error, item) {
+  var persistItemDataObject = function(done) {
+    Item.findOrCreate(conditions, function(error, item) {
       if (error) {
         done(error);
       } else {
@@ -720,7 +720,7 @@ module.exports.persistItemDataObject = function (itemDataObject, relationships, 
     });
   };
 
-  var saveSourceCreatedAt = function (item, done) {
+  var saveSourceCreatedAt = function(item, done) {
     var createdAt = itemDataObject.createdAt ? itemDataObject.createdAt * 1000 : null;
     createdAt = !createdAt && itemDataObject.created_time ? itemDataObject.created_time : createdAt;
 
@@ -734,7 +734,7 @@ module.exports.persistItemDataObject = function (itemDataObject, relationships, 
     }
   };
 
-  var saveDescription = function (item, done) {
+  var saveDescription = function(item, done) {
     if (itemDataObject) {
       var parts = [];
 
@@ -763,13 +763,13 @@ module.exports.persistItemDataObject = function (itemDataObject, relationships, 
     }
   };
 
-  var determinePath = function (item, done) {
-    module.exports.storagePath(item, itemDataObject, function (error, path) {
+  var determinePath = function(item, done) {
+    module.exports.storagePath(item, itemDataObject, function(error, path) {
       done(error, path, item);
     });
   };
 
-  var savePath = function (path, item, done) {
+  var savePath = function(path, item, done) {
     item.storagePath = path;
     item.save((error) => {
       done(error, item);
@@ -785,7 +785,7 @@ module.exports.persistItemDataObject = function (itemDataObject, relationships, 
     saveDescription,
     determinePath,
     savePath
-  ], function (error, item) {
+  ], function(error, item) {
     if (error) {
       log('error', 'Item controller failed to persist item data object', {error: error});
     } else {
@@ -807,10 +807,10 @@ module.exports.persistItemDataObject = function (itemDataObject, relationships, 
  * @param {callback} done
  */
 // item is newly created item, data is the data for that item (from source)
-module.exports.storeItemData = function (item, data, job, done) {
+module.exports.storeItemData = function(item, data, job, done) {
   var log = logger.scopedLog();
 
-  var validate = function (done) {
+  var validate = function(done) {
     validateParams([{
       name: 'item', variable: item, required: true, requiredProperties: ['user', 'storage', 'save']
     }, {
@@ -818,20 +818,20 @@ module.exports.storeItemData = function (item, data, job, done) {
     }], done);
   };
 
-  var setupLog = function (done) {
+  var setupLog = function(done) {
     debug.start('storeItemData');
     log = logger.scopedLog({item: item.id});
     done();
   };
 
-  var updateStorageAttemptedAt = function (done) {
+  var updateStorageAttemptedAt = function(done) {
     item.storageAttemptedAt = Date.now();
-    item.save(function (error) {
+    item.save(function(error) {
       done(error);
     });
   };
   // ?? what is going on here??
-  var storeFile = function (done) {
+  var storeFile = function(done) {
     debug('storeFile : item.user = ', item.user);
     module.exports.storeFile(item.user, item.storage, item.storagePath, data, (error, storeFileResult) => {
       if (error) {
@@ -847,12 +847,12 @@ module.exports.storeItemData = function (item, data, job, done) {
     });
   };
 
-  var updateStorageProperties = function (storeFileResult, done) {
+  var updateStorageProperties = function(storeFileResult, done) {
     item.storageVerifiedAt = Date.now();
     item.storageFailedAt = undefined;
     item.storageBytes = storeFileResult.size;
     item.storagePath = storeFileResult.path_lower;
-    item.save(function (error) {
+    item.save(function(error) {
       if (!error) {
         debug.success('updateStorageProperties');
       }
@@ -861,7 +861,7 @@ module.exports.storeItemData = function (item, data, job, done) {
     });
   };
 
-  var updateJob = function (done) {
+  var updateJob = function(done) {
     if (job) {
       job.incrementTotalItemsStored();
     }
@@ -869,7 +869,7 @@ module.exports.storeItemData = function (item, data, job, done) {
     done();
   };
 
-  var notifyApp = function (done) {
+  var notifyApp = function(done) {
     if (app && typeof app.emit === 'function') {
       app.emit('storedItemData', item, job);
       debug('app notified of storedItemData');
@@ -888,13 +888,13 @@ module.exports.storeItemData = function (item, data, job, done) {
     updateStorageProperties,
     updateJob,
     notifyApp
-  ], function (error) {
+  ], function(error) {
     if (error) {
       log('error', 'Item controller failed to storeItemData', {error: error.message});
 
       if (item && item.save) {
         item.storageFailedAt = Date.now();
-        item.save(function (saveError) {
+        item.save(function(saveError) {
           if (saveError) {
             log('error', 'Item controller failed to update item after failure to store it', {error: saveError.message});
           }
@@ -919,10 +919,10 @@ module.exports.storeItemData = function (item, data, job, done) {
  * @param {Object} data - Object that represents data for file.
  * @param {function} done - Error-first callback function with object representing HTTP response body from storage request as second parameter.
  */
-module.exports.storeFile = function (user, storage, path, data, done) {
+module.exports.storeFile = function(user, storage, path, data, done) {
   var log = logger.scopedLog();
 
-  var validate = function (done) {
+  var validate = function(done) {
     validateParams([{
       name: 'user', variable: user, required: true, requiredProperties: ['id']
     }, {
@@ -933,7 +933,7 @@ module.exports.storeFile = function (user, storage, path, data, done) {
       name: 'data', variable: data, required: true, requiredType: ['buffer', 'object']
     }, {
       name: 'done', variable: done, required: true, requiredType: 'function'
-    }], function (error) {
+    }], function(error) {
       if (!error) {
         var mediaType = mime.lookup(path);
 
@@ -950,7 +950,7 @@ module.exports.storeFile = function (user, storage, path, data, done) {
     });
   };
 
-  var prepareData = function (done) {
+  var prepareData = function(done) {
     debug.start('storeFile (path: %s)', path);
     if (!(data instanceof Buffer)) {
       data = JSON.stringify(data);
@@ -959,7 +959,7 @@ module.exports.storeFile = function (user, storage, path, data, done) {
     done();
   };
 
-  var setupLog = function (done) {
+  var setupLog = function(done) {
     log = logger.scopedLog({
       path: path,
       storage: storage.id,
@@ -969,11 +969,11 @@ module.exports.storeFile = function (user, storage, path, data, done) {
     done();
   };
 
-  var findUserStorageAuth = function (done) {
+  var findUserStorageAuth = function(done) {
     UserStorageAuth.findOne({
       storage: storage.id,
       user: user.id
-    }, function (error, userStorageAuth) {
+    }, function(error, userStorageAuth) {
       if (!error && !userStorageAuth) {
         error = new Error('Failed to retrieve userStorageAuth');
       }
@@ -982,7 +982,7 @@ module.exports.storeFile = function (user, storage, path, data, done) {
     });
   };
 
-  var storeFile = function (userStorageAuth, done) {
+  var storeFile = function(userStorageAuth, done) {
     var options = {
       body: data,
       headers: storage.headers(path, userStorageAuth),
@@ -992,7 +992,7 @@ module.exports.storeFile = function (user, storage, path, data, done) {
     debug('storeFile:options %o', options);
 
     // what is going on t is ?????
-    request.post(options, function (error, res, body) {
+    request.post(options, function(error, res, body) {
       if (!error) {
         error = request.statusCodeError(res.statusCode);
       }
@@ -1013,7 +1013,7 @@ module.exports.storeFile = function (user, storage, path, data, done) {
     setupLog,
     findUserStorageAuth,
     storeFile
-  ], function (error, responseBody) {
+  ], function(error, responseBody) {
     if (error) {
       log('error', 'Item controller failed to store file', {error: error.message, responseBody: responseBody});
     }
