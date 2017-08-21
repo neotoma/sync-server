@@ -757,7 +757,7 @@ jsonapi.routeModelResources = function () {
     });
   });
 
-// default response
+  // default response
   app.get('/', (req, res) => {
     this.sendResponseDocument(res);
   });

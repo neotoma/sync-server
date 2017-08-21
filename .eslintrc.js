@@ -34,33 +34,30 @@ module.exports = {
       "always"
     ],
     "key-spacing": [
-      "warn",
-      "always"
+      "warn"
     ],
     "func-call-spacing": [
-      "warn",
-      "always"
+      "error",
+      "never"
     ], "block-spacing": [
-      "warn",
-      "always"
+      "error"
     ],
     "array-bracket-spacing": [
-      "warn",
-      "always"
+      "error"
     ], "keyword-spacing": [
-      "warn",
-      "always"
+      "error"
     ],
     "semi-spacing": [
-      "warn",
-      "always"
+      "error"
     ], "arrow-spacing": [
-      "warn",
-      "always"
+      "error"
     ],
     "no-tabs": [
-      "warn",
-      "always"
+      "error"
+    ],
+    "space-before-function-paren": [
+      "error",
+      "never"
     ]
 
 

@@ -10,21 +10,21 @@ var templateCompiler = require('es6-template-strings');
 var SourceContentType = require('app/models/sourceContentType');
 
 var methods = Object.assign({
-  itemDataObjectsFromPagePath: function (contentType) {
+  itemDataObjectsFromPagePath: function(contentType) {
     return templateCompiler(this.itemDataObjectsFromPagePathTemplate, {
       contentTypePluralCamelName: contentType ? contentType.pluralCamelName() : undefined,
       contentTypePluralLowercaseName: contentType ? contentType.pluralLowercaseName() : undefined
     });
   },
 
-  totalItemsAvailableFromPagePath: function (contentType) {
+  totalItemsAvailableFromPagePath: function(contentType) {
     return templateCompiler(this.totalItemsAvailableFromPagePathTemplate, {
       contentTypePluralCamelName: contentType ? contentType.pluralCamelName() : undefined,
       contentTypePluralLowercaseName: contentType ? contentType.pluralLowercaseName() : undefined
     });
   },
 
-  itemsGetUrl: function (itemsGetUrlTemplate, $properties) {
+  itemsGetUrl: function(itemsGetUrlTemplate, $properties) {
 
     if ($properties.next) {
       return $properties.next;
@@ -36,8 +36,8 @@ var methods = Object.assign({
   /**
    * @param done {Function} A callback that will be passed a the error (Error) and optionally the sourceContentTypes results
    */
-  getSourceContentTypesForSource: function (done) {
-    SourceContentType.find({source: this.id}, function (err, sourceContentTypes) {
+  getSourceContentTypesForSource: function(done) {
+    SourceContentType.find({source: this.id}, function(err, sourceContentTypes) {
       if (err) {
         return done(err);
       } else {

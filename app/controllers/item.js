@@ -629,7 +629,7 @@ module.exports.storeItemsPage = function (user, source, storage, sourceContentTy
       if (job) {
         jobAttributes.jobId = job.id;
       }
-// this is where the actual jobs queue "items" are created
+      // this is where the actual jobs queue "items" are created
       /// where the magic happens…
       var queueJob = queue.create(STORE_ITEM_DATA, jobAttributes).save((error) => {
         if (error) {
@@ -830,7 +830,7 @@ module.exports.storeItemData = function (item, data, job, done) {
       done(error);
     });
   };
-// ?? what is going on here??
+  // ?? what is going on here??
   var storeFile = function (done) {
     debug('storeFile : item.user = ', item.user);
     module.exports.storeFile(item.user, item.storage, item.storagePath, data, (error, storeFileResult) => {

@@ -206,7 +206,7 @@ module.exports = {
   one: function(modelId, overwriteProperties) {
     if (ObjectId.isValid(overwriteProperties)) {
       overwriteProperties = {
-        _id : overwriteProperties
+        _id: overwriteProperties
       };
     }
 

@@ -9,7 +9,7 @@ var modelFactory = require('app/factories/model');
 var queryConditions = require('./queryConditions');
 var sanitizeFilename = require('sanitize-filename');
 
-var convertToFilename = function (content) {
+var convertToFilename = function(content) {
   return _.toLower(emojiStrip(sanitizeFilename(content).replace(/[^\x00-\x7F]/g, '').replace('.', '').replace('-', ' ').replace(/ {2}/g, ' ').replace(/ +/g, '-').replace(/–|—+/g, '-')));
 };
 
@@ -50,7 +50,7 @@ module.exports = modelFactory.new('Item', {
     }
   }
 }, {
-  slug: function (data) {
+  slug: function(data) {
     var parts = [];
 
     if (data) {

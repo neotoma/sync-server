@@ -24,7 +24,7 @@ module.exports = modelFactory.new('Job', {
     type: String,
     required: true,
     validate: {
-      validator: function (value) {
+      validator: function(value) {
         return (['storeAllItemsForUserStorageSource', 'storeAllItemsForUserStorageSourceContentType'].indexOf(value) > -1);
       },
       message: '"{VALUE}" is not a supported name value'
@@ -65,8 +65,8 @@ module.exports = modelFactory.new('Job', {
     this.totalItemsAvailable = this.totalItemsAvailable ? total + this.totalItemsAvailable : total;
     this.save();
   }
-}, function (schema) {
-  schema.post('save', function () {
+}, function(schema) {
+  schema.post('save', function() {
     var itemController = require('app/controllers/item');
     var job = this;
 
@@ -74,11 +74,11 @@ module.exports = modelFactory.new('Job', {
       return;
     }
 
-    var populate = function (done) {
+    var populate = function(done) {
       job.populate('contentType source storage user', done);
     };
 
-    var runJob = function (done) {
+    var runJob = function(done) {
       switch (job.name) {
       case 'storeAllItemsForUserStorageSource':
         debug('running job "storeAllItemsForUserStorageSource": user %s, source %s, storage %s', job.user.id, job.source.id, job.storage.id);
