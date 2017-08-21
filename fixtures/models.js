@@ -292,7 +292,7 @@ module.exports = {
       post: 'admin'
     },
     mockProperties: () => {
-      return { 
+      return {
         _id: ObjectId(),
         apiVersion: '99',
         authScope: ['foo','bar'],

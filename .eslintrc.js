@@ -32,6 +32,37 @@ module.exports = {
     "semi": [
       "warn",
       "always"
+    ],
+    "key-spacing": [
+      "warn",
+      "always"
+    ],
+    "func-call-spacing": [
+      "warn",
+      "always"
+    ], "block-spacing": [
+      "warn",
+      "always"
+    ],
+    "array-bracket-spacing": [
+      "warn",
+      "always"
+    ], "keyword-spacing": [
+      "warn",
+      "always"
+    ],
+    "semi-spacing": [
+      "warn",
+      "always"
+    ], "arrow-spacing": [
+      "warn",
+      "always"
+    ],
+    "no-tabs": [
+      "warn",
+      "always"
     ]
+
+
   }
 };
