@@ -11,19 +11,19 @@ describe('itemController.getResource method', function() {
   assertions.function.callbacks.error(controller.getResource, [{
     when: 'no url parameter provided',
     params: [undefined],
-    error: 'Parameter url undefined or null',
+    error: 'Parameter url undefined or null'
   }, {
     when: 'url parameter not string',
     params: [3],
-    error: 'Parameter url is not a string',
+    error: 'Parameter url is not a string'
   }, {
     when: 'url parameter not a valid URL',
     params: ['asdf'],
-    error: 'Parameter url is not a properly formatted string',
+    error: 'Parameter url is not a properly formatted string'
   }, {
     when: 'url parameter has unsupported extension',
     params: ['http://example.com/foo.xyz'],
-    error: 'Parameter url indicates unsupported media type',
+    error: 'Parameter url indicates unsupported media type'
   }, {
     when: 'url parameter indicates non-existent resource',
     params: [wh.jsonUrl],

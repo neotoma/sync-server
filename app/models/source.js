@@ -24,7 +24,6 @@ var methods = Object.assign({
   },
 
   itemsGetUrl: function(itemsGetUrlTemplate, $properties) {
-
     if ($properties.next) {
       return $properties.next;
     }
@@ -41,11 +40,9 @@ var methods = Object.assign({
       if (err) {
         return done(err);
       } else {
-
         done(err, sourceContentTypes);
       }
     });
-
   }
 }, nameMethods);
 

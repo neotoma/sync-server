@@ -408,7 +408,6 @@ module.exports.storeAllForUserStorageSource = function(user, source, storage, jo
 
 
   let getSourceContentTypesFunction = function(done) {
-
     source.getSourceContentTypesForSource(function(err, sourceContentTypes) {
       if (err) {
         return done(err);
@@ -519,7 +518,6 @@ module.exports.storeAllForUserStorageSourceContentType = function(user, source, 
  * @param {callback} done
  */
 module.exports.storeItemsPage = function(user, source, storage, sourceContentType, pagination, job, done) {
-
   var log = logger.scopedLog();
   var ids, page, userSourceAuth;
 
@@ -696,7 +694,7 @@ module.exports.persistItemDataObject = function(itemDataObject, relationships, d
       storage: relationships.storage.id,
       source: relationships.source.id,
       contentType: relationships.sourceContentType.contentType.id,
-      sourceItem: itemDataObject.id,
+      sourceItem: itemDataObject.id
     };
     done();
   };
@@ -948,6 +946,7 @@ module.exports.storeFile = function(user, storage, path, data, done) {
 
   var prepareData = function(done) {
     debug.start('storeFile (path: %s)', path);
+
     if (!(data instanceof Buffer)) {
       data = JSON.stringify(data);
     }

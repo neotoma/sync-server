@@ -95,7 +95,6 @@ module.exports = ContactVerificationRequest = modelFactory.new('ContactVerificat
           _id: ObjectId(req.body.data.id),
           code: req.body.data.attributes.code
         }, (error, contactVerificationRequest) => {
-
           if (!error && !contactVerificationRequest) {
             error = new Error('No contactVerificationRequest found with id and code');
           }
@@ -108,7 +107,7 @@ module.exports = ContactVerificationRequest = modelFactory.new('ContactVerificat
             });
           }
         });
-      },
+      }
     },
     post: {
       allowed: 'public',

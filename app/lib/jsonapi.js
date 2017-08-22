@@ -485,7 +485,6 @@ jsonapi.routeModelPostObjectResource = function(app, Model) {
       debug('executePostRoutine... ', Model.collection.collectionName);
 
       if (Model.jsonapi.post && Model.jsonapi.post.post) {
-
         Model.jsonapi.post.post(req, res, document, function(error) {
           done(error, document);
         });
@@ -525,6 +524,7 @@ jsonapi.routeModelPostObjectResource = function(app, Model) {
  */
 jsonapi.routeModelResource = function(app, model, method, path, done) {
   debug('jsonapi.routeModelResource -- method = %s, path = %s', method, path);
+
   if (!model.jsonapi || !model.jsonapi[method]) {
     return;
   }
@@ -781,7 +781,6 @@ jsonapi.routeModelResources = function() {
  * @param {function} done - Express route callback expecting req and res as parameters
  */
 jsonapi.routeResource = function(app, method, path, middleware, done) {
-
   var requireAuthentication = (req, res, next) => {
     if (middleware && middleware.requireAuthentication) {
       app.requireAuthentication(req, res, next);
