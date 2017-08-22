@@ -58,8 +58,20 @@ module.exports = {
     "space-before-function-paren": [
       "error",
       "never"
+    ],"no-multiple-empty-lines": [
+      "error",
+      { "max": 2 }
+    ],"padded-blocks": [
+      "error",
+      "never"
+    ],"padding-line-between-statements": [
+      "error",
+      { "blankLine": "always", "prev": "*", "next": "if" },
+    ],"sort-imports": [
+      "error"
+    ],"comma-dangle": [
+      "error",
+      "never"
     ]
-
-
   }
 };

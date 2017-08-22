@@ -12,9 +12,6 @@ var logger = require('app/lib/logger');
 var models = require('app/models');
 var ObjectId = require('mongoose').Types.ObjectId;
 var validateParams = require('./validateParams');
-const util = require('util');
-
-
 var jsonapi = {};
 
 /**
@@ -31,9 +28,7 @@ jsonapi.resourceObjectFromDocument = function(document) {
   var Model = models[document.modelId()];
 
   var attributes = document.toObject();
-  debug('attributes ', util.inspect(attributes));
-
-
+  debug('attributes %O ', attributes);
   delete attributes.id;
 
   var relationships = {};
@@ -43,7 +38,7 @@ jsonapi.resourceObjectFromDocument = function(document) {
       if (property && property.id && property.modelType) {
         if (!relationships[key] || !relationships[key].data) {
           if (Array.isArray(document[key])) {
-            relationships[key] = {data: []};
+            relationships[key] = { data: [] };
           } else {
             relationships[key] = {data: {}};
           }
@@ -786,7 +781,7 @@ jsonapi.routeModelResources = function() {
  * @param {function} done - Express route callback expecting req and res as parameters
  */
 jsonapi.routeResource = function(app, method, path, middleware, done) {
-  //debug("jsonapi.routeResource: ",app, method, path, middleware, done);
+
   var requireAuthentication = (req, res, next) => {
     if (middleware && middleware.requireAuthentication) {
       app.requireAuthentication(req, res, next);

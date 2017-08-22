@@ -30,12 +30,8 @@ var urlRegex = require('app/lib/urlRegex');
 var UserSourceAuth = require('app/models/userSourceAuth');
 var UserStorageAuth = require('app/models/userStorageAuth');
 var validateParams = require('app/lib/validateParams');
-
-
 var queue = kue.createQueue();
-
-
-const STORE_ITEM_DATA = 'storeItemData';
+var STORE_ITEM_DATA = 'storeItemData';
 
 queue.process(STORE_ITEM_DATA, function(queueJob, done) {
   debug('process queueJob %s', queueJob.id);

@@ -3,10 +3,9 @@
  * @module
  */
 
+var templateCompiler = require('es6-template-strings');
 var modelFactory = require('app/factories/model');
 var nameMethods = require('./methods/name');
-// a way to interporlate strings to get a final URL
-var templateCompiler = require('es6-template-strings');
 var SourceContentType = require('app/models/sourceContentType');
 
 var methods = Object.assign({
@@ -34,6 +33,7 @@ var methods = Object.assign({
   },
 
   /**
+   * returns the sourceContentTypes associated with this source
    * @param done {Function} A callback that will be passed a the error (Error) and optionally the sourceContentTypes results
    */
   getSourceContentTypesForSource: function(done) {

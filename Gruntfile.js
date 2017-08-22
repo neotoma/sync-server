@@ -43,7 +43,7 @@ module.exports = function(grunt) {
     },
     nodemon: {
       dev: {
-        script: 'app/server.js',
+        script: 'app/server.js'
       }
     },
     symlink: {
