@@ -23,7 +23,6 @@ var ObjectId = require('mongoose').Types.ObjectId;
  * @property {boolean} [createUser=false] - Whether to create a user upon verification if one doesn't already exist with matching contact info
  * @property {string} [session] - Session that created contactVerificationRequest
  * @property {string} method - Method used to send request to contact (e.g. "email")
- * @property {boolean} [verified=false] - Whether document has been verified 
  */
 module.exports = ContactVerificationRequest = modelFactory.new('ContactVerificationRequest', {
   authenticateSession: { type: Boolean, default: false },
