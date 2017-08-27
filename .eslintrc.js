@@ -34,7 +34,7 @@ module.exports = {
       "always"
     ],
     "key-spacing": [
-      "warn"
+      "error"
     ],
     "func-call-spacing": [
       "error",
@@ -60,7 +60,7 @@ module.exports = {
       "never"
     ],"no-multiple-empty-lines": [
       "error",
-      { "max": 2 }
+      { "max": 1 }
     ],"padded-blocks": [
       "error",
       "never"
@@ -72,6 +72,9 @@ module.exports = {
     ],"comma-dangle": [
       "error",
       "never"
+    ],"object-curly-spacing": [
+      "error",
+      "always"
     ]
   }
 };

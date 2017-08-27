@@ -15,10 +15,10 @@ var queryConditions = require('./queryConditions');
  * @property {module:models/user~User} [user] - User to authenticate at source
  */
 module.exports = modelFactory.new('UserSourceAuth', {
-  source: {ref: 'Source', required: true},
+  source: { ref: 'Source', required: true },
   sourceToken: String,
   sourceUser: String,
-  user: {ref: 'User'}
+  user: { ref: 'User' }
 }, {
   jsonapi: {
     get: {

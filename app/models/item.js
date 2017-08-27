@@ -28,19 +28,19 @@ var convertToFilename = function(content) {
  * @property {module:models/user~User} user - User for which item was pulled from source
  */
 module.exports = modelFactory.new('Item', {
-  contentType: {ref: 'ContentType', required: true},
+  contentType: { ref: 'ContentType', required: true },
   description: String,
-  source: {ref: 'Source', required: true},
+  source: { ref: 'Source', required: true },
   sourceCreatedAt: Date,
-  sourceItem: {type: String, required: true},
-  storage: {ref: 'Storage', required: true},
+  sourceItem: { type: String, required: true },
+  storage: { ref: 'Storage', required: true },
   storageAttemptedAt: Date,
   storageBytes: Number,
   storageError: String,
   storageFailedAt: Date,
   storagePath: String,
   storageVerifiedAt: Date,
-  user: {ref: 'User', required: true}
+  user: { ref: 'User', required: true }
 }, {
   jsonapi: {
     sort: '-storageVerifiedAt',

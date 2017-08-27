@@ -40,7 +40,7 @@ jsonapi.resourceObjectFromDocument = function(document) {
           if (Array.isArray(document[key])) {
             relationships[key] = { data: [] };
           } else {
-            relationships[key] = {data: {}};
+            relationships[key] = { data: {} };
           }
         }
 
@@ -85,7 +85,6 @@ jsonapi.resourceObjectFromDocument = function(document) {
   relationships = _.mapKeys(relationships, (value, key) => {
     return _.kebabCase(key);
   });
-
 
   return {
     id: document.id,
@@ -216,7 +215,7 @@ jsonapi.normalizeRelationships = function(relationships) {
 jsonapi.routeModelDeleteObjectResource = function(app, Model) {
   this.routeModelResource(app, Model, 'delete', '/' + _.kebabCase(Model.modelType()) + '/:id', (req, res) => {
     var getConditions = (done) => {
-      this.compiledQueryConditions(req, {_id: req.params.id}, Model, 'delete', done);
+      this.compiledQueryConditions(req, { _id: req.params.id }, Model, 'delete', done);
     };
 
     var findOne = (conditions, done) => {
@@ -249,7 +248,7 @@ jsonapi.routeModelDeleteObjectResource = function(app, Model) {
 jsonapi.routeModelGetObjectResource = function(app, Model) {
   this.routeModelResource(app, Model, 'get', '/' + _.kebabCase(Model.modelType()) + '/:id', (req, res) => {
     var getConditions = (done) => {
-      this.compiledQueryConditions(req, {_id: req.params.id}, Model, 'get', done);
+      this.compiledQueryConditions(req, { _id: req.params.id }, Model, 'get', done);
     };
 
     var findOne = (conditions, done) => {
@@ -314,7 +313,7 @@ jsonapi.routeModelGetObjectsResource = function(app, Model) {
         if (Model.jsonapi.sort) {
           query.sort(Model.jsonapi.sort);
         } else {
-          query.sort({createdAt: -1});
+          query.sort({ createdAt: -1 });
         }
       }
 
@@ -352,11 +351,11 @@ jsonapi.routeModelPatchObjectResource = function(app, Model) {
     };
 
     var getConditions = (done) => {
-      this.compiledQueryConditions(req, {_id: req.params.id}, Model, 'patch', done);
+      this.compiledQueryConditions(req, { _id: req.params.id }, Model, 'patch', done);
     };
 
     var findOneAndUpdate = (conditions, done) => {
-      Model.findOneAndUpdate(conditions, _.camelCasedKeys(req.body.data.attributes), {new: true}, done);
+      Model.findOneAndUpdate(conditions, _.camelCasedKeys(req.body.data.attributes), { new: true }, done);
     };
 
     var addRelationships = (document, done) => {
@@ -741,7 +740,7 @@ jsonapi.routeModelResources = function() {
    * Establish body-parser middleware with JSON API error handling
    */
   app.use((req, res, next) => {
-    var json = bodyParser.json({type: ['application/vnd.api+json', 'application/json']});
+    var json = bodyParser.json({ type: ['application/vnd.api+json', 'application/json'] });
 
     json(req, res, (error) => {
       if (error) {

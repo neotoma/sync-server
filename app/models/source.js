@@ -36,7 +36,7 @@ var methods = Object.assign({
    * @param done {Function} A callback that will be passed a the error (Error) and optionally the sourceContentTypes results
    */
   getSourceContentTypesForSource: function(done) {
-    SourceContentType.find({source: this.id}, function(err, sourceContentTypes) {
+    SourceContentType.find({ source: this.id }, function(err, sourceContentTypes) {
       if (err) {
         return done(err);
       } else {
@@ -67,14 +67,13 @@ module.exports = modelFactory.new('Source', {
   authScope: Array,
   clientId: String,
   clientSecret: String,
-  itemDataObjectsFromPagePathTemplate: {type: String, default: 'data'},
+  itemDataObjectsFromPagePathTemplate: { type: String, default: 'data' },
 
-
-  itemStorageEnabled: {type: Boolean, default: false},
+  itemStorageEnabled: { type: Boolean, default: false },
   host: String,
-  itemsLimit: {type: Number, default: 25},
+  itemsLimit: { type: Number, default: 25 },
   logoGlyphPath: String,
-  name: {type: String, required: true},
+  name: { type: String, required: true },
   passportStrategy: String,
   slug: String,
   totalItemsAvailableFromPagePathTemplate: String

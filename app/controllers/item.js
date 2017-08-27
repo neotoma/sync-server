@@ -155,7 +155,7 @@ module.exports.getResource = function(url, done) {
     getResource
   ], function(error, resource) {
     if (error) {
-      log('error', 'Item controller failed to get resource', {error: error});
+      log('error', 'Item controller failed to get resource', { error: error });
     }
 
     done(error, resource);
@@ -231,7 +231,6 @@ module.exports.itemsGetUrl = function(source, sourceContentType, userSourceAuth,
     name: 'pagination', variable: pagination
   }]);
 
-
   debug('getItemURL, source.authScope = %s', source.authScope);
 
   return source.itemsGetUrl(sourceContentType.itemsGetUrlTemplate, {
@@ -275,7 +274,6 @@ module.exports.totalItemsAvailableFromPage = function(page, source, contentType)
   return total;
 };
 
-
 /**
  * Returns error from items page if error exists within.
  * @param {Object} page - Items page.
@@ -301,7 +299,6 @@ module.exports.itemsPageError = function(page) {
   }
 };
 
-
 /**
  * Returns pagination for next items page after current items page.
  * @param {Object} page - Current items page.
@@ -322,22 +319,22 @@ module.exports.itemsPageNextPagination = function(page, pagination, contentType)
 
   if (page.response && page.response[contentType.pluralLowercaseName()] && page.response[contentType.pluralLowercaseName()].items && page.response[contentType.pluralLowercaseName()].items.length) {
     if (pagination && pagination.offset) {
-      nextPagination = {offset: pagination.offset + page.response[contentType.pluralLowercaseName()].items.length};
+      nextPagination = { offset: pagination.offset + page.response[contentType.pluralLowercaseName()].items.length };
     } else {
-      nextPagination = {offset: page.response[contentType.pluralLowercaseName()].items.length};
+      nextPagination = { offset: page.response[contentType.pluralLowercaseName()].items.length };
     }
   }
 
   if (page.data && page.data.pagination && page.data.pagination.next_max_id) {
-    nextPagination = {maxId: page.data.pagination.next_max_id};
+    nextPagination = { maxId: page.data.pagination.next_max_id };
   }
 
   if (page.links && page.links.next) {
-    nextPagination = {next: page.links.next};
+    nextPagination = { next: page.links.next };
   }
 
   if (page.paging && page.paging.next) {
-    nextPagination = {next: page.paging.next};
+    nextPagination = { next: page.paging.next };
   }
 
   debug.success('itemsPageNextPagination (nextPagination: %o)', nextPagination);
@@ -406,7 +403,6 @@ module.exports.storeAllForUserStorageSource = function(user, source, storage, jo
     module.exports.storeAllForUserStorageSourceContentType(user, source, storage, sourceContentType, job, done);
   };
 
-
   let getSourceContentTypesFunction = function(done) {
     source.getSourceContentTypesForSource(function(err, sourceContentTypes) {
       if (err) {
@@ -422,10 +418,9 @@ module.exports.storeAllForUserStorageSource = function(user, source, storage, jo
     async.eachSeries(sourceContentTypes, storeAllForUserStorageSourceContentType, done);
   };
 
-
   async.waterfall([validate, setupLog, getSourceContentTypesFunction, storeAllItems], function(error) {
     if (error) {
-      log('error', 'Item controller failed to store all items', {error: error.message});
+      log('error', 'Item controller failed to store all items', { error: error.message });
     } else {
       debug.success('storeAllForUserStorageSource');
     }
@@ -489,16 +484,16 @@ module.exports.storeAllForUserStorageSourceContentType = function(user, source, 
       }
     };
 
-    storeAllItemPages(null, {offset: 0});
+    storeAllItemPages(null, { offset: 0 });
   };
 
   async.series([validate, setupLog, storeAllItems], function(error) {
     if (error) {
       debug.error('storeAllForUserStorageSourceContentType (message: %s)', error.message);
-      log('error', 'Item controller failed to store all items', {error: error});
+      log('error', 'Item controller failed to store all items', { error: error });
     } else {
       debug.success('storeAllForUserStorageSourceContentType');
-      log('milestone', 'Item controller stored all items', {error: error});
+      log('milestone', 'Item controller stored all items', { error: error });
     }
 
     done(error);
@@ -652,7 +647,7 @@ module.exports.storeItemsPage = function(user, source, storage, sourceContentTyp
     determineNextPagination
   ], function(error, nextPagination) {
     if (error) {
-      log('error', 'Item controller failed to store page of items', {error: error.message});
+      log('error', 'Item controller failed to store page of items', { error: error.message });
     } else {
       debug.success('storeItemsPage (sourceContentType: %s, pagination: %o, nextPagination: %o)', sourceContentType.id, pagination, nextPagination);
     }
@@ -781,7 +776,7 @@ module.exports.persistItemDataObject = function(itemDataObject, relationships, d
     savePath
   ], function(error, item) {
     if (error) {
-      log('error', 'Item controller failed to persist item data object', {error: error});
+      log('error', 'Item controller failed to persist item data object', { error: error });
     } else {
       debug.success('persistItemDataObject', item);
     }
@@ -814,7 +809,7 @@ module.exports.storeItemData = function(item, data, job, done) {
 
   var setupLog = function(done) {
     debug.start('storeItemData');
-    log = logger.scopedLog({item: item.id});
+    log = logger.scopedLog({ item: item.id });
     done();
   };
 
@@ -884,13 +879,13 @@ module.exports.storeItemData = function(item, data, job, done) {
     notifyApp
   ], function(error) {
     if (error) {
-      log('error', 'Item controller failed to storeItemData', {error: error.message});
+      log('error', 'Item controller failed to storeItemData', { error: error.message });
 
       if (item && item.save) {
         item.storageFailedAt = Date.now();
         item.save(function(saveError) {
           if (saveError) {
-            log('error', 'Item controller failed to update item after failure to store it', {error: saveError.message});
+            log('error', 'Item controller failed to update item after failure to store it', { error: saveError.message });
           }
 
           return done(error);
@@ -1010,7 +1005,7 @@ module.exports.storeFile = function(user, storage, path, data, done) {
     storeFile
   ], function(error, responseBody) {
     if (error) {
-      log('error', 'Item controller failed to store file', {error: error.message, responseBody: responseBody});
+      log('error', 'Item controller failed to store file', { error: error.message, responseBody: responseBody });
     }
 
     done(error, responseBody);

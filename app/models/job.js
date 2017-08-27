@@ -19,7 +19,7 @@ var queryConditions = require('./queryConditions');
  * @property {module:models/user~User} [user] - User for which this job should be executed
  */
 module.exports = modelFactory.new('Job', {
-  contentType: {ref: 'ContentType'},
+  contentType: { ref: 'ContentType' },
   name: {
     type: String,
     required: true,
@@ -30,9 +30,9 @@ module.exports = modelFactory.new('Job', {
       message: '"{VALUE}" is not a supported name value'
     }
   },
-  source: {ref: 'Source'},
-  storage: {ref: 'Storage'},
-  user: {ref: 'User'},
+  source: { ref: 'Source' },
+  storage: { ref: 'Storage' },
+  user: { ref: 'User' },
   totalItemsAvailable: Number,
   totalItemsStored: Number
 }, {
@@ -96,7 +96,7 @@ module.exports = modelFactory.new('Job', {
     };
 
     async.series([populate, runJob], (error) => {
-      var log = logger.scopedLog({jobId: job.id});
+      var log = logger.scopedLog({ jobId: job.id });
 
       if (error) {
         debug.error('# job failed: %s', error.message);
