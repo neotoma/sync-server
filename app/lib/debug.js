@@ -54,38 +54,5 @@ module.exports = function(name) {
     this.style(['gray'], arguments);
   };
 
-  debug.noAsyncTrace= function(depth=1,compact=false,filter='async.js'){
-    this.stackTrace(depth,compact,filter);
-  };
-
-  debug.stackTrace = function(depth = 1,compact=false, filter=null) {
-    depth = depth < 1 ? 1 : depth;
-    let theCurrentStack = sTrace.get();
-    let tmp,fileName,output;
-
-    output = 'trace: ';
-    depth = depth < theCurrentStack.length -1 ? depth : theCurrentStack.length -1;
-
-    for (let i = 1; i <= depth; i++) {
-      tmp = theCurrentStack[i];
-      fileName = tmp.getFileName();
-
-
-      if (fileName.indexOf('/') > -1) {
-        fileName = fileName.split('/').pop();
-
-        if (filter && filter.indexOf(fileName) > -1) continue;
-      }
-
-      if (compact) {
-        output += `${fileName}.${tmp.getFunctionName()}, --> `;
-      } else {
-        output += `${tmp.getFunctionName()}, ${fileName}, ${tmp.getLineNumber()}\n`;
-      }
-    }
-
-    this(output);
-  };
-
   return debug;
 };
