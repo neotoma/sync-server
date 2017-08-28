@@ -25,15 +25,15 @@ var kue = require('kue');
 var logger = require('app/lib/logger');
 var mime = require('app/lib/mime');
 var request = require('app/lib/request');
+var templateCompiler = require('es6-template-strings');
 var Url = require('url');
 var urlRegex = require('app/lib/urlRegex');
 var UserSourceAuth = require('app/models/userSourceAuth');
 var UserStorageAuth = require('app/models/userStorageAuth');
 var validateParams = require('app/lib/validateParams');
 var queue = kue.createQueue();
-var STORE_ITEM_DATA = 'storeItemData';
 
-queue.process(STORE_ITEM_DATA, function(queueJob, done) {
+queue.process('storeItemData', function(queueJob, done) {
   debug('process queueJob %s', queueJob.id);
 
   var getItem = (done) => {
@@ -232,20 +232,26 @@ module.exports.itemsGetUrl = function(source, sourceContentType, userSourceAuth,
   }]);
 
   debug('getItemURL, source.authScope = %s', source.authScope);
+  
+  var property_next = (typeof pagination !== 'undefined' && pagination.next) ? pagination.next : undefined;
 
-  return source.itemsGetUrl(sourceContentType.itemsGetUrlTemplate, {
-    sourceToken: userSourceAuth.sourceToken,
-    apiVersion: source.apiVersion,
-    contentTypePluralCamelName: sourceContentType.contentType.pluralCamelName(),
-    contentTypePluralLowercaseName: sourceContentType.contentType.pluralLowercaseName(),
-    sourceHost: source.host,
-    sourceItemsLimit: source.itemsLimit,
-    maxId: (typeof pagination !== 'undefined' && pagination.maxId) ? pagination.maxId : undefined,
-    offset: (typeof pagination !== 'undefined' && pagination.offset) ? pagination.offset : 0,
-    next: (typeof pagination !== 'undefined' && pagination.next) ? pagination.next : undefined,
-    sourceName: source.name
-
-  });
+  if (property_next) {
+    return property_next;
+  } else {
+    return templateCompiler(sourceContentType.itemsGetUrlTemplate,
+      {
+        sourceToken: userSourceAuth.sourceToken,
+        apiVersion: source.apiVersion,
+        contentTypePluralCamelName: sourceContentType.contentType.pluralCamelName(),
+        contentTypePluralLowercaseName: sourceContentType.contentType.pluralLowercaseName(),
+        sourceHost: source.host,
+        sourceItemsLimit: source.itemsLimit,
+        maxId: (typeof pagination !== 'undefined' && pagination.maxId) ? pagination.maxId : undefined,
+        offset: (typeof pagination !== 'undefined' && pagination.offset) ? pagination.offset : 0,
+        next: property_next,
+        sourceName: source.name
+      });
+  }
 };
 
 /**
@@ -403,8 +409,8 @@ module.exports.storeAllForUserStorageSource = function(user, source, storage, jo
     module.exports.storeAllForUserStorageSourceContentType(user, source, storage, sourceContentType, job, done);
   };
 
-  let getSourceContentTypesFunction = function(done) {
-    source.getSourceContentTypesForSource(function(err, sourceContentTypes) {
+  let getSourceContentTypes = function(done) {
+    source.getSourceContentTypes(function(err, sourceContentTypes) {
       if (err) {
         return done(err);
       } else {
@@ -418,7 +424,7 @@ module.exports.storeAllForUserStorageSource = function(user, source, storage, jo
     async.eachSeries(sourceContentTypes, storeAllForUserStorageSourceContentType, done);
   };
 
-  async.waterfall([validate, setupLog, getSourceContentTypesFunction, storeAllItems], function(error) {
+  async.waterfall([validate, setupLog, getSourceContentTypes, storeAllItems], function(error) {
     if (error) {
       log('error', 'Item controller failed to store all items', { error: error.message });
     } else {
@@ -620,7 +626,7 @@ module.exports.storeItemsPage = function(user, source, storage, sourceContentTyp
       }
       // this is where the actual jobs queue "items" are created
       /// where the magic happens…
-      var queueJob = queue.create(STORE_ITEM_DATA, jobAttributes).save((error) => {
+      var queueJob = queue.create('storeItemData', jobAttributes).save((error) => {
         if (error) {
           debug.error('queueJob %s failed to queue: %s', queueJob.id, error.message);
         } else {

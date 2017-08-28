@@ -39,17 +39,20 @@ module.exports = {
     "func-call-spacing": [
       "error",
       "never"
-    ], "block-spacing": [
+    ],
+    "block-spacing": [
       "error"
     ],
     "array-bracket-spacing": [
       "error"
-    ], "keyword-spacing": [
+    ],
+    "keyword-spacing": [
       "error"
     ],
     "semi-spacing": [
       "error"
-    ], "arrow-spacing": [
+    ],
+    "arrow-spacing": [
       "error"
     ],
     "no-tabs": [
@@ -58,21 +61,31 @@ module.exports = {
     "space-before-function-paren": [
       "error",
       "never"
-    ],"no-multiple-empty-lines": [
+    ],
+    "no-multiple-empty-lines": [
       "error",
       { "max": 1 }
-    ],"padded-blocks": [
+    ],
+    "padded-blocks": [
       "error",
       "never"
-    ],"padding-line-between-statements": [
+    ],
+    "padding-line-between-statements": [
       "error",
-      { "blankLine": "always", "prev": "*", "next": "if" },
-    ],"sort-imports": [
+      {
+        "blankLine": "always",
+        "prev": "*",
+        "next": "if"
+      },
+    ],
+    "sort-imports": [
       "error"
-    ],"comma-dangle": [
+    ],
+    "comma-dangle": [
       "error",
       "never"
-    ],"object-curly-spacing": [
+    ],
+    "object-curly-spacing": [
       "error",
       "always"
     ]

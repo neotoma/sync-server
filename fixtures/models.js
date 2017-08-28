@@ -301,7 +301,6 @@ module.exports = {
         itemStorageEnabled: true,
         host: 'sourcehost.example.com',
         itemDataObjectsFromPagePathTemplate: 'things.${contentTypePluralCamelName}',
-        itemsGetUrlTemplate: 'https://${host}/test-path/${contentTypePluralCamelName}?foo=bar&access_token=${accessToken}&limit=${limit}&offset=${offset}',
         itemsLimit: 72,
         logoGlyphPath: '/source/logoGlyphPath.svg',
         name: 'Super Source',
@@ -320,10 +319,29 @@ module.exports = {
       logoGlyphPath: String,
       name: { type: String, required: true },
       passportStrategy: String,
-      itemsGetUrlTemplate: String,
       itemDataObjectsFromPagePathTemplate: { type: String, default: 'data' },
       slug: String,
       totalItemsAvailableFromPagePathTemplate: String
+    }
+  },
+  sourceContentType: {
+    name: 'SourceContentType',
+    type: 'sourceContentTypes',
+    jsonapi: {
+      get: 'public'
+    },
+    mockProperties: () => {
+      return {
+        _id: ObjectId(),
+        contentType: ObjectId(),
+        itemsGetUrlTemplate: 'https://${sourceHost}/foo/${contentTypePluralCamelName}?bar=wiz&access_token=${sourceToken}&limit=${sourceItemsLimit}&offset=${offset}',
+        source: ObjectId()
+      };
+    },
+    schemaProperties: {
+      contentType: { ref: 'ContentType', required: true },
+      itemsGetUrlTemplate: { type: String, default: 'https://${sourceHost}/${contentTypePluralCamelName}?access_token=${sourceToken}&limit=${sourceItemsLimit}&offset=${offset}' },
+      source: { ref: 'Source', required: true }
     }
   },
   storage: {

@@ -23,26 +23,14 @@ var methods = Object.assign({
     });
   },
 
-  itemsGetUrl: function(itemsGetUrlTemplate, $properties) {
-    if ($properties.next) {
-      return $properties.next;
-    }
 
-    return templateCompiler(itemsGetUrlTemplate, $properties);
-  },
 
   /**
    * returns the sourceContentTypes associated with this source
    * @param done {Function} A callback that will be passed a the error (Error) and optionally the sourceContentTypes results
    */
-  getSourceContentTypesForSource: function(done) {
-    SourceContentType.find({ source: this.id }, function(err, sourceContentTypes) {
-      if (err) {
-        return done(err);
-      } else {
-        done(err, sourceContentTypes);
-      }
-    });
+  getSourceContentTypes: function(done) {
+    SourceContentType.find({ source: this.id }, done);
   }
 }, nameMethods);
 
@@ -58,7 +46,6 @@ var methods = Object.assign({
  * @property {string} [logoGlyphPath] - URL path to logo glyph image file on host (e.g. "/images/logos/foursquare-glyph.svg")
  * @property {string} name - Name of source (e.g. "foursquare")
  * @property {string} [passportStrategy] - Strategy for Passport module (e.g. "passport-foursquare")
- * @property {string} [itemsGetUrlTemplate=https://${host}/${contentTypePluralCamelName}?access_token=${accessToken}&limit=${limit}&offset=${offset}] - String template used to generate URLs for GET requests for items on source
  * @property {string} [itemDataObjectsFromPagePathTemplate=data] - String template used to generate object paths to itemDataObjects found within pages returned from source
  * @property {string} [totalItemsAvailableFromPagePathTemplate=response.${contentTypePluralCamelName}.count] - String template used to generate object paths to value representing total items available for contentType within pages returned from source
  */
@@ -68,7 +55,6 @@ module.exports = modelFactory.new('Source', {
   clientId: String,
   clientSecret: String,
   itemDataObjectsFromPagePathTemplate: { type: String, default: 'data' },
-
   itemStorageEnabled: { type: Boolean, default: false },
   host: String,
   itemsLimit: { type: Number, default: 25 },
