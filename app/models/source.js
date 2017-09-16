@@ -3,6 +3,7 @@
  * @module
  */
 
+var debug = require('app/lib/debug')('syncServer:models/source.js');
 var templateCompiler = require('es6-template-strings');
 var modelFactory = require('app/factories/model');
 var nameMethods = require('./methods/name');
@@ -23,15 +24,24 @@ var methods = Object.assign({
     });
   },
 
-
-
   /**
-   * returns the sourceContentTypes associated with this source
-   * @param done {Function} A callback that will be passed a the error (Error) and optionally the sourceContentTypes results
+   * returns the contentTypes associated with this source
+   * @param done {Function} A callback that will be passed a the error (Error) and optionally the contentTypes results
    */
-  getSourceContentTypes: function(done) {
-    SourceContentType.find({ source: this.id }, done);
+  getContentTypes: function(done) {
+    debug(this);
+    debug("this.id = %O",this.id);
+
+    SourceContentType.find({ source: this._id }, function(err, sourceContentTypes) {
+      if (err) {
+        return done(err);
+      } else {
+        debug("sourceContentTypes = %O", sourceContentTypes);
+        done(err, sourceContentTypes.map((sourceContentType) => sourceContentType.contentType));
+      }
+    });
   }
+
 }, nameMethods);
 
 /**
