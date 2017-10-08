@@ -12,7 +12,6 @@ var logger = require('app/lib/logger');
 var models = require('app/models');
 var ObjectId = require('mongoose').Types.ObjectId;
 var validateParams = require('./validateParams');
-
 var jsonapi = {};
 
 /**
@@ -29,6 +28,7 @@ jsonapi.resourceObjectFromDocument = function(document) {
   var Model = models[document.modelId()];
 
   var attributes = document.toObject();
+  debug('attributes %O ', attributes);
   delete attributes.id;
 
   var relationships = {};
@@ -140,6 +140,7 @@ jsonapi.allowed = function(model, method) {
  */
 jsonapi.compiledQueryConditions = function myself(req, conditions, model, method, done) {
   this.modelQueryConditions(req, model, method, (error, modelConditions) => {
+    debug('jsonapi.compiledQueryConditions : ', modelConditions, conditions);
     done(error, Object.assign({}, modelConditions, conditions));
   });
 };
@@ -257,7 +258,10 @@ jsonapi.routeModelGetObjectResource = function(app, Model) {
 
     async.waterfall([getConditions, findOne], (error, document) => {
       if (error) {
-        logger.error('Resource router failed to query for object', { model: Model.modelName, error: error.message });
+        logger.error('Resource router failed to query for object', {
+          model: Model.modelName,
+          error: error.message
+        });
         this.sendError(res);
       } else if (!document) {
         this.sendNotFound(res);
@@ -278,7 +282,7 @@ jsonapi.routeModelGetObjectsResource = function(app, Model) {
     var compileConditions = (done) => {
       var conditions = {};
       var filter = req.query.filter ? req.query.filter : {};
-      
+
       try {
         if (filter.relationships) {
           Object.keys(filter.relationships).forEach((modelName) => {
@@ -323,7 +327,10 @@ jsonapi.routeModelGetObjectsResource = function(app, Model) {
 
     async.waterfall([compileConditions, executeQuery], function(error, documents) {
       if (error) {
-        logger.error('Resource router failed to query for objects', { model: Model.modelName, error: error.message });
+        logger.error('Resource router failed to query for objects', {
+          model: Model.modelName,
+          error: error.message
+        });
         jsonapi.sendError(res, error, 400);
       } else {
         jsonapi.sendDocuments(res, documents);
@@ -411,8 +418,11 @@ jsonapi.routeModelPatchObjectResource = function(app, Model) {
  * @param {Object} app - Express app
  * @param {Object} Model - Mongoose model
  */
+
 jsonapi.routeModelPostObjectResource = function(app, Model) {
-  this.routeModelResource(app, Model, 'post', '/'+ _.kebabCase(Model.modelType()), (req, res) => {
+  debug('routeModelPostObjectResource -- Model = ', Model.collection.collectionName);
+
+  this.routeModelResource(app, Model, 'post', '/' + _.kebabCase(Model.modelType()), (req, res) => {
     /**
      * Validates all available attributes (TODO: and relationships)
      */
@@ -471,6 +481,8 @@ jsonapi.routeModelPostObjectResource = function(app, Model) {
      * Executes any available post-POST routine available for Model
      */
     var executePostRoutine = (document, done) => {
+      debug('executePostRoutine... ', Model.collection.collectionName);
+
       if (Model.jsonapi.post && Model.jsonapi.post.post) {
         Model.jsonapi.post.post(req, res, document, function(error) {
           done(error, document);
@@ -510,7 +522,11 @@ jsonapi.routeModelPostObjectResource = function(app, Model) {
  * @param {function} done - Express route callback expecting req and res as parameters
  */
 jsonapi.routeModelResource = function(app, model, method, path, done) {
-  if (!model.jsonapi || !model.jsonapi[method]) { return; }
+  debug('jsonapi.routeModelResource -- method = %s, path = %s', method, path);
+
+  if (!model.jsonapi || !model.jsonapi[method]) {
+    return;
+  }
 
   var validateRequestBody = false;
 
@@ -662,7 +678,7 @@ jsonapi.sendError = function(res, error, status) {
     }
 
     // Convert object of errors to array if needed
-    if(typeof errors === 'object' && !Array.isArray(errors)) {
+    if (typeof errors === 'object' && !Array.isArray(errors)) {
       errors = Object.keys(errors).map(function(key) {
         return errors[key];
       });
@@ -735,14 +751,16 @@ jsonapi.routeModelResources = function() {
     });
   });
 
+  // default response
   app.get('/', (req, res) => {
     this.sendResponseDocument(res);
   });
 
   // Route requests for each model with Mongoose compatability and jsonapi configuration
+  // that is: set up the routes for specific paths
   Object.keys(models).forEach((key) => {
     var model = models[key];
-    
+
     if (model.modelName && model.jsonapi) {
       this.routeModelGetObjectsResource(app, model);
       this.routeModelGetObjectResource(app, model);
@@ -810,7 +828,7 @@ jsonapi.saveRelationshipsToDocument = function(document, relationships, done) {
 
   var saveRelationshipsToDocument = function(done) {
     var Model = models[document.modelId()];
-    
+
     async.forEachOf(relationships, function(relationship, relationshipName, done) {
       var validateRelationship = function(done) {
         var errors = [];
@@ -926,7 +944,7 @@ jsonapi.validateQueryData = function(req, data, model, method, done) {
 
     Object.keys(conditions).forEach(function(key) {
       var isEqualObjectId;
-      
+
       try {
         isEqualObjectId = ObjectId(_.get(data, `relationships.${key}.data.id`)).equals(conditions[key]);
       } catch (error) {

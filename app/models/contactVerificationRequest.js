@@ -107,7 +107,7 @@ module.exports = ContactVerificationRequest = modelFactory.new('ContactVerificat
             });
           }
         });
-      },
+      }
     },
     post: {
       allowed: 'public',

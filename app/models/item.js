@@ -10,7 +10,7 @@ var queryConditions = require('./queryConditions');
 var sanitizeFilename = require('sanitize-filename');
 
 var convertToFilename = function(content) {
-  return _.toLower(emojiStrip(sanitizeFilename(content).replace(/[^\x00-\x7F]/g, '').replace('.','').replace('-', ' ').replace(/ {2}/g, ' ').replace(/ +/g, '-').replace(/–|—+/g, '-')));
+  return _.toLower(emojiStrip(sanitizeFilename(content).replace(/[^\x00-\x7F]/g, '').replace('.', '').replace('-', ' ').replace(/ {2}/g, ' ').replace(/ +/g, '-').replace(/–|—+/g, '-')));
 };
 
 /**

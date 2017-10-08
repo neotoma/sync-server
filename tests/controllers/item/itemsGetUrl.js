@@ -7,8 +7,8 @@ var wh = require('app/lib/warehouse');
 
 describe('itemController.itemsGetUrl method', function() {
   assertions.function.returnsResult('controller.itemsGetUrl', controller.itemsGetUrl, [{
-    when: 'provided source (with itemsGetUrlTemplate property), contentType, userSourceAuth, and pagination as parameters',
-    params: [wh.one('source'), wh.one('contentType'), wh.one('userSourceAuth'), wh.pagination()],
+    when: 'provided source (with itemsGetUrlTemplate property), sourceContentType, userSourceAuth, and pagination as parameters',
+    params: [wh.one('source'), wh.one('sourceContentType'), wh.one('userSourceAuth'), wh.pagination()],
     result: function(itemsGetUrl, done) {
       assert.equal(itemsGetUrl, templateCompiler(this.params[0].itemsGetUrlTemplate, {
         host: this.params[0].host,
@@ -20,8 +20,8 @@ describe('itemController.itemsGetUrl method', function() {
       done();
     }
   }, {
-    when: 'provided source (without itemsGetUrlTemplate property), contentType, userSourceAuth, and pagination as parameters',
-    params: [wh.one('source'), wh.one('contentType'), wh.one('userSourceAuth'), wh.pagination()],
+    when: 'provided source (without itemsGetUrlTemplate property), sourceContentType, userSourceAuth, and pagination as parameters',
+    params: [wh.one('source'), wh.one('sourceContentType'), wh.one('userSourceAuth'), wh.pagination()],
     result: function(itemsGetUrl, done) {
       assert.equal(itemsGetUrl, templateCompiler('https://${host}/${contentTypePluralCamelName}?access_token=${accessToken}&limit=${limit}&offset=${offset}', {
         host: this.params[0].host,
@@ -43,27 +43,27 @@ describe('itemController.itemsGetUrl method', function() {
 
   assertions.function.throws.error('controller.itemsGetUrl', controller.itemsGetUrl, [{
     when: 'no source parameter provided',
-    params: [undefined, wh.one('contentType'), wh.one('userSourceAuth'), wh.pagination()],
+    params: [undefined, wh.one('sourceContentType'), wh.one('userSourceAuth'), wh.pagination()],
     error: 'Parameter source undefined or null'
   }, {
     when: 'source parameter has no host property',
-    params: [{}, wh.one('contentType'), wh.one('userSourceAuth'), wh.pagination()],
+    params: [{}, wh.one('sourceContentType'), wh.one('userSourceAuth'), wh.pagination()],
     error: 'Parameter source has no host property'
   }, {
-    when: 'no contentType parameter provided',
+    when: 'no sourceContentType parameter provided',
     params: [wh.one('source'), undefined, wh.one('userSourceAuth'), wh.pagination()],
-    error: 'Parameter contentType undefined or null'
+    error: 'Parameter sourceContentType undefined or null'
   }, {
-    when: 'contentType parameter has no name property',
+    when: 'sourceContentType parameter has no name property',
     params: [wh.one('source'), {}, wh.one('userSourceAuth'), wh.pagination()],
-    error: 'Parameter contentType has no name property'
+    error: 'Parameter sourceContentType has no name property'
   }, {
     when: 'no userSourceAuth parameter provided',
-    params: [wh.one('source'), wh.one('contentType'), undefined, wh.pagination()],
+    params: [wh.one('source'), wh.one('sourceContentType'), undefined, wh.pagination()],
     error: 'Parameter userSourceAuth undefined or null'
   }, {
     when: 'userSourceAuth parameter has no sourceToken property',
-    params: [wh.one('source'), wh.one('contentType'), {}, wh.pagination()],
+    params: [wh.one('source'), wh.one('sourceContentType'), {}, wh.pagination()],
     error: 'Parameter userSourceAuth has no sourceToken property'
   }]);
 });

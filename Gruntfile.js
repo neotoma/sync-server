@@ -32,7 +32,7 @@ module.exports = function(grunt) {
     jsdoc: {
       build: {
         options: {
-          configure : '.jsdoc.json'
+          configure: '.jsdoc.json'
         }
       }
     },

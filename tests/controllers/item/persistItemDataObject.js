@@ -12,11 +12,11 @@ describe('itemController.persistItemDataObject method', function() {
   assertions.function.callbacks.error(controller.persistItemDataObject, [{
     when: 'no itemDataObject parameter provided',
     params: [undefined, wh.itemRelationships()],
-    error: 'Parameter itemDataObject undefined or null',
+    error: 'Parameter itemDataObject undefined or null'
   }, {
     when: 'no relationships parameter provided',
     params: [wh.itemDataObject(), undefined],
-    error: 'Parameter relationships undefined or null',
+    error: 'Parameter relationships undefined or null'
   }, {
     when: 'itemDataObject parameter has no id property',
     params: [wh.itemDataObject(), wh.itemRelationships()],

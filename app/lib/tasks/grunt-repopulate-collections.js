@@ -38,7 +38,6 @@ module.exports = function(grunt) {
         if (!relatedDocument) {
           done(new Error('Unable to find related document referenced by resourceObject'));
         } else {
-
           if (toMany) {
             if (!document[relationshipName]) {
               document[relationshipName] = [];

@@ -33,7 +33,7 @@ mongoose.transform = function(doc, ret) {
     }
 
     // Convert under_scores to camelCase
-    newKey = key.replace(/_([a-z])/g, function (g) { return g[1].toUpperCase(); });
+    newKey = key.replace(/_([a-z])/g, function(g) { return g[1].toUpperCase(); });
 
     if (newKey != key) {
       ret[newKey] = ret[key];

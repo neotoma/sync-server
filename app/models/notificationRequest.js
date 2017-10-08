@@ -1,4 +1,4 @@
-  /**
+/**
  * NotificationRequest model
  * @module
  */
