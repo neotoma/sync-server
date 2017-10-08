@@ -76,7 +76,7 @@ module.exports = {
         "blankLine": "always",
         "prev": "*",
         "next": "if"
-      },
+      }
     ],
     "sort-imports": [
       "error"

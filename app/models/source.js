@@ -30,13 +30,13 @@ var methods = Object.assign({
    */
   getContentTypes: function(done) {
     debug(this);
-    debug("this.id = %O",this.id);
+    debug('this.id = %O',this.id);
 
     SourceContentType.find({ source: this._id }, function(err, sourceContentTypes) {
       if (err) {
         return done(err);
       } else {
-        debug("sourceContentTypes = %O", sourceContentTypes);
+        debug('sourceContentTypes = %O', sourceContentTypes);
         done(err, sourceContentTypes.map((sourceContentType) => sourceContentType.contentType));
       }
     });

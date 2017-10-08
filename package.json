@@ -22,7 +22,7 @@
     "grunt-contrib-clean": "^1.0.0",
     "grunt-contrib-symlink": "^1.0.0",
     "grunt-contrib-watch": "^1.0.0",
-    "grunt-eslint": "^19.0.0",
+    "grunt-eslint": "^20.1.0",
     "grunt-force-task": "^2.0.0",
     "grunt-jsdoc": "^2.1.0",
     "grunt-mocha-test": "^0.13.2",
@@ -86,6 +86,7 @@
   "devDependencies": {
     "grunt-deploy-files": "1.0.5",
     "grunt-env": "^0.4.4",
+    "grunt-eslint": "^19.0.0",
     "grunt-hoist": "1.0.4"
   }
 }

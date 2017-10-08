@@ -240,7 +240,6 @@ module.exports.itemsGetUrl = function(source, contentType, userSourceAuth, pagin
       contentType: contentType.id,
       source: source.id
     }, function(error, sourceContentType) {
-      console.log("made it here",sourceContentType.itemsGetUrlTemplate);
       if (error) {
         return done(error);
       } else {
