@@ -12,12 +12,15 @@ var passportSocketIO = require('app/lib/passportSocketIO');
 var socketEvents = require('app/socketEvents');
 var socketIO = require('socket.io');
 
-var httpsServer = https.createServer(ranger.cert, app).listen(process.env.SYNC_SERVER_HTTPS_PORT, () => {
-  debug('App server started listening for HTTPS requests', { port: process.env.SYNC_SERVER_HTTPS_PORT });
+var httpPort = process.env.SYNC_SERVER_HTTP_PORT ? process.env.SYNC_SERVER_HTTP_PORT : 9001;
+var httpsPort = process.env.SYNC_SERVER_HTTPS_PORT ? process.env.SYNC_SERVER_HTTPS_PORT : 9002;
+
+var httpServer = http.createServer(app).listen(httpPort, () => {
+  debug('App server started listening for HTTP requests', { port: httpPort });
 });
 
-var httpServer = http.createServer(app).listen(process.env.SYNC_SERVER_HTTP_PORT, () => {
-  debug('App server started listening for HTTP requests', { port: process.env.SYNC_SERVER_HTTP_PORT });
+var httpsServer = https.createServer(ranger.cert, app).listen(httpsPort, () => {
+  debug('App server started listening for HTTPS requests', { port: httpsPort });
 });
 
 var servers = {

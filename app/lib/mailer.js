@@ -5,20 +5,20 @@ var sendGridTransport = require('nodemailer-sendgrid-transport');
 var stubTransport = require('nodemailer-stub-transport');
 
 var mailer = {
-  emailRegex: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+  emailRegex: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/ // eslint-disable-line
 };
 
 mailer.sendMail = function(email, done) {
   try {
-    if (!process.env.SYNC_SERVER_NAME) {
-      throw new Error('Mailer failed to find app name variable in environment');
+    var senderEmail = process.env.SYNC_SERVER_MAILER_SENDER_EMAIL;
+    var serverName = process.env.SYNC_SERVER_NAME ? process.env.SYNC_SERVER_NAME : 'Neotoma';
+
+    if (!senderEmail) {
+      debug('Sending mail aborted due to lack of SYNC_SERVER_MAILER_SENDER_EMAIL environment variable');
+      return done();
     }
 
-    if (!process.env.SYNC_SERVER_MAILER_SENDER_EMAIL) {
-      throw new Error('Mailer failed to find sender email variable in environment');
-    }
-
-    email.from = process.env.SYNC_SERVER_NAME + '<' + process.env.SYNC_SERVER_MAILER_SENDER_EMAIL + '>';
+    email.from = `${serverName}<${senderEmail}>`;
 
     if (logger.trace) {
       logger.trace('Mailer sending email', { email: email });

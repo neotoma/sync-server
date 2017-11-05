@@ -338,6 +338,7 @@ module.exports = {
     mockProperties: () => {
       return { 
         _id: ObjectId(),
+        apiVersion: '5',
         clientId: 'storageClientId',
         clientSecret: 'storageClientSecret',
         host: 'storagehost.example.com',
@@ -349,6 +350,7 @@ module.exports = {
       };
     },
     schemaProperties: {
+      apiVersion: String,
       clientId: String,
       clientSecret: String,
       host: String,

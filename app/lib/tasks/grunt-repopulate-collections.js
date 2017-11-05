@@ -22,7 +22,7 @@ module.exports = function(grunt) {
     var models = require('app/models');
     var mongoose = require('app/lib/mongoose');
 
-    var dataPath = path.resolve(process.env.SYNC_SERVER_DIR, 'data');
+    var dataPath = path.resolve(process.env.SYNC_SERVER_DIR ? process.env.SYNC_SERVER_DIR : '/var/www/sync-server', 'data');
 
     debug.start('# repopulating collections: %s', dataPath);
 

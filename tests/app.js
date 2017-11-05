@@ -15,8 +15,4 @@ describe('app', function() {
   it('has requireAthentication method', function() {
     assert(typeof app.requireAuthentication === 'function');
   });
-
-  it('has host', function() {
-    assert(typeof app.host === 'string');
-  });
 });

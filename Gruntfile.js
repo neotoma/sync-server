@@ -3,7 +3,7 @@
  * @module
  */
 
-var ranger = require('park-ranger')();
+require('park-ranger')();
 var loadGruntTasks = require('load-grunt-tasks');
 
 module.exports = function(grunt) {
@@ -43,7 +43,7 @@ module.exports = function(grunt) {
     },
     nodemon: {
       dev: {
-        script: 'app/server.js'
+        script: 'index.js'
       }
     },
     symlink: {
@@ -54,17 +54,6 @@ module.exports = function(grunt) {
           src: ['app', 'fixtures', 'data'],
           dest: 'node_modules'
         }]
-      }
-    },
-    sshexec: {
-      options: {
-        agent: ranger.env.SSH_AUTH_SOCK,
-        host: ranger.env.SYNC_SERVER_DEPLOY_HOST,
-        username: ranger.env.SYNC_SERVER_DEPLOY_HOST_USER,
-        port: 22
-      },
-      repopulateCollections: {
-        command: 'cd ' + ranger.env.SYNC_SERVER_DEPLOY_HOST_DIR + ' && grunt repopulate-collections'
       }
     },
     watch: {
@@ -97,10 +86,6 @@ module.exports = function(grunt) {
   grunt.registerTask('rebuild-jsdoc', 'Delete and regenerate JSDoc documentation.', [
     'clean:jsdoc',
     'jsdoc:build'
-  ]);
-
-  grunt.registerTask('remote-repopulate-collections', 'Remove database collections and repopulate them with resourceObjects stored in files.', [
-    'sshexec:repopulateCollections'
   ]);
 
   grunt.registerTask('test', 'Run tests against app.', [

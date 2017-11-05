@@ -20,6 +20,7 @@ var validateParams = require('app/lib/validateParams');
  * @property {string} [itemPutUrlTemplate=https://{$host}{$path}?access_token={$accessToken}] - String template used to generate URLs for PUT requests for items to storage
  */
 module.exports = modelFactory.new('Storage', {
+  apiVersion: String,
   clientId: String,
   clientSecret: String,
   host: String,

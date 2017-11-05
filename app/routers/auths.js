@@ -66,11 +66,12 @@ var reqPassportDocument = function(req, res, next) {
     var passportStrategy = require(document.passportStrategy);
 
     req.strategy = new passportStrategy.Strategy({
+      apiVersion: document.apiVersion,
       clientID: document.clientId,
       clientSecret: document.clientSecret,
       consumerKey: document.clientId,
       consumerSecret: document.clientSecret,
-      callbackURL: app.host + path.resolve('/', Model.modelType(), document.slug, 'auth-callback'),
+      callbackURL: `${req.protocol}://${req.get('host')}${path.resolve('/', Model.modelType(), document.slug, 'auth-callback')}`,
       passReqToCallback: true,
       profileFields: ['id', 'displayName', 'emails']
     }, function(req, accessToken, refreshToken, profile, done) {
