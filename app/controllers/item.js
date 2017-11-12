@@ -339,6 +339,26 @@ module.exports.itemsPageNextPagination = function(page, pagination, contentType)
 };
 
 /**
+ * Callbacks ID used to store item on storage.
+ * @param {Item} item - Item.
+ * @param {Object} data - Raw item data from source.
+ * @param {function} done - Error-first callback function expecting ID as second parameter.
+ */
+module.exports.storageId = function(item, data, done) {
+  var validate = function(done) {
+    validateParams([{
+      name: 'item', variable: item, required: true, requiredProperties: ['id', 'contentType']
+    }], done);
+  };
+
+  var storageId = function(done) {
+    done(undefined, `${item.source.lowercaseName()}-${data.id}`);
+  };
+
+  async.waterfall([validate, storageId], done);
+};
+
+/**
  * Callbacks file system path used to store item on storage.
  * @param {Item} item - Item.
  * @param {Object} data - Raw item data from source.
@@ -351,13 +371,15 @@ module.exports.storagePath = function(item, data, done) {
     }], done);
   };
 
-  var storagePath = function(done) {
-    var path = '/' + item.source.kebabName() + '/' + item.contentType.pluralKebabName() + '/' + item.slug(data) + '.json';
-    debug.success('storagePath: %s', path);
-    done(undefined, path);
+  var storageId = function(done) {
+    module.exports.storageId(item, data, done);
   };
 
-  async.waterfall([validate, storagePath], done);
+  var storagePath = function(id, done) {
+    done(undefined, `/${item.contentType.pluralLowercaseName()}/${id}.json`);
+  };
+
+  async.waterfall([validate, storageId, storagePath], done);
 };
 
 /**
@@ -794,6 +816,71 @@ module.exports.storeItemData = function(item, data, job, done) {
     });
   };
 
+  var storageId = function(done) {
+    module.exports.storageId(item, data, done);
+  };
+
+  var formatData = function(id, done) {
+    var formattedData = {
+      'id': id,
+      'type': item.contentType.pluralLowercaseName(),
+      'attributes': {}
+    }
+
+    if (!item.contentType.dataTemplate) { 
+      formattedData.attributes = data;
+      data = formattedData;
+      return done(); 
+    }
+
+    var extractValue = function(data, path) {
+      try {
+        var value = path;
+        var variables = path.match(/\$\{.+?\}/g);
+
+        variables.forEach((variable) => {
+          var matches = variable.match(/\$\{(.+?)\}/);
+          var variableValue = _.get(data, matches[1]);
+
+          if (!variableValue) {
+            throw new Error('Variable value null or undefined');
+          }
+
+          debug.trace('replace %s with %s', variable, variableValue);
+          value = value.replace(variable, _.get(data, matches[1]));
+        });
+
+        debug.trace('variables for %s: %o -> %s', path, variables, value);
+
+        return value;
+      } catch (error) {
+        return _.get(data, path);
+      }
+    }
+
+    Object.keys(item.contentType.dataTemplate).forEach((key) => {
+      switch (typeof item.contentType.dataTemplate[key]) {
+        case 'string':
+          formattedData.attributes[key] = extractValue(data, item.contentType.dataTemplate[key]);
+          break;
+
+        case 'object':
+          formattedData.attributes[key] = extractValue(data, item.contentType.dataTemplate[key]['path']);
+          
+          if (item.contentType.dataTemplate[key]['type'] === 'epoch') {
+            debug.trace('converting epoch time: %s', formattedData.attributes[key]);
+            var date = new Date(formattedData.attributes[key] * 1000);
+            formattedData.attributes[key] = date.toISOString();
+          }
+
+          break;
+      }
+    });
+
+    data = formattedData;
+    done();
+  };
+
   var storeFile = function(done) {
     module.exports.storeFile(item.user, item.storage, item.storagePath, data, (error, storeFileResult) => {
       if (error) {
@@ -846,6 +933,8 @@ module.exports.storeItemData = function(item, data, job, done) {
     validate,
     setupLog,
     updateStorageAttemptedAt,
+    storageId,
+    formatData,
     storeFile,
     updateStorageProperties,
     updateJob,
@@ -915,7 +1004,7 @@ module.exports.storeFile = function(user, storage, path, data, done) {
   var prepareData = function(done) {
     debug.start('storeFile (path: %s)', path);
     if (!(data instanceof Buffer)) {
-      data = JSON.stringify(data);
+      data = JSON.stringify(data, null, 2);
     }
 
     done();
