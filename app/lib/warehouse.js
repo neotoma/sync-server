@@ -23,7 +23,7 @@ module.exports = {
   jsonUrl: 'http://example.com/foo.json',
 
   jsonData: function() {
-    return { foo1: 'bar1', foo2: 'bar2' };
+    return { id: 'barId', foo1: 'bar1', foo2: 'bar2' };
   },
 
   pagination: () => {

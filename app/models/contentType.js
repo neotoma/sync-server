@@ -3,6 +3,7 @@
  * @module
  */
 
+var jsonapi = require('app/lib/jsonapi');
 var modelFactory = require('app/factories/model');
 var mongoose = require('app/lib/mongoose');
 var nameMethods = require('app/models/methods/name');
@@ -18,7 +19,7 @@ module.exports = modelFactory.new('ContentType', {
 }, {
   jsonapi: {
     get: 'public',
-    patch: 'admin',
-    post: 'admin'
+    patch: jsonapi.adminFlag,
+    post: jsonapi.adminFlag
   }
 }, nameMethods);

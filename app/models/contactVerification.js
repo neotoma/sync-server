@@ -6,6 +6,7 @@
 var async = require('async');
 var ContactVerificationRequest = require('./contactVerificationRequest');
 var debug = require('debug')('syncServer:contactVerification');
+var jsonapi = require('app/lib/jsonapi');
 var logger = require('app/lib/logger');
 var modelFactory = require('app/factories/model');
 var NotificationRequest = require('app/models/notificationRequest');
@@ -26,14 +27,14 @@ module.exports = modelFactory.new('ContactVerification', {
   user: { ref: 'User' }
 }, {
   jsonapi: {
-    delete: 'admin',
+    delete: jsonapi.adminFlag,
     get: {
       allowed: 'public',
       queryConditions: function(req, done) {
         done(undefined, { session: req.session.id });
       }
     },
-    patch: 'admin',
+    patch: jsonapi.adminFlag,
     post: {
       allowed: 'public',
 

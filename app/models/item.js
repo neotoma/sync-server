@@ -3,11 +3,8 @@
  * @module
  */
 
-var _ = require('lodash');
-var emojiStrip = require('emoji-strip');
 var modelFactory = require('app/factories/model');
 var queryConditions = require('./queryConditions');
-var sanitizeFilename = require('sanitize-filename');
 
 /**
  * Represents atomic unit of content available from source for storage

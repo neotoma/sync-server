@@ -3,6 +3,7 @@
  * @module
  */
 
+var jsonapi = require('app/lib/jsonapi');
 var modelFactory = require('app/factories/model');
 var templateCompiler = require('es6-template-strings');
 var validateParams = require('app/lib/validateParams');
@@ -35,11 +36,11 @@ module.exports = modelFactory.new('Storage', {
   }
 }, {
   jsonapi: {
-    delete: 'admin',
+    delete: jsonapi.adminFlag,
     filteredProperties: ['clientId', 'clientSecret'],
     get: 'public',
-    patch: 'admin',
-    post: 'admin'
+    patch: jsonapi.adminFlag,
+    post: jsonapi.adminFlag
   }
 }, {
   /**

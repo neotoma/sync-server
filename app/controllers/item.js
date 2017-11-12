@@ -49,6 +49,8 @@ queue.process('storeItemData', function(queueJob, done) {
   };
 
   var getJob = (item, done) => {
+    if (!queueJob.data.jobId) { return done(undefined, item, undefined); }
+
     Job.findById(queueJob.data.jobId, (error, job) => {
       if (error) {
         done(error);
@@ -61,7 +63,7 @@ queue.process('storeItemData', function(queueJob, done) {
   };
 
   var storeItemData = (item, job, done) => {
-    debug.start('queueJob storeItemData', item.id, job.id);
+    debug.start('queueJob storeItemData', item.id, job ? job.id : null);
     module.exports.storeItemData(item, queueJob.data.data, job, done);
   };
 
@@ -825,9 +827,9 @@ module.exports.storeItemData = function(item, data, job, done) {
       'id': id,
       'type': item.contentType.pluralLowercaseName(),
       'attributes': {}
-    }
+    };
 
-    if (!item.contentType.dataTemplate) { 
+    if (!item.contentType.dataTemplate) {
       formattedData.attributes = data;
       data = formattedData;
       return done(); 
@@ -856,24 +858,24 @@ module.exports.storeItemData = function(item, data, job, done) {
       } catch (error) {
         return _.get(data, path);
       }
-    }
+    };
 
     Object.keys(item.contentType.dataTemplate).forEach((key) => {
       switch (typeof item.contentType.dataTemplate[key]) {
-        case 'string':
-          formattedData.attributes[key] = extractValue(data, item.contentType.dataTemplate[key]);
-          break;
+      case 'string':
+        formattedData.attributes[key] = extractValue(data, item.contentType.dataTemplate[key]);
+        break;
 
-        case 'object':
-          formattedData.attributes[key] = extractValue(data, item.contentType.dataTemplate[key]['path']);
+      case 'object':
+        formattedData.attributes[key] = extractValue(data, item.contentType.dataTemplate[key]['path']);
           
-          if (item.contentType.dataTemplate[key]['type'] === 'epoch') {
-            debug.trace('converting epoch time: %s', formattedData.attributes[key]);
-            var date = new Date(formattedData.attributes[key] * 1000);
-            formattedData.attributes[key] = date.toISOString();
-          }
+        if (item.contentType.dataTemplate[key]['type'] === 'epoch') {
+          debug.trace('converting epoch time: %s', formattedData.attributes[key]);
+          var date = new Date(formattedData.attributes[key] * 1000);
+          formattedData.attributes[key] = date.toISOString();
+        }
 
-          break;
+        break;
       }
     });
 
