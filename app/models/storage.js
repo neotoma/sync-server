@@ -3,6 +3,7 @@
  * @module
  */
 
+var jsonapi = require('app/lib/jsonapi');
 var modelFactory = require('app/factories/model');
 var templateCompiler = require('es6-template-strings');
 var validateParams = require('app/lib/validateParams');
@@ -35,11 +36,11 @@ module.exports = modelFactory.new('Storage', {
   }
 }, {
   jsonapi: {
-    delete: 'admin',
+    delete: jsonapi.adminFlag,
     filteredProperties: ['clientId', 'clientSecret'],
     get: 'public',
-    patch: 'admin',
-    post: 'admin'
+    patch: jsonapi.adminFlag,
+    post: jsonapi.adminFlag
   }
 }, {
   /**
@@ -54,8 +55,9 @@ module.exports = modelFactory.new('Storage', {
       'Authorization': 'Bearer ' + userStorageAuth.storageToken,
       'Content-Type': 'application/octet-stream',
       'Dropbox-API-Arg': JSON.stringify({
-        autorename: true,
+        autorename: false,
         mode: 'add',
+        mute: true,
         path: path
       })
     };
@@ -76,9 +78,10 @@ module.exports = modelFactory.new('Storage', {
     }]);
 
     return templateCompiler(this.itemPutUrlTemplate, {
+      accessToken: userStorageAuth.storageToken,
+      apiVersion: this.apiVersion,
       host: this.host,
-      path: path,
-      accessToken: userStorageAuth.storageToken
+      path: path
     });
   }
 });

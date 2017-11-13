@@ -49,7 +49,7 @@ describe('itemController.storagePath method', function() {
       });
     },
     result: function(result, done) {
-      assert.equal(result, `/${this.params[0].source.kebabName()}/${this.params[0].contentType.pluralKebabName()}/${this.params[0].id}.json`);
+      assert.equal(result, `/${this.params[0].contentType.pluralLowercaseName()}/${this.params[0].source.lowercaseName()}-${this.params[1].id}.json`);
       done();
     }
   }]);

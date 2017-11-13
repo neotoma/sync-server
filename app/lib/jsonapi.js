@@ -15,6 +15,8 @@ var validateParams = require('./validateParams');
 
 var jsonapi = {};
 
+jsonapi.adminFlag = (process.env.SYNC_SERVER_PUBLIC_ADMIN == 'true') ? 'public' : 'admin';
+
 /**
  * Returns JSON API resource object representing provided Mongoose document
  * Document properties filtered out per model settings

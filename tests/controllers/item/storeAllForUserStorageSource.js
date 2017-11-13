@@ -45,15 +45,13 @@ describe('itemController.storeAllForUserStorageSource method', function() {
   var before = function(done) {
     prepareStoreAll(this.params[0], this.params[1], this.params[2], undefined, done);
   };
-
-  var timeout = 100000;
   
   assertions.function.callbacks.noError(controller.storeAllForUserStorageSource, [{
     after: after,
     before: before,
     context: controller,
     params: [wh.one('user'), wh.one('source'), wh.one('storage'), undefined],
-    timeout: timeout,
+    timeout: 100000,
     when: 'valid parameters provided'
   }]);
 });

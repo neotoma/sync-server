@@ -3,8 +3,9 @@
  * @module
  */
 
+var jsonapi = require('app/lib/jsonapi');
 var modelFactory = require('app/factories/model');
-var nameMethods = require('./methods/name');
+var nameMethods = require('app/models/methods/name');
 var templateCompiler = require('es6-template-strings');
 
 var methods = Object.assign({
@@ -66,10 +67,10 @@ module.exports = modelFactory.new('Source', {
   totalItemsAvailableFromPagePathTemplate: String
 }, {
   jsonapi: {
-    delete: 'admin',
+    delete: jsonapi.adminFlag,
     filteredProperties: ['clientId', 'clientSecret'],
     get: 'public',
-    patch: 'admin',
-    post: 'admin'
+    patch: jsonapi.adminFlag,
+    post: jsonapi.adminFlag
   }
 }, methods);

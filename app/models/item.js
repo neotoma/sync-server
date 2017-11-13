@@ -3,15 +3,8 @@
  * @module
  */
 
-var _ = require('lodash');
-var emojiStrip = require('emoji-strip');
 var modelFactory = require('app/factories/model');
 var queryConditions = require('./queryConditions');
-var sanitizeFilename = require('sanitize-filename');
-
-var convertToFilename = function(content) {
-  return _.toLower(emojiStrip(sanitizeFilename(content).replace(/[^\x00-\x7F]/g, '').replace('.','').replace('-', ' ').replace(/ {2}/g, ' ').replace(/ +/g, '-').replace(/–|—+/g, '-')));
-};
 
 /**
  * Represents atomic unit of content available from source for storage
@@ -48,37 +41,5 @@ module.exports = modelFactory.new('Item', {
       allowed: 'user',
       queryConditions: queryConditions.userMatchesRequester
     }
-  }
-}, {
-  slug: function(data) {
-    var parts = [];
-
-    if (data) {
-      if (data.createdAt) {
-        var date = new Date(data.createdAt * 1000);
-        var dateString = date.toISOString();
-        parts.push(dateString.substring(0, dateString.indexOf('T')));
-      }
-
-      if (data.venue && data.venue.name) {
-        parts.push(convertToFilename(data.venue.name));
-      } else if (data.firstName || data.lastName) {
-        if (data.firstName) {
-          parts.push(data.firstName);
-        }
-
-        if (data.lastName) {
-          parts.push(data.lastName);
-        }
-      } else if (data.text) {
-        parts.push(data.text);
-      }
-    }
-
-    if (!parts.length) {
-      parts.push(this.id);
-    }
-
-    return parts.map((part) => convertToFilename(part)).join('-');
   }
 });
