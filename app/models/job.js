@@ -7,7 +7,7 @@ var async = require('async'),
   debug = require('app/lib/debug')('app:job'),
   logger = require('app/lib/logger'),
   modelFactory = require('app/factories/model'),
-  queryConditions = require('./queryConditions')
+  queryConditions = require('./queryConditions');
 
 /**
  * Represents job scheduled for execution for related documents
@@ -68,9 +68,10 @@ module.exports = modelFactory.new('Job', {
   }
 }, function(schema) {
   schema.post('save', function() {
-    // eslint-disable-next-line global-require
+    /* eslint-disable global-require */
     let storeAllForUserStorageSource = require('app/controllers/item/storeAllForUserStorageSource'),
       storeAllForUserStorageSourceContentType = require('app/controllers/item/storeAllForUserStorageSourceContentType');
+    /* eslint-enable global-require */
 
     if (!this.wasNew) {
       return;
