@@ -1,10 +1,14 @@
 require('park-ranger')();
-var assert = require('assert');
-var assertions = require('app/lib/assertions');
-var wh = require('app/lib/warehouse');
+
+var assert = require('assert'),
+  assertFunctionReturnsResult = require('app/lib/assertions/functionReturnsResult'),
+  assertFunctionThrowsError = require('app/lib/assertions/functionThrowsError'),
+  assertFunctionThrowsNoError = require('app/lib/assertions/functionThrowsNoError'),
+  assertObjectHasProperties = require('app/lib/assertions/objectHasProperties'),
+  wh = require('app/lib/warehouse');
 
 describe('warehouse', () => {
-  assertions.object.hasProperties('warehouse', wh, 'itemDataObjects' [
+  assertObjectHasProperties('warehouse', wh, 'itemDataObjects' [
     'bytes',
     'jpegData',
     'jpegPath',
@@ -15,13 +19,13 @@ describe('warehouse', () => {
     'pagination'
   ]);
 
-  assertions.function.throws.noError('itemDataObjects', wh.itemDataObjects, [{
+  assertFunctionThrowsNoError('itemDataObjects', wh.itemDataObjects, [{
     context: wh,
     when: 'no contentType provided',
     params: []
   }]);
 
-  assertions.function.returnsResult('itemDataObjects', wh.itemDataObjects, [{
+  assertFunctionReturnsResult('itemDataObjects', wh.itemDataObjects, [{
     context: wh,
     when: 'contentType and no count provided',
     params: [wh.one('contentType')],
@@ -49,7 +53,7 @@ describe('warehouse', () => {
     }
   }]);
 
-  assertions.function.throws.error('itemPages', wh.itemPages, [{
+  assertFunctionThrowsError('itemPages', wh.itemPages, [{
     when: 'no contentType provided',
     params: [wh.one('source'), undefined, wh.one('userSourceAuth')],
     error: 'Parameter contentType undefined or null'
@@ -64,7 +68,7 @@ describe('warehouse', () => {
     error: 'Parameter userSourceAuth undefined or null'
   }]);
 
-  assertions.function.returnsResult('itemPages', wh.itemPages, [{
+  assertFunctionReturnsResult('itemPages', wh.itemPages, [{
     context: wh,
     when: 'contentType, source and userSourceAuth provided',
     params: [wh.one('source'), wh.one('contentType'), wh.one('userSourceAuth')],

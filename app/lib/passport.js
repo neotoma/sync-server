@@ -1,5 +1,5 @@
-var passport = require('passport');
-var User = require('app/models/user');
+var passport = require('passport'),
+  User = require('app/models/user');
 
 passport.serializeUser(function(user, done) {
   done(undefined, user.id);

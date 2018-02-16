@@ -3,14 +3,15 @@
  * @module
  */
 
-var async = require('async');
-var debug = require('app/lib/debug')('syncServer:job');
-var logger = require('app/lib/logger');
-var modelFactory = require('app/factories/model');
-var queryConditions = require('./queryConditions');
+var async = require('async'),
+  debug = require('app/lib/debug')('app:job'),
+  logger = require('app/lib/logger'),
+  modelFactory = require('app/factories/model'),
+  queryConditions = require('./queryConditions')
 
 /**
  * Represents job scheduled for execution for related documents
+ *
  * @class Job
  * @property {module:models/contentType~ContentType} [contentType] - ContentType for which this job should be executed
  * @property {('storeAllItemsForUserStorageSource'|'storeAllItemsForUserStorageSourceContentType')} name - Enumerated name of job
@@ -67,27 +68,36 @@ module.exports = modelFactory.new('Job', {
   }
 }, function(schema) {
   schema.post('save', function() {
-    var itemController = require('app/controllers/item');
-    var job = this;
+    // eslint-disable-next-line global-require
+    let storeAllForUserStorageSource = require('app/controllers/item/storeAllForUserStorageSource'),
+      storeAllForUserStorageSourceContentType = require('app/controllers/item/storeAllForUserStorageSourceContentType');
 
-    if (!job.wasNew) {
+    if (!this.wasNew) {
       return;
     }
 
-    var populate = function(done) {
-      job.populate('contentType source storage user', done);
+    var populate = (done) => {
+      this.populate('contentType source storage user', done);
     };
 
-    var runJob = function(done) {
-      switch (job.name) {
+    var runJob = (done) => {
+      switch (this.name) {
       case 'storeAllItemsForUserStorageSource':
-        debug('running job "storeAllItemsForUserStorageSource": user %s, source %s, storage %s', job.user.id, job.source.id, job.storage.id);
-        itemController.storeAllForUserStorageSource(job.user, job.source, job.storage, job, done);
+        if (!this.user || !this.source || !this.storage) {
+          return done(new Error('Missing user, source or storage upon starting to run storeAllItemsForUserStorageSource job'));
+        }
+
+        debug('running job "storeAllItemsForUserStorageSource": user %s, source %s, storage %s', this.user.id, this.source.id, this.storage.id);
+        storeAllForUserStorageSource(this.user, this.source, this.storage, this, done);
         break;
 
       case 'storeAllItemsForUserStorageSourceContentType':
-        debug('running job "storeAllItemsForUserStorageSourceContentType"');
-        itemController.storeAllForUserStorageSourceContentType(job.user, job.source, job.storage, job.contentType, job, done);
+        if (!this.user || !this.source || !this.storage || this.contentType) {
+          return done(new Error('Missing contentType, user, source or storage upon starting to run storeAllItemsForUserStorageSourceContentType job'));
+        }
+
+        debug('running job "storeAllItemsForUserStorageSourceContentType": contentType %s, user %s, source %s, storage %s', this.contentType, this.user.id, this.source.id, this.storage.id);
+        storeAllForUserStorageSourceContentType(this.user, this.source, this.storage, this.contentType, this, done);
         break;
 
       default:
@@ -96,7 +106,7 @@ module.exports = modelFactory.new('Job', {
     };
 
     async.series([populate, runJob], (error) => {
-      var log = logger.scopedLog({ jobId: job.id });
+      var log = logger.scopedLog({ jobId: this.id });
 
       if (error) {
         debug.error('# job failed: %s', error.message);

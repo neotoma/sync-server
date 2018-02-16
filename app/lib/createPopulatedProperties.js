@@ -5,7 +5,7 @@
 
 var _ = require('lodash');
 var async = require('async');
-var debug = require('debug')('syncServer:tests:createPopulatedProperties');
+var debug = require('app/lib/debug')('app:createPopulatedProperties');
 var wh = require('app/lib/warehouse');
 
 /**

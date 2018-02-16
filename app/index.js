@@ -3,14 +3,15 @@
  * @module
  */
 
-var cookieParser = require('cookie-parser');
-var express = require('express');
-var expressSession = require('express-session');
-var compression = require('compression');
-var morgan = require('app/lib/morgan');
-var passport = require('app/lib/passport');
-var routers = require('app/routers');
-var sessionConfig = require('app/config/session');
+var cookieParser = require('cookie-parser'),
+  debug = require('app/lib/debug')('app'),
+  express = require('express'),
+  expressSession = require('express-session'),
+  compression = require('compression'),
+  morgan = require('app/lib/morgan'),
+  passport = require('app/lib/passport'),
+  routers = require('app/routers'),
+  sessionConfig = require('app/config/session');
 
 var app = express();
 
@@ -45,4 +46,6 @@ app.requireAuthentication = function(req, res, next) {
 
 module.exports = app;
 
-routers();
+routers(app);
+
+debug('done initializing app');

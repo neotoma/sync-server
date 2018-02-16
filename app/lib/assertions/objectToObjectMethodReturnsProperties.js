@@ -5,7 +5,7 @@
 
 var _ = require('underscore');
 var assert = require('assert');
-var debug = require('debug')('syncServer:objectToObjectMethodReturnsProperties');
+var debug = require('app/lib/debug')('app:objectToObjectMethodReturnsProperties');
 var ObjectId = require('mongoose').Types.ObjectId;
 
 module.exports = function(objectName, object, properties) {

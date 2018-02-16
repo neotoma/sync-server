@@ -1,11 +1,13 @@
 require('park-ranger')();
-var _ = require('lodash');
-var assertions = require('app/lib/assertions');
-var controller = require('app/controllers/item');
-var wh = require('app/lib/warehouse');
 
-describe('itemController.itemsPageNextPagination method', () => {
-  assertions.function.returnsResult('controller.itemsPageNextPagination', controller.itemsPageNextPagination, [{
+var _ = require('lodash'),
+  assertFunctionReturnsResult = require('app/lib/assertions/functionReturnsResult'),
+  assertFunctionThrowsError = require('app/lib/assertions/functionThrowsError'),
+  itemsPageNextPagination = require('app/controllers/item/itemsPageNextPagination'),
+  wh = require('app/lib/warehouse');
+
+describe('itemController itemsPageNextPagination method', () => {
+  assertFunctionReturnsResult('controller itemsPageNextPagination', itemsPageNextPagination, [{
     when: 'provided page with no response',
     params: [wh.itemPage(), wh.pagination(), wh.one('contentType')],
     before: function(done) {
@@ -76,7 +78,7 @@ describe('itemController.itemsPageNextPagination method', () => {
     result: { maxId: 999 }
   }]);
 
-  assertions.function.throws.error('controller.itemsPageNextPagination', controller.itemsPageNextPagination, [{
+  assertFunctionThrowsError('controller itemsPageNextPagination', itemsPageNextPagination, [{
     when: 'no page parameter provided',
     params: [undefined, wh.pagination(), wh.one('contentType')],
     error: 'Parameter page undefined or null'

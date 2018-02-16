@@ -1,12 +1,14 @@
 require('park-ranger')();
-var assert = require('assert');
-var assertions = require('app/lib/assertions');
-var async = require('async');
-var controller = require('app/controllers/item');
-var wh = require('app/lib/warehouse');
 
-describe('itemController.storagePath method', function() {
-  assertions.function.callbacks.error(controller.storagePath, [{
+var assert = require('assert'),
+  assertFunctionCallbacksError = require('app/lib/assertions/functionCallbacksError'),
+  assertFunctionCallbacksResult = require('app/lib/assertions/functionCallbacksResult'),
+  async = require('async'),
+  storagePath = require('app/controllers/item/storagePath'),
+  wh = require('app/lib/warehouse');
+
+describe('itemController storagePath method', function() {
+  assertFunctionCallbacksError(storagePath, [{
     when: 'no item parameter provided',
     params: [undefined, wh.jsonData()],
     error: 'Parameter item undefined or null'
@@ -20,7 +22,7 @@ describe('itemController.storagePath method', function() {
     error: 'Parameter item has no contentType property'
   }]);
 
-  assertions.function.callbacks.result(controller.storagePath, [{
+  assertFunctionCallbacksResult(storagePath, [{
     when: 'item provided',
     params: [wh.one('item'), wh.jsonData()],
     before: function(done) {

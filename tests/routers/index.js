@@ -1,7 +1,8 @@
 require('park-ranger')();
-var app = require('app');
-var assert = require('assert');
-var supertest = require('supertest');
+
+var app = require('app'),
+  assert = require('assert'),
+  supertest = require('supertest');
 
 describe('GET /', function() {
   it('responds with jsonapi object', function(done) {

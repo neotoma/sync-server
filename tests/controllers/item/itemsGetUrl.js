@@ -1,12 +1,14 @@
 require('park-ranger')();
-var assert = require('assert');
-var assertions = require('app/lib/assertions');
-var controller = require('app/controllers/item');
-var templateCompiler = require('es6-template-strings');
-var wh = require('app/lib/warehouse');
 
-describe('itemController.itemsGetUrl method', function() {
-  assertions.function.returnsResult('controller.itemsGetUrl', controller.itemsGetUrl, [{
+var assert = require('assert'),
+  assertFunctionReturnsResult = require('app/lib/assertions/functionReturnsResult'),
+  assertFunctionThrowsError = require('app/lib/assertions/functionThrowsError'),
+  itemsGetUrl = require('app/controllers/item/itemsGetUrl'),
+  templateCompiler = require('es6-template-strings'),
+  wh = require('app/lib/warehouse');
+
+describe('itemController itemsGetUrl method', function() {
+  assertFunctionReturnsResult('controller itemsGetUrl', itemsGetUrl, [{
     when: 'provided source (with itemsGetUrlTemplate property), contentType, userSourceAuth, and pagination as parameters',
     params: [wh.one('source'), wh.one('contentType'), wh.one('userSourceAuth'), wh.pagination()],
     result: function(itemsGetUrl, done) {
@@ -41,7 +43,7 @@ describe('itemController.itemsGetUrl method', function() {
     }
   }]);
 
-  assertions.function.throws.error('controller.itemsGetUrl', controller.itemsGetUrl, [{
+  assertFunctionThrowsError('controller itemsGetUrl', itemsGetUrl, [{
     when: 'no source parameter provided',
     params: [undefined, wh.one('contentType'), wh.one('userSourceAuth'), wh.pagination()],
     error: 'Parameter source undefined or null'

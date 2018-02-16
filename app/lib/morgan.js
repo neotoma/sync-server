@@ -1,5 +1,5 @@
-var logger = require('./logger');
-var morgan = require('morgan');
+var logger = require('./logger'),
+  morgan = require('morgan');
 
 module.exports = function(message) {
   message = message ? message : 'Processed request';

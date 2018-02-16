@@ -1,7 +1,7 @@
-var async = require('async');
-var debug = require('debug')('syncServer:test:prepareStoreAll');
-var nock = require('app/lib/nock');
-var wh = require('app/lib/warehouse');
+var async = require('async'),
+  debug = require('app/lib/debug')('app:tests:prepareStoreAll'),
+  nock = require('app/lib/nock'),
+  wh = require('app/lib/warehouse');
 
 module.exports = function(user, source, storage, contentType, done) {
   var saveUser = (done) => {

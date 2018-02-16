@@ -1,11 +1,13 @@
 require('park-ranger')();
-var _ = require('lodash');
-var assertions = require('app/lib/assertions');
-var controller = require('app/controllers/item');
-var wh = require('app/lib/warehouse');
 
-describe('itemController.itemDataObjectsFromPage method', () => {
-  assertions.function.returnsResult('controller.itemDataObjectsFromPage', controller.itemDataObjectsFromPage, [{
+var _ = require('lodash'),
+  assertFunctionReturnsResult = require('app/lib/assertions/functionReturnsResult'),
+  assertFunctionThrowsError = require('app/lib/assertions/functionThrowsError'),
+  itemDataObjectsFromPage = require('app/controllers/item/itemDataObjectsFromPage'),
+  wh = require('app/lib/warehouse');
+
+describe('itemController itemDataObjectsFromPage method', () => {
+  assertFunctionReturnsResult('controller itemDataObjectsFromPage', itemDataObjectsFromPage, [{
     when: 'provided source with itemDataObjectsFromPagePathTemplate property as parameter',
     params: [undefined, wh.one('source'), wh.one('contentType')],
     before: function(done) {
@@ -27,7 +29,7 @@ describe('itemController.itemDataObjectsFromPage method', () => {
     }
   }]);
 
-  assertions.function.throws.error('controller.itemDataObjectsFromPage', controller.itemDataObjectsFromPage, [{
+  assertFunctionThrowsError('controller itemDataObjectsFromPage', itemDataObjectsFromPage, [{
     when: 'no page parameter provided',
     params: [undefined, wh.one('source'), wh.one('contentType')],
     error: 'Parameter page undefined or null'

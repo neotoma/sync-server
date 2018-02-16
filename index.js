@@ -5,7 +5,7 @@
 
 var ranger = require('park-ranger')();
 var app = require('app');
-var debug = require('app/lib/debug')('syncServer:server');
+var debug = require('app/lib/debug')('app:server');
 var http = require('http');
 var https = require('https');
 var passportSocketIO = require('app/lib/passportSocketIO');

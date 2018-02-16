@@ -1,9 +1,12 @@
 require('park-ranger')();
-var assertions = require('app/lib/assertions');
-var jsonapi = require('app/lib/jsonapi');
+
+var assertObjectHasProperties = require('app/lib/assertions/objectHasProperties'),
+  assertFunctionCallbacksResult = require('app/lib/assertions/functionCallbacksResult'),
+  assertFunctionThrowsError = require('app/lib/assertions/functionThrowsError'),
+  jsonapi = require('app/lib/jsonapi');
 
 describe('jsonapi', () => {
-  assertions.object.hasProperties('jsonapi', jsonapi, [
+  assertObjectHasProperties('jsonapi', jsonapi, [
     'allowed',
     'compiledQueryConditions',
     'modelQueryConditions',
@@ -31,7 +34,7 @@ describe('jsonapi', () => {
   };
   var req = {};
 
-  assertions.function.throws.error('jsonapi.modelQueryConditions', jsonapi.modelQueryConditions, [{
+  assertFunctionThrowsError('jsonapi.modelQueryConditions', jsonapi.modelQueryConditions, [{
     when: 'no req parameter provided',
     params: [undefined, model, method],
     error: 'Parameter req undefined or null'
@@ -55,7 +58,7 @@ describe('jsonapi', () => {
     }
   }]);
 
-  assertions.function.callbacks.result('jsonapi.modelQueryConditions', jsonapi.modelQueryConditions, [{
+  assertFunctionCallbacksResult('jsonapi.modelQueryConditions', jsonapi.modelQueryConditions, [{
     when: 'model with no jsonapi[method] property provided',
     params: [req, model, method],
     result: {},

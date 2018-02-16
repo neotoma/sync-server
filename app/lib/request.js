@@ -3,7 +3,7 @@
  * @module
  */
 
-var debug = require('debug')('syncServer:request');
+var debug = require('app/lib/debug')('app:request');
 var request = require('request');
 
 request.statusCodeError = function(statusCode) {

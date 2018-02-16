@@ -1,11 +1,13 @@
 require('park-ranger')();
-var assert = require('assert');
-var assertions = require('app/lib/assertions');
-var controller = require('app/controllers/item');
-var wh = require('app/lib/warehouse');
 
-describe('itemController.itemsPageError method', () => {
-  assertions.function.returnsResult('controller.itemsPageError', controller.itemsPageError, [{
+var assert = require('assert'),
+  assertFunctionReturnsResult = require('app/lib/assertions/functionReturnsResult'),
+  assertFunctionThrowsError = require('app/lib/assertions/functionThrowsError'),
+  itemsPageError = require('app/controllers/item/itemsPageError'),
+  wh = require('app/lib/warehouse');
+
+describe('itemController itemsPageError method', () => {
+  assertFunctionReturnsResult('controller itemsPageError', itemsPageError, [{
     when: 'provided page with no meta',
     params: [wh.itemPage(wh.one('source'), wh.one('contentType')), wh.one('source')],
     result: undefined
@@ -90,7 +92,7 @@ describe('itemController.itemsPageError method', () => {
     }
   }]);
 
-  assertions.function.throws.error('controller.itemsPageError', controller.itemsPageError, [{
+  assertFunctionThrowsError('controller itemsPageError', itemsPageError, [{
     when: 'no page parameter provided',
     params: [undefined, wh.one('source'), wh.one('contentType')],
     error: 'Parameter page undefined or null'

@@ -1,12 +1,11 @@
-var app = require('app');
-var cors = require('cors');
-var debug = require('app/lib/debug')('syncServer:cors');
+var cors = require('cors'),
+  debug = require('app/lib/debug')('app:cors');
 
 /**
  * Restricts cross-origin HTTP requests for app to given host using CORS
  * @param {string} [host] - Host (e.g. http://example.com) or hosts (comma-delimited). If omitted, all CORS requests enabled.
  */
-module.exports = function(host) {
+module.exports = function(app, host) {
   if (!host) {
     return app.use(cors());
   }

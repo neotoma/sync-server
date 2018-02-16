@@ -3,14 +3,14 @@
  * @module
  */
 
-var _ = require('lodash');
-var async = require('async');
-var debug = require('debug')('syncServer:warehouse');
-var itemController = require('app/controllers/item');
-var modelFixtures = require('fixtures/models');
-var models = require('app/models');
-var ObjectId = require('mongoose').Types.ObjectId;
-var validateParams = require('./validateParams');
+var _ = require('lodash'),
+  async = require('async'),
+  debug = require('app/lib/debug')('app:warehouse'),
+  itemsGetUrl = require('app/controllers/item/itemsGetUrl'),
+  modelFixtures = require('fixtures/models'),
+  models = require('app/models'),
+  ObjectId = require('mongoose').Types.ObjectId,
+  validateParams = require('./validateParams');
 
 debug('models', models);
 
@@ -21,9 +21,15 @@ module.exports = {
   jpegUrl: 'http://example.com/foo.jpg',
   jsonPath: '/foo.json',
   jsonUrl: 'http://example.com/foo.json',
+  nextJsonDataId: 1,
 
-  jsonData: function() {
-    return { id: 'barId', foo1: 'bar1', foo2: 'bar2' };
+  jsonData: function(uniqueId) {
+    let id = (uniqueId) ? `barId-${this.nextJsonDataId}` : 'barId';
+    let data = { id: id, foo1: 'bar1', foo2: 'bar2' };
+
+    this.nextJsonDataId++;
+
+    return data;
   },
 
   pagination: () => {
@@ -70,7 +76,7 @@ module.exports = {
         type: contentType.pluralCamelName()
       };
 
-      Object.assign(itemDataObject, this.jsonData());
+      Object.assign(itemDataObject, this.jsonData(true));
 
       return itemDataObject;
     });
@@ -137,7 +143,7 @@ module.exports = {
       
       // Populate page pagination
       if (itemDataObjects.length) {
-        _.set(pages[i], 'links.next', itemController.itemsGetUrl(source, contentType, userSourceAuth, { offset: (i * source.itemsLimit) + pageItemDataObjects.length }));
+        _.set(pages[i], 'links.next', itemsGetUrl(source, contentType, userSourceAuth, { offset: (i * source.itemsLimit) + pageItemDataObjects.length }));
       }
     }
 
@@ -206,7 +212,7 @@ module.exports = {
   one: function(modelId, overwriteProperties) {
     if (ObjectId.isValid(overwriteProperties)) {
       overwriteProperties = {
-        _id : overwriteProperties
+        _id: overwriteProperties
       };
     }
 

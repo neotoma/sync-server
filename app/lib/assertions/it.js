@@ -64,7 +64,6 @@ module.exports = function(description, assertion) {
     return description;
   };
 
-
   return function(subjectName, subject, tests) {
     if (!tests) {
       tests = subject;

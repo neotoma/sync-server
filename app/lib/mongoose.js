@@ -1,6 +1,6 @@
 var _ = require('lodash');
 var async = require('async');
-var debug = require('app/lib/debug')('syncServer:mongoose');
+var debug = require('app/lib/debug')('app:mongoose');
 var mongoose = require('mongoose');
 var logger = require('./logger');
 var mongoDBConfig = require('app/config/mongodb');
@@ -35,7 +35,7 @@ mongoose.transform = function(doc, ret) {
     }
 
     // Convert under_scores to camelCase
-    newKey = key.replace(/_([a-z])/g, function (g) { return g[1].toUpperCase(); });
+    newKey = key.replace(/_([a-z])/g, function(g) { return g[1].toUpperCase(); });
 
     if (newKey != key) {
       ret[newKey] = ret[key];

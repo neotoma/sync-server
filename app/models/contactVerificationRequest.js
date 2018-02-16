@@ -3,13 +3,13 @@
  * @module
  */
 
-var async = require('async');
-var ContactVerificationRequest;
-var crypto = require('crypto');
-var logger = require('app/lib/logger');
-var mailer = require('app/lib/mailer');
-var modelFactory = require('app/factories/model');
-var ObjectId = require('mongoose').Types.ObjectId;
+var async = require('async'),
+  ContactVerificationRequest,
+  crypto = require('crypto'),
+  logger = require('app/lib/logger'),
+  mailer = require('app/lib/mailer'),
+  modelFactory = require('app/factories/model'),
+  ObjectId = require('mongoose').Types.ObjectId;
 
 /**
  * Represents request to verify contact information
@@ -106,7 +106,7 @@ module.exports = ContactVerificationRequest = modelFactory.new('ContactVerificat
             });
           }
         });
-      },
+      }
     },
     post: {
       allowed: 'public',

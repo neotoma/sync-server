@@ -1,19 +1,21 @@
 require('park-ranger')();
-var app = require('app');
-var assert = require('assert');
-var async = require('async');
-var assertions = require('app/lib/assertions');
-var controller = require('app/controllers/item');
-var mongoose = require('app/lib/mongoose');
-var nock = require('app/lib/nock');
-var resetAppSpy = require('./routines/resetAppSpy');
-var wh = require('app/lib/warehouse');
 
-describe('itemController.storeItemData method', function() {
+var app = require('app'),
+  assert = require('assert'),
+  assertFunctionCallbacksError = require('app/lib/assertions/functionCallbacksError'),
+  assertFunctionCallbacksNoError = require('app/lib/assertions/functionCallbacksNoError'),
+  async = require('async'),
+  mongoose = require('app/lib/mongoose'),
+  nock = require('app/lib/nock'),
+  resetAppSpy = require('./routines/resetAppSpy'),
+  storeItemData = require('app/controllers/item/storeItemData'),
+  wh = require('app/lib/warehouse');
+
+describe('itemController storeItemData method', function() {
   beforeEach(mongoose.removeAllCollections);
   beforeEach(resetAppSpy);
 
-  assertions.function.callbacks.error(controller.storeItemData, [{
+  assertFunctionCallbacksError(storeItemData, [{
     when: 'no item parameter provided',
     params: [undefined, wh.jsonData(), wh.one('job')],
     error: 'Parameter item undefined or null'
@@ -53,8 +55,7 @@ describe('itemController.storeItemData method', function() {
     }
   }]);
 
-  assertions.function.callbacks.noError(controller.storeItemData, [{
-    context: controller,
+  assertFunctionCallbacksNoError(storeItemData, [{
     when: 'provided item with json data',
     params: [wh.one('item'), wh.jsonData(), wh.one('job')],
     before: function(done) {

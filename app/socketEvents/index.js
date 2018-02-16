@@ -1,3 +1,5 @@
+var storedItemData = require('app/socketEvents/storedItemData');
+
 module.exports = function(server, socket) {
-  return require('app/socketEvents/storedItemData')(server, socket);
+  return storedItemData(server, socket);
 };

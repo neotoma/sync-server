@@ -3,16 +3,17 @@
  * @module
  */
 
+require('app/index');
 require('park-ranger')();
 
-var _ = require('lodash');
-var assertions = require('app/lib/assertions');
-var async = require('async');
-var createPopulatedProperties = require('app/lib/createPopulatedProperties');
-var fixtures = require('fixtures/models');
-var methods = require('methods');
-var models = require('app/models');
-var mongoose = require('app/lib/mongoose');
+var _ = require('lodash'),
+  assertRoute = require('app/lib/assertions/route'),
+  async = require('async'),
+  createPopulatedProperties = require('app/lib/createPopulatedProperties'),
+  fixtures = require('fixtures/models'),
+  methods = require('methods'),
+  models = require('app/models'),
+  mongoose = require('app/lib/mongoose');
 
 Object.keys(fixtures).forEach((id) => {
   var Model = models[id];
@@ -84,7 +85,7 @@ Object.keys(fixtures).forEach((id) => {
       }
 
       if (['patch', 'post'].indexOf(method) > -1) {
-        assertions.route(Model, method, tests);
+        assertRoute(Model, method, tests);
       }
 
       if (id === 'contactVerificationRequest') {

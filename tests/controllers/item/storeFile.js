@@ -1,9 +1,11 @@
 require('park-ranger')();
-var assertions = require('app/lib/assertions');
-var controller = require('app/controllers/item');
-var mongoose = require('app/lib/mongoose');
-var nock = require('app/lib/nock');
-var wh = require('app/lib/warehouse');
+
+var assertFunctionCallbacksError = require('app/lib/assertions/functionCallbacksError'),
+  assertFunctionCallbacksResult = require('app/lib/assertions/functionCallbacksResult'),
+  mongoose = require('app/lib/mongoose'),
+  nock = require('app/lib/nock'),
+  storeFile = require('app/controllers/item/storeFile'),
+  wh = require('app/lib/warehouse');
 
 var before = function(path) {
   return function(done) {
@@ -17,11 +19,11 @@ var before = function(path) {
   };
 };
 
-describe('itemController.storeFile method', function() {
+describe('itemController storeFile method', function() {
   beforeEach(mongoose.removeAllCollections);
   beforeEach(nock.cleanAll);
   
-  assertions.function.callbacks.error(controller.storeFile, [{
+  assertFunctionCallbacksError(storeFile, [{
     when: 'no user parameter provided',
     params: [undefined, wh.one('storage'), wh.jsonPath, wh.jsonData()],
     error: 'Parameter user undefined or null'
@@ -84,7 +86,7 @@ describe('itemController.storeFile method', function() {
     }
   }]);
 
-  assertions.function.callbacks.result(controller.storeFile, [{
+  assertFunctionCallbacksResult(storeFile, [{
     when: 'provided JSON data',
     params: [wh.one('user'), wh.one('storage'), wh.jsonPath, wh.jsonData()],
     result: { size: wh.bytes, path_lower: wh.jsonPath },

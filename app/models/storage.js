@@ -72,7 +72,7 @@ module.exports = modelFactory.new('Storage', {
    */
   itemPutUrl: function(path, userStorageAuth) {
     validateParams([{
-      name: 'path', variable: path, required: true, requiredType: 'string',
+      name: 'path', variable: path, required: true, requiredType: 'string'
     }, {
       name: 'userStorageAuth', variable: userStorageAuth, required: true, requiredProperties: ['storageToken']
     }]);

@@ -1,22 +1,24 @@
 require('park-ranger')();
-var assert = require('assert');
-var assertions = require('app/lib/assertions');
-var async = require('async');
-var controller = require('app/controllers/item');
-var mongoose = require('app/lib/mongoose');
-var wh = require('app/lib/warehouse');
 
-describe('itemController.persistItemDataObject method', function() {
+var assert = require('assert'),
+  assertFunctionCallbacksError = require('app/lib/assertions/functionCallbacksError'),
+  assertFunctionCallbacksResult = require('app/lib/assertions/functionCallbacksResult'),
+  async = require('async'),
+  mongoose = require('app/lib/mongoose'),
+  persistItemDataObject = require('app/controllers/item/persistItemDataObject'),
+  wh = require('app/lib/warehouse');
+
+describe('itemController persistItemDataObject method', function() {
   beforeEach(mongoose.removeAllCollections);
 
-  assertions.function.callbacks.error(controller.persistItemDataObject, [{
+  assertFunctionCallbacksError(persistItemDataObject, [{
     when: 'no itemDataObject parameter provided',
     params: [undefined, wh.itemRelationships()],
-    error: 'Parameter itemDataObject undefined or null',
+    error: 'Parameter itemDataObject undefined or null'
   }, {
     when: 'no relationships parameter provided',
     params: [wh.itemDataObject(), undefined],
-    error: 'Parameter relationships undefined or null',
+    error: 'Parameter relationships undefined or null'
   }, {
     when: 'itemDataObject parameter has no id property',
     params: [wh.itemDataObject(), wh.itemRelationships()],
@@ -74,7 +76,7 @@ describe('itemController.persistItemDataObject method', function() {
     }
   }]);
 
-  assertions.function.callbacks.result(controller.persistItemDataObject, [{
+  assertFunctionCallbacksResult(persistItemDataObject, [{
     when: 'itemDataObject and relationships parameters provided',
     params: [wh.itemDataObject(), wh.itemRelationships()],
     before: function(done) {

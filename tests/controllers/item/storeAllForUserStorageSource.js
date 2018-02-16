@@ -1,18 +1,19 @@
 require('park-ranger')();
 
-var assertions = require('app/lib/assertions');
-var controller = require('app/controllers/item');
-var mongoose = require('app/lib/mongoose');
-var prepareStoreAll = require('./routines/prepareStoreAll');
-var resetAppSpy = require('./routines/resetAppSpy');
-var verifyStoredItems = require('./routines/verifyStoredItems');
-var wh = require('app/lib/warehouse');
+var assertFunctionCallbacksError = require('app/lib/assertions/functionCallbacksError'),
+  assertFunctionCallbacksNoError = require('app/lib/assertions/functionCallbacksNoError'),
+  mongoose = require('app/lib/mongoose'),
+  prepareStoreAll = require('./routines/prepareStoreAll'),
+  resetAppSpy = require('./routines/resetAppSpy'),
+  storeAllForUserStorageSource = require('app/controllers/item/storeAllForUserStorageSource'),
+  verifyStoredItems = require('./routines/verifyStoredItems'),
+  wh = require('app/lib/warehouse');
 
-describe('itemController.storeAllForUserStorageSource method', function() {
+describe('itemController storeAllForUserStorageSource method', function() {
   beforeEach(mongoose.removeAllCollections);
   beforeEach(resetAppSpy);
   
-  assertions.function.callbacks.error(controller.storeAllForUserStorageSource, [{
+  assertFunctionCallbacksError(storeAllForUserStorageSource, [{
     when: 'no user parameter provided',
     params: [undefined, wh.one('source'), wh.one('storage'), wh.one('job')],
     error: 'Parameter user undefined or null'
@@ -46,10 +47,9 @@ describe('itemController.storeAllForUserStorageSource method', function() {
     prepareStoreAll(this.params[0], this.params[1], this.params[2], undefined, done);
   };
   
-  assertions.function.callbacks.noError(controller.storeAllForUserStorageSource, [{
+  assertFunctionCallbacksNoError(storeAllForUserStorageSource, [{
     after: after,
     before: before,
-    context: controller,
     params: [wh.one('user'), wh.one('source'), wh.one('storage'), undefined],
     timeout: 100000,
     when: 'valid parameters provided'

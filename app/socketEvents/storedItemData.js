@@ -1,5 +1,5 @@
 var app = require('app');
-var debug = require('app/lib/debug')('syncServer:socketEvents:status');
+var debug = require('app/lib/debug')('app:socketEvents:status');
 var jsonapi = require('app/lib/jsonapi');
 
 module.exports = function(server, socket) {

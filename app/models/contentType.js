@@ -3,10 +3,10 @@
  * @module
  */
 
-var jsonapi = require('app/lib/jsonapi');
-var modelFactory = require('app/factories/model');
-var mongoose = require('app/lib/mongoose');
-var nameMethods = require('app/models/methods/name');
+var jsonapi = require('app/lib/jsonapi'),
+  modelFactory = require('app/factories/model'),
+  mongoose = require('app/lib/mongoose'),
+  nameMethods = require('app/models/methods/name');
 
 /**
  * Represents type of content available from source for storage

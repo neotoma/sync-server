@@ -3,9 +3,9 @@
  * @module
  */
 
-var logger = require('app/lib/logger');
-var mongoDBConfig = require('./mongodb');
-var MongoStore = require('connect-mongo')(require('express-session'));
+var logger = require('app/lib/logger'),
+  mongoDBConfig = require('./mongodb'),
+  MongoStore = require('connect-mongo')(require('express-session'));
 
 try {
   var secret = process.env.SYNC_SERVER_SESSION_SECRET;

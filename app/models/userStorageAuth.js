@@ -3,8 +3,8 @@
  * @module
  */
 
-var modelFactory = require('app/factories/model');
-var queryConditions = require('./queryConditions');
+var modelFactory = require('app/factories/model'),
+  queryConditions = require('./queryConditions');
 
 /**
  * Represents OAuth 2.0 credentials for user authentication to storage

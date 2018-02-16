@@ -1,20 +1,19 @@
-//var app = require('app');
-var assert = require('assert');
-var async = require('async');
-var debug = require('debug')('syncServer:test:verifyStoredItems');
-var Item = require('app/models/item');
-var wh = require('app/lib/warehouse');
+var assert = require('assert'),
+  async = require('async'),
+  debug = require('app/lib/debug')('app:tests:verifyStoredItems'),
+  Item = require('app/models/item'),
+  wh = require('app/lib/warehouse');
 
 module.exports = function(source, contentType, totalPages, done) {
   debug('verifyStoredItems totalPages: %s', totalPages);
 
   var contentTypes = contentType ? [contentType] : source.contentTypes;
   var itemDataObjectsCount = totalPages ? totalPages * source.itemsLimit : undefined;
-  //var totalItemDataObjects = 0;
 
   async.each(contentTypes, (contentType, done) => {
     var itemDataObjects = wh.itemDataObjects(contentType, itemDataObjectsCount);
-    //totalItemDataObjects += itemDataObjects.length;
+
+    debug(`verifying stored items for contentType "${contentType.name}"`);
 
     Item.count({
       contentType: contentType.id
@@ -26,16 +25,5 @@ module.exports = function(source, contentType, totalPages, done) {
         done(error);
       }
     });
-  }, (error) => {
-    if (error) {
-      return done(error);
-    }
-
-    try {
-      //assert.equal(app.emit.callCount, totalItemDataObjects);
-      done();
-    } catch (error) {
-      return done(error);
-    }
-  });
+  }, done);
 };

@@ -3,14 +3,14 @@
  * @module
  */
 
-var async = require('async');
-var ContactVerificationRequest = require('./contactVerificationRequest');
-var debug = require('debug')('syncServer:contactVerification');
-var jsonapi = require('app/lib/jsonapi');
-var logger = require('app/lib/logger');
-var modelFactory = require('app/factories/model');
-var NotificationRequest = require('app/models/notificationRequest');
-var User = require('app/models/user');
+var async = require('async'),
+  ContactVerificationRequest = require('app/models/contactVerificationRequest'),
+  debug = require('app/lib/debug')('app:contactVerification'),
+  jsonapi = require('app/lib/jsonapi'),
+  logger = require('app/lib/logger'),
+  modelFactory = require('app/factories/model'),
+  NotificationRequest = require('app/models/notificationRequest'),
+  User = require('app/models/user');
 
 /**
  * Represents verification of contact information

@@ -1,8 +1,9 @@
-var Debug = require('debug');
-var itemController = require('app/controllers/item');
-var nock = require('nock');
-var url = require('url');
-var wh = require('app/lib/warehouse');
+var debug = require('app/lib/debug')('app:tests:nock'),
+  itemDataObjectsFromPage = require('app/controllers/item/itemDataObjectsFromPage'),
+  itemsGetUrl = require('app/controllers/item/itemsGetUrl'),
+  nock = require('nock'),
+  url = require('url'),
+  wh = require('app/lib/warehouse');
 
 module.exports = {
   cleanAll: nock.cleanAll,
@@ -14,7 +15,7 @@ module.exports = {
    * @param {number} [responseStatus=200] - Response status code
    */
   get: function(requestUrl, responseBody, responseStatus) {
-    Debug('syncServer:test:nock:get')('get %s', requestUrl);
+    debug('get %s', requestUrl);
 
     var urlObject = url.parse(requestUrl);
 
@@ -49,21 +50,19 @@ module.exports = {
   getItemPages: function(source, contentType, userSourceAuth, done) {
     var contentTypes = contentType ? [contentType] : source.contentTypes;
 
-    var debug = Debug('syncServer:test:nock');
     debug('getItemPages with source %s, userSourceAuth %s for %s contentTypes', source.id, userSourceAuth.id, contentTypes.length);
 
     contentTypes.forEach((contentType) => {
-      var debug = Debug('syncServer:test:nock:getItemPages');
       var itemPages = wh.itemPages(source, contentType, userSourceAuth);
       var offset = 0;
 
       debug('getItemPages with contentType %s for %s pages', contentType.id, itemPages.length);
 
       itemPages.forEach((page) => {
-        debug('getItemPages with contentType %s for page with %s items', contentType.id, itemController.itemDataObjectsFromPage(page, source, contentType).length);
+        debug('getItemPages with contentType %s for page with %s items', contentType.id, itemDataObjectsFromPage(page, source, contentType).length);
 
-        this.get(itemController.itemsGetUrl(source, contentType, userSourceAuth, { offset: offset }), page);
-        offset = offset + itemController.itemDataObjectsFromPage(page, source, contentType).length;
+        this.get(itemsGetUrl(source, contentType, userSourceAuth, { offset: offset }), page);
+        offset = offset + itemDataObjectsFromPage(page, source, contentType).length;
       });
     });
 
@@ -82,11 +81,14 @@ module.exports = {
   putItems: function(source, contentType, storage, userStorageAuth, done) {
     var contentTypes = contentType ? [contentType] : source.contentTypes;
 
-    var debug = Debug('syncServer:test:nock');
     debug('putItems with source %s, storage %s, userStorageAuth %s for %s contentTypes', source.id, storage.id, userStorageAuth.id, contentTypes.length);
 
     contentTypes.forEach((contentType) => {
-      wh.itemDataObjects(contentType).forEach(() => {
+      let itemDataObjects = wh.itemDataObjects(contentType);
+
+      debug(`put ${itemDataObjects.length} itemDataObjects for contentType "${contentType.name}"`);
+
+      itemDataObjects.forEach(() => {
         this.postStorage(storage, userStorageAuth);
       });
     });

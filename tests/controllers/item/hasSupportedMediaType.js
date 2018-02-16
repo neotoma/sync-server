@@ -1,9 +1,11 @@
 require('park-ranger')();
-var assertions = require('app/lib/assertions');
-var controller = require('app/controllers/item');
 
-describe('itemController.hasSupportedMediaType method', function() {
-  assertions.function.throws.error(controller.hasSupportedMediaType, [{
+var assertFunctionReturnsResult = require('app/lib/assertions/functionReturnsResult'),
+  assertFunctionThrowsError = require('app/lib/assertions/functionThrowsError'),
+  hasSupportedMediaType = require('app/controllers/item/hasSupportedMediaType');
+
+describe('itemController hasSupportedMediaType method', function() {
+  assertFunctionThrowsError(hasSupportedMediaType, [{
     when: 'no url parameter provided',
     params: [undefined],
     error: 'Parameter url undefined or null'
@@ -13,7 +15,7 @@ describe('itemController.hasSupportedMediaType method', function() {
     error: 'Parameter url is not a string'
   }]);
 
-  assertions.function.returnsResult(controller.hasSupportedMediaType, [{
+  assertFunctionReturnsResult(hasSupportedMediaType, [{
     when: 'url with jpeg extension provided',
     params: ['http://example.com/image.jpeg'],
     result: true

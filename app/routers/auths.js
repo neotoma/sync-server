@@ -1,20 +1,21 @@
-var _ = require('lodash');
-var app = require('app');
-var async = require('async');
-var debug = require('app/lib/debug')('syncServer:auths');
-var logger = require('app/lib/logger');
-var ObjectId = require('mongoose').Types.ObjectId;
-var passport = require('app/lib/passport');
-var path = require('path');
-var pluralize = require('pluralize');
-var User = require('app/models/user');
+var _ = require('lodash'),
+  async = require('async'),
+  debug = require('app/lib/debug')('app:auths'),
+  logger = require('app/lib/logger'),
+  ObjectId = require('mongoose').Types.ObjectId,
+  passport = require('app/lib/passport'),
+  path = require('path'),
+  pluralize = require('pluralize'),
+  User = require('app/models/user');
 
+/* eslint-disable global-require */
 var models = {
   source: require('app/models/source'),
   storage: require('app/models/storage'),
   userSourceAuth: require('app/models/userSourceAuth'),
   userStorageAuth: require('app/models/userStorageAuth')
 };
+/*eslint-enable global-require */
 
 var reqPassportDocument = function(req, res, next) {
   if (!req.params.type || !req.params.id) {
@@ -63,6 +64,7 @@ var reqPassportDocument = function(req, res, next) {
       documentId: document.id
     });
 
+    // eslint-disable-next-line global-require
     var passportStrategy = require(document.passportStrategy);
 
     req.strategy = new passportStrategy.Strategy({
@@ -145,46 +147,50 @@ var reqPassportDocument = function(req, res, next) {
   });
 };
 
-app.get('/:type/:id/auth', reqPassportDocument, function(req, res, next) {
-  if (!req.document) {
-    return res.sendStatus(404);
-  }
-
-  if (req.query.redirectURL) {
-    req.session.authRedirectURL = req.query.redirectURL;
-  } else {
-    delete req.session.authRedirectURL;
-  }
-
-  passport.authenticate(req.strategy.name, { scope: req.document.authScope })(req, res, next);
-});
-
-app.get('/:type/:id/auth-callback', reqPassportDocument, function(req, res) {
-  debug.start('auth-callback');
-  
-  var authenticate = function(done) {
-    passport.authenticate(req.strategy.name, (error, user) => {
-      done(error, user);
-    })(req, res);
-  };
-
-  var logIn = function(user, done) {
-    req.logIn(user, done);
-  };
-
-  async.waterfall([authenticate, logIn], (error) => {
-    if (error) {
-      debug.error('auth-callback error: %s', error.message);
-      return res.sendStatus(500);
+var authsRouter = function(app) {
+  app.get('/:type/:id/auth', reqPassportDocument, function(req, res, next) {
+    if (!req.document) {
+      return res.sendStatus(404);
     }
 
-    if (req.session.authRedirectURL) {
-      var authRedirectURL = req.session.authRedirectURL;
-      delete req.session.authRedirectURL;
-
-      res.redirect(authRedirectURL);
+    if (req.query.redirectURL) {
+      req.session.authRedirectURL = req.query.redirectURL;
     } else {
-      res.redirect('/sessions');
+      delete req.session.authRedirectURL;
     }
+
+    passport.authenticate(req.strategy.name, { scope: req.document.authScope })(req, res, next);
   });
-});
+
+  app.get('/:type/:id/auth-callback', reqPassportDocument, function(req, res) {
+    debug.start('auth-callback');
+    
+    var authenticate = function(done) {
+      passport.authenticate(req.strategy.name, (error, user) => {
+        done(error, user);
+      })(req, res);
+    };
+
+    var logIn = function(user, done) {
+      req.logIn(user, done);
+    };
+
+    async.waterfall([authenticate, logIn], (error) => {
+      if (error) {
+        debug.error('auth-callback error: %s', error.message);
+        return res.sendStatus(500);
+      }
+
+      if (req.session.authRedirectURL) {
+        var authRedirectURL = req.session.authRedirectURL;
+        delete req.session.authRedirectURL;
+
+        res.redirect(authRedirectURL);
+      } else {
+        res.redirect('/sessions');
+      }
+    });
+  });
+};
+
+module.exports = authsRouter;

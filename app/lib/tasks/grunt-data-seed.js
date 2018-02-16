@@ -1,26 +1,27 @@
 /**
- * grunt-repopulate-collections
+ * grunt-data-seed
  * @module
  */
 
 'use strict';
 
-var _ = require('lodash');
-var async = require('async');
-var path = require('path');
-var pluralize = require('pluralize');
-var requireDir = require('require-dir');
+var _ = require('lodash'),
+  async = require('async'),
+  debug = require('app/lib/debug')('app:loadData'),
+  models = require('app/models'),
+  mongoose = require('app/lib/mongoose'),
+  parkRanger = require('park-ranger'),
+  path = require('path'),
+  pluralize = require('pluralize'),
+  requireDir = require('require-dir');
 
-module.exports = function(grunt) {
+var registerTask = function(grunt) {
   /**
-   * Remove database collections and repopulate them with resourceObjects stored in files
+   * Remove database collections and seed them with resourceObjects stored in files
    * @param {string} [args] – rsync arguments
    */
-  grunt.registerTask('repopulate-collections', 'Remove database collections and repopulate them with resourceObjects stored in files', function() {  
-    require('park-ranger')();
-    var debug = require('app/lib/debug')('syncServer:loadData');
-    var models = require('app/models');
-    var mongoose = require('app/lib/mongoose');
+  grunt.registerTask('data-seed', 'Remove database collections and seed them with resourceObjects stored in files', function() {  
+    parkRanger();
 
     var dataPath = path.resolve(process.env.SYNC_SERVER_DIR ? process.env.SYNC_SERVER_DIR : '/var/www/sync-server', 'data');
 
@@ -38,7 +39,6 @@ module.exports = function(grunt) {
         if (!relatedDocument) {
           done(new Error('Unable to find related document referenced by resourceObject'));
         } else {
-
           if (toMany) {
             if (!document[relationshipName]) {
               document[relationshipName] = [];
@@ -112,12 +112,14 @@ module.exports = function(grunt) {
 
     async.series([removeCollections, populateCollections], (error) => {
       if (error) {
-        debug.error('# failed to repopulate collections: %s', error.message);
+        debug.error('# failed to seed data: %s', error.message);
       } else {
-        debug.success('# repopulated collections');
+        debug.success('# seeded data');
       }
 
       done();
     });
   });
 };
+
+module.exports = registerTask;

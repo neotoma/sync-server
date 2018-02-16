@@ -4,17 +4,24 @@
  */
 
 require('park-ranger')();
-var assert = require('assert');
-var assertions = require('app/lib/assertions');
-var async = require('async');
-var createPopulatedProperties = require('app/lib/createPopulatedProperties');
-var fixtures = require('fixtures/models');
-var models = require('app/models');
-var mongoose = require('app/lib/mongoose');
-var options = require('app/lib/minimist');
-var templateCompiler = require('es6-template-strings');
-var unpopulatedProperties = require('app/lib/unpopulatedProperties');
-var wh = require('app/lib/warehouse');
+
+var assert = require('assert'),
+  async = require('async'),
+  createPopulatedProperties = require('app/lib/createPopulatedProperties'),
+  fixtures = require('fixtures/models'),
+  assertFunctionReturnsResult = require('app/lib/assertions/functionReturnsResult'),
+  assertFunctionThrowsError = require('app/lib/assertions/functionThrowsError'),
+  models = require('app/models'),
+  mongoose = require('app/lib/mongoose'),
+  assertObjectHasProperties = require('app/lib/assertions/objectHasProperties'),
+  assertObjectHasProperty = require('app/lib/assertions/objectHasProperty'),
+  assertObjectMethodReturnsResult = require('app/lib/assertions/objectMethodReturnsResult'),
+  assertObjectSavesAndHasProperties = require('app/lib/assertions/objectSavesAndHasProperties'),
+  assertObjectToObjectMethodReturnsProperties = require('app/lib/assertions/ObjectToObjectMethodReturnsProperties'),
+  options = require('app/lib/minimist'),
+  templateCompiler = require('es6-template-strings'),
+  unpopulatedProperties = require('app/lib/unpopulatedProperties'),
+  wh = require('app/lib/warehouse');
 
 if (options.model) {
   var fixture = fixtures[options.model];
@@ -47,14 +54,14 @@ Object.keys(fixtures).forEach((id) => {
       async.series([mongoose.removeAllCollections, createPopulatedProperties(modelFixture, properties)], done);
     });
 
-    assertions.object.hasProperty(modelName + ' model', Model, 'modelName', modelName);
-    assertions.object.method.returnsResult(modelName + ' model', Model, 'modelType', modelFixture.type);
-    assertions.object.method.returnsResult(modelName + ' model', Model, 'modelId', id);
-    assertions.object.hasProperties(modelName + ' document', new Model(properties), unpopulatedProperties(properties));
-    assertions.object.savesAndHasProperties(modelName + ' document', new Model(properties), ['id', 'createdAt', 'updatedAt']);
-    assertions.object.toObjectMethodReturnsProperties(modelName + ' document', new Model(properties), unpopulatedProperties(properties));
-    assertions.object.method.returnsResult(modelName + ' document', new Model(properties), 'modelType', Model.modelType());
-    assertions.object.method.returnsResult(modelName + ' document', new Model(properties), 'modelId', id);
+    assertObjectHasProperty(modelName + ' model', Model, 'modelName', modelName);
+    assertObjectMethodReturnsResult(modelName + ' model', Model, 'modelType', modelFixture.type);
+    assertObjectMethodReturnsResult(modelName + ' model', Model, 'modelId', id);
+    assertObjectHasProperties(modelName + ' document', new Model(properties), unpopulatedProperties(properties));
+    assertObjectSavesAndHasProperties(modelName + ' document', new Model(properties), ['id', 'createdAt', 'updatedAt']);
+    assertObjectToObjectMethodReturnsProperties(modelName + ' document', new Model(properties), unpopulatedProperties(properties));
+    assertObjectMethodReturnsResult(modelName + ' document', new Model(properties), 'modelType', Model.modelType());
+    assertObjectMethodReturnsResult(modelName + ' document', new Model(properties), 'modelId', id);
 
     it(modelName + ' document can be created then found with ' + modelName + ' model method findOrCreate', (done) => {
       properties = conditionProperties(modelFixture, properties);
@@ -92,7 +99,7 @@ Object.keys(fixtures).forEach((id) => {
     it('has functional instance methods');
 
     if (id === 'storage') {
-      assertions.function.returnsResult('storage.itemPutUrl', wh.one('storage').itemPutUrl, [{
+      assertFunctionReturnsResult('storage.itemPutUrl', wh.one('storage').itemPutUrl, [{
         context: wh.one('storage'),
         when: 'given path and userStorageAuth for storage with itemPutUrlTemplate',
         params: ['/foo', wh.one('userStorageAuth')],
@@ -125,7 +132,7 @@ Object.keys(fixtures).forEach((id) => {
         }
       }]);
 
-      assertions.function.throws.error('storage.itemPutUrl', wh.one('storage').itemPutUrl, [{
+      assertFunctionThrowsError('storage.itemPutUrl', wh.one('storage').itemPutUrl, [{
         context: wh.one('storage'),
         when: 'no path parameter provided',
         params: [undefined, wh.one('userStorageAuth')],

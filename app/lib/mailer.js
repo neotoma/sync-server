@@ -1,4 +1,4 @@
-var debug = require('./debug')('syncServer:mailer');
+var debug = require('./debug')('app:mailer');
 var logger = require('./logger');
 var nodemailer = require('nodemailer');
 var sendGridTransport = require('nodemailer-sendgrid-transport');

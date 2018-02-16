@@ -3,8 +3,8 @@
  * @module
  */
 
-var colors = require('colors/safe');
-var Debug = require('debug');
+var colors = require('colors/safe'),
+  Debug = require('debug');
 
 module.exports = function(name) {
   // Ensure env variable is loaded even if debug module was previously loaded with other value

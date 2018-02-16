@@ -167,7 +167,7 @@ module.exports = {
     name: 'ContentType',
     type: 'contentTypes',
     jsonapi: {
-      delete:  'admin',
+      delete: 'admin',
       get: 'public',
       patch: 'admin',
       post: 'admin'
@@ -408,7 +408,7 @@ module.exports = {
       sourceToken: String,
       sourceUser: String,
       user: { ref: 'User' }
-    },
+    }
   },
   userStorageAuth: {
     name: 'UserStorageAuth',

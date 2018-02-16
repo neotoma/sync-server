@@ -1,17 +1,19 @@
 require('park-ranger')();
-var assertions = require('app/lib/assertions');
-var controller = require('app/controllers/item');
-var mongoose = require('app/lib/mongoose');
-var prepareStoreAll = require('./routines/prepareStoreAll');
-var resetAppSpy = require('./routines/resetAppSpy');
-var verifyStoredItems = require('./routines/verifyStoredItems');
-var wh = require('app/lib/warehouse');
 
-describe('itemController.storeAllForUserStorageSourceContentType method', function() {
+var assertFunctionCallbacksError = require('app/lib/assertions/functionCallbacksError'),
+  assertFunctionCallbacksNoError = require('app/lib/assertions/functionCallbacksNoError'),
+  mongoose = require('app/lib/mongoose'),
+  prepareStoreAll = require('./routines/prepareStoreAll'),
+  resetAppSpy = require('./routines/resetAppSpy'),
+  storeAllForUserStorageSourceContentType = require('app/controllers/item/storeAllForUserStorageSourceContentType'),
+  verifyStoredItems = require('./routines/verifyStoredItems'),
+  wh = require('app/lib/warehouse');
+
+describe('itemController storeAllForUserStorageSourceContentType method', function() {
   beforeEach(mongoose.removeAllCollections);
   beforeEach(resetAppSpy);
   
-  assertions.function.callbacks.error(controller.storeAllForUserStorageSourceContentType, [{
+  assertFunctionCallbacksError(storeAllForUserStorageSourceContentType, [{
     when: 'no user parameter provided',
     params: [undefined, wh.one('source'), wh.one('storage'), wh.one('contentType'), wh.one('job')],
     error: 'Parameter user undefined or null'
@@ -55,10 +57,9 @@ describe('itemController.storeAllForUserStorageSourceContentType method', functi
 
   var timeout = 10000;
 
-  assertions.function.callbacks.noError(controller.storeAllForUserStorageSourceContentType, [{
+  assertFunctionCallbacksNoError(storeAllForUserStorageSourceContentType, [{
     after: after,
     before: before,
-    context: controller,
     params: [wh.one('user'), wh.one('source'), wh.one('storage'), wh.one('contentType'), undefined],
     timeout: timeout,
     when: 'valid parameters provided'

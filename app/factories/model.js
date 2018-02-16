@@ -2,11 +2,11 @@
  * @module
  */
 
-var _ = require('lodash');
-var mongoose = require('app/lib/mongoose');
-var mongooseAutopopulate = require('mongoose-autopopulate');
-var pluralize = require('pluralize');
-var unpopulatedProperties = require('app/lib/unpopulatedProperties');
+var _ = require('lodash'),
+  mongoose = require('app/lib/mongoose'),
+  mongooseAutopopulate = require('mongoose-autopopulate'),
+  pluralize = require('pluralize'),
+  unpopulatedProperties = require('app/lib/unpopulatedProperties');
 
 module.exports = {
   /**

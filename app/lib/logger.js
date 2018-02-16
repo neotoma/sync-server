@@ -3,9 +3,10 @@
  * @module
  */
 
-var mongoDBConfig = require('app/config/mongodb');
-var winston = require('winston');
-var winstonMailerTransport = require('./winstonMailerTransport');
+var mongoDBConfig = require('app/config/mongodb'),
+  winston = require('winston'),
+  winstonMailerTransport = require('./winstonMailerTransport');
+
 require('winston-mongodb').MongoDB;
 
 module.exports = new(winston.Logger)({
@@ -43,8 +44,8 @@ module.exports.scopedLog = function(defaultMeta) {
 /**
  * Establishes logging of all requests for app
  */
-module.exports.logRequests = function() {
-  require('app').use((req, res, next) => {
+module.exports.logRequests = function(app) {
+  app.use((req, res, next) => {
     this.trace('App received request', { 
       ip: req.ip,
       method: req.method,

@@ -1,11 +1,10 @@
-var app = require('app');
-var async = require('async');
-var jsonapi = require('app/lib/jsonapi');
-var UserSourceAuth = require('app/models/userSourceAuth');
-var UserStorageAuth = require('app/models/userStorageAuth');
+var async = require('async'),
+  jsonapi = require('app/lib/jsonapi'),
+  UserSourceAuth = require('app/models/userSourceAuth'),
+  UserStorageAuth = require('app/models/userStorageAuth');
 
 module.exports = {
-  routeResources() {
+  routeResources(app) {
     jsonapi.routeResource(app, 'get', '/sessions', undefined, function(req, res) {
       var data;
       var included = [];
