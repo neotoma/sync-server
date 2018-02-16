@@ -80,7 +80,7 @@
     "deploy-app": "grunt hoist-deploy-app",
     "deploy-dependencies": "grunt hoist-deploy-dependencies"
   },
-  "version": "1.0.1",
+  "version": "0.1.0",
   "devDependencies": {
     "grunt-deploy-files": "1.0.5",
     "grunt-env": "^0.4.4",
