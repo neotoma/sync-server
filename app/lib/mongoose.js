@@ -16,9 +16,7 @@ mongoose.connection.once('open', function() {
   logger.info('Mongoose connected to MongoDB', { url: mongoDBConfig.url });
 });
 
-mongoose.connect(mongoDBConfig.url, {
-  useMongoClient: true
-});
+mongoose.connect(mongoDBConfig.url);
 
 mongoose.transform = function(doc, ret) {
   delete ret._id;
