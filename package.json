@@ -39,7 +39,7 @@
     "mongodb": "^3.0.2",
     "mongoose": "^5.0.6",
     "mongoose-autopopulate": "^0.6.0",
-    "morgan": "^1.7.0",
+    "morgan": "^1.9.1",
     "nock": "^9.0.9",
     "nodemailer": "^4.3.1",
     "nodemailer-sendgrid-transport": "^0.2.0",
