@@ -34,7 +34,7 @@
     "methods": "^1.1.2",
     "mime-types": "^2.1.12",
     "minami": "^1.1.1",
-    "minimist": "^1.2.0",
+    "minimist": "^1.2.6",
     "mocha": "^5.0.1",
     "mongodb": "^3.0.2",
     "mongoose": "^5.0.6",
